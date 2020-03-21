@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class SectorGenerator : MonoBehaviour
@@ -12,7 +13,7 @@ public class SectorGenerator : MonoBehaviour
     public float far = 0.8f;
     [Range(0, 0.5f)]
     public float near = 0.1f;
-    Mesh GenerateMesh(int range, int resolution, float far, float near, int size)
+    static public Mesh GenerateMesh(int range, int resolution, float far, float near, int size)
     {
         Mesh mesh = new Mesh();
         int angle = range * 6;
@@ -51,7 +52,7 @@ public class SectorGenerator : MonoBehaviour
         //mesh.uv = new Vector2[vertices.Length];
         return mesh;
     }
-    Texture2D GenerateTexture(int range, float far, float near)
+    static public Texture2D GenerateTexture(int range, float far, float near)
     {
         int size = 256;
         float radius = size / 2;
@@ -82,6 +83,7 @@ public class SectorGenerator : MonoBehaviour
                 {
                     color = Color.black;
                 }
+
                 texture.SetPixel(w, h, color * alpha);
             }
         }
@@ -92,10 +94,7 @@ public class SectorGenerator : MonoBehaviour
     }
     void OnValidate()
     {
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        meshFilter.mesh = GenerateMesh(range, resolution, far, near, 10);
-
-        Projector projector = GetComponent<Projector>();
-        projector.material.SetTexture("_ShadowTex", GenerateTexture(range, far, near));
+        //Projector projector = GetComponent<Projector>();
+        //projector.material.SetTexture("_ShadowTex", GenerateTexture(range, far, near));
     }
 }

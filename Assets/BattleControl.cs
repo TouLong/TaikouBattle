@@ -27,29 +27,33 @@ public class BattleControl : MonoBehaviour
             }
         }
         else if (player != null)
+        {
             player.MovementShow(false);
+        }
     }
     void SetPosition()
     {
         if (Mouse.Hit(out RaycastHit hit))
         {
-            player.ClampModelPosition(new Vector3(hit.point.x, 0, hit.point.z));
-            if (Mouse.RightDown)
-            {
-                player.ModelShow(false);
-                stateUpdate = Selecting;
-            }
+            player.ClampModelPosition(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
             if (Mouse.LeftDown)
             {
                 stateUpdate = SetRotation;
+                player.AttackShow(true);
             }
+        }
+        if (Mouse.RightDown)
+        {
+            player.AttackShow(false);
+            player.ModelShow(false);
+            stateUpdate = Selecting;
         }
     }
     void SetRotation()
     {
         if (Mouse.Hit(out RaycastHit hit))
         {
-            player.RotateModel(new Vector3(hit.point.x, 0, hit.point.z));
+            player.RotateModel(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
             if (Mouse.RightDown)
             {
                 player.ResetModel();
@@ -60,6 +64,7 @@ public class BattleControl : MonoBehaviour
                 player.MoveToTaget(() => { stateUpdate = Selecting; });
                 player.ModelShow(false);
                 player.MovementShow(false);
+                player.AttackShow(false);
             }
         }
     }

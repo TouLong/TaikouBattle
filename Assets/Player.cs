@@ -7,14 +7,22 @@ public class Player : MonoBehaviour
     public Transform playerPrefab;
     new Collider collider;
     MovementRange movementRange;
+    AttackRange attackRange;
     Transform indicator;
     void Start()
     {
         movementRange = FindObjectOfType<MovementRange>();
+        attackRange = FindObjectOfType<AttackRange>();
         collider = GetComponent<Collider>();
         indicator = Instantiate(playerPrefab, transform);
         MovementShow(false);
+        AttackShow(false);
         ModelShow(false);
+        attackRange.transform.SetParent(indicator);
+    }
+    void Update()
+    {
+
     }
     public void MoveToTaget(TweenCallback onCompleted)
     {
@@ -42,6 +50,10 @@ public class Player : MonoBehaviour
     public void MovementShow(bool show)
     {
         movementRange.gameObject.SetActive(show);
+    }
+    public void AttackShow(bool show)
+    {
+        attackRange.gameObject.SetActive(show);
     }
     public void ModelShow(bool show)
     {
