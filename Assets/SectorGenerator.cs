@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class SectorGenerator : MonoBehaviour
 {
-    [Range(1, 60)]
-    public int range = 18;
+    [Range(1, 90)]
+    public int range = 45;
     [Range(1, 6)]
     public int resolution = 3;
     [Range(0.6f, 1)]
@@ -92,9 +92,15 @@ public class SectorGenerator : MonoBehaviour
         texture.Apply();
         return texture;
     }
+    public static void SaveTextureAsPNG(Texture2D texture, string path)
+    {
+        byte[] bytes = texture.EncodeToPNG();
+        System.IO.File.WriteAllBytes(path, bytes);
+        Debug.Log(bytes.Length / 1024 + "Kb was saved as: " + path);
+    }
     void OnValidate()
     {
-        //Projector projector = GetComponent<Projector>();
-        //projector.material.SetTexture("_ShadowTex", GenerateTexture(range, far, near));
+        Texture2D texture = GenerateTexture(range, far, near);
+        SaveTextureAsPNG(texture, "Assets/sector.png");
     }
 }

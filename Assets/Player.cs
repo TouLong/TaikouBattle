@@ -4,31 +4,33 @@ using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
-    public Transform playerPrefab;
+    public Transform model;
+    public Transform movementRange;
+    public Transform attackRange;
     new Collider collider;
-    MovementRange movementRange;
-    AttackRange attackRange;
     Transform indicator;
     void Start()
     {
-        movementRange = FindObjectOfType<MovementRange>();
-        attackRange = FindObjectOfType<AttackRange>();
         collider = GetComponent<Collider>();
-        indicator = Instantiate(playerPrefab, transform);
+        indicator = Instantiate(model, transform);
         MovementShow(false);
         AttackShow(false);
         ModelShow(false);
         attackRange.transform.SetParent(indicator);
+        OnGround();
     }
-    void Update()
+    void OnGround()
     {
-
+        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("Ground")))
+        {
+            transform.position = hit.point;
+        }
     }
     public void MoveToTaget(TweenCallback onCompleted)
     {
         Sequence sequence = DOTween.Sequence();
         sequence.Append(transform.DOLookAt(indicator.position, 1));
-        sequence.Append(transform.DOMove(indicator.position, 1));
+        sequence.Append(transform.DOMove(indicator.position, 1).OnUpdate(OnGround));
         sequence.Append(transform.DORotateQuaternion(indicator.rotation, 1));
         sequence.PrependInterval(0.1f);
         sequence.AppendCallback(ResetModel);
@@ -45,7 +47,7 @@ public class Player : MonoBehaviour
     }
     public void ClampModelPosition(Vector3 newPosition)
     {
-        indicator.position = Vector3.ClampMagnitude(newPosition - transform.position, movementRange.size / 2) + transform.position;
+        indicator.position = Vector3.ClampMagnitude(newPosition - transform.position, 1) + transform.position;
     }
     public void MovementShow(bool show)
     {
