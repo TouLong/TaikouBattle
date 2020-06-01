@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapDimension: 1
   chunkMesh: 100
-  mapHeight: 8
+  mapHeight: 20
   mapScale: 1
-  noiseScale: 68
+  noiseScale: 154
   octaves: 3
-  lacunarity: 2
-  persistance: 0.5
-  seed: 662
+  lacunarity: 4
+  persistance: 0.125
+  seed: -225
   offset: {x: 0, y: 0}
   heightCurve:
     serializedVersion: 2

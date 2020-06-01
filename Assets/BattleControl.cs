@@ -4,6 +4,7 @@ using UnityEngine;
 public class BattleControl : MonoBehaviour
 {
     Player player;
+    Transform hightLightEnemy;
     Action stateUpdate;
     void Start()
     {
@@ -54,6 +55,19 @@ public class BattleControl : MonoBehaviour
         if (Mouse.Hit(out RaycastHit hit))
         {
             player.RotateModel(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
+            if (player.HitDetect(90, out Transform hitEnemy))
+            {
+                if (hightLightEnemy != hitEnemy)
+                {
+                    hightLightEnemy = hitEnemy;
+                    hightLightEnemy.GetComponent<MeshOutline>().enabled = true;
+                }
+            }
+            else if (hightLightEnemy != null)
+            {
+                hightLightEnemy.GetComponent<MeshOutline>().enabled = false;
+                hightLightEnemy = null;
+            }
             if (Mouse.RightDown)
             {
                 player.ResetModel();
@@ -65,6 +79,7 @@ public class BattleControl : MonoBehaviour
                 player.ModelShow(false);
                 player.MovementShow(false);
                 player.AttackShow(false);
+                stateUpdate = Moving;
             }
         }
     }

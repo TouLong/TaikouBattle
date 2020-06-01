@@ -10,17 +10,15 @@ public class HelperWindow : EditorWindow
     {
         GetWindow<HelperWindow>("Helper");
     }
-    static public void GUILine()
-    {
-        EditorGUILayout.Space();
-        Rect rect = EditorGUILayout.GetControlRect(false, 1);
-        rect.height = 1;
-        EditorGUI.DrawRect(rect, Color.gray);
-        EditorGUILayout.Space();
-    }
     Vector2 scrollPos;
     string childNewName;
     Transform reNameTransform;
+    MeshFilter meshFilter;
+    int range = 45;
+    float far = 0.8f;
+    float near = 0.1f;
+    float height = 1;
+    float scale = 1;
     void OnGUI()
     {
         minSize = new Vector2(300, 100);
@@ -28,9 +26,21 @@ public class HelperWindow : EditorWindow
 
         childNewName = EditorGUILayout.TextField("新群組名稱", childNewName);
         reNameTransform = EditorGUILayout.ObjectField("群組", reNameTransform, typeof(Transform), true) as Transform;
-        if (GUILayout.Button("改名"))
-            ChildReName(reNameTransform, childNewName);
-        GUILine();
+        UIHelper.Button("改名", () =>
+         {
+             ChildReName(reNameTransform, childNewName);
+         });
+        UIHelper.Line();
+        meshFilter = EditorGUILayout.ObjectField("Mesh", meshFilter, typeof(MeshFilter), true) as MeshFilter;
+        range = EditorGUILayout.IntField("range", range);
+        far = EditorGUILayout.FloatField("far", far);
+        near = EditorGUILayout.FloatField("near", near);
+        scale = EditorGUILayout.FloatField("size", scale);
+        UIHelper.Button("Gen Mesh", () =>
+        {
+            meshFilter.mesh = SectorGenerator.GenerateMesh(range, far, near, scale);
+        });
+        UIHelper.Line();
 
         EditorGUILayout.EndScrollView();
     }
@@ -41,26 +51,6 @@ public class HelperWindow : EditorWindow
             transform.GetChild(i).name = newName + conjunction + (i + 1);
         }
     }
-    static public T CopyComponent<T>(T original, GameObject destination) where T : Component
-    {
-        Type type = original.GetType();
-        var dst = destination.GetComponent(type) as T;
-        if (!dst) dst = destination.AddComponent(type) as T;
-        var fields = type.GetFields();
-        foreach (var field in fields)
-        {
-            if (field.IsStatic) continue;
-            field.SetValue(dst, field.GetValue(original));
-        }
-        var props = type.GetProperties();
-        foreach (var prop in props)
-        {
-            if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
-            prop.SetValue(dst, prop.GetValue(original, null), null);
-        }
-        return dst as T;
-    }
-
 }
 
 

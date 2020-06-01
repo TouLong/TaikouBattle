@@ -5,8 +5,12 @@ using DG.Tweening;
 public class Player : MonoBehaviour
 {
     public Transform model;
-    public Transform movementRange;
+    public Transform moveRange;
     public Transform attackRange;
+    [Range(1f, 20f)]
+    public float moveRangeSize;
+    [Range(1f, 20f)]
+    public float attackRangeSize;
     new Collider collider;
     Transform indicator;
     void Start()
@@ -26,6 +30,26 @@ public class Player : MonoBehaviour
             transform.position = hit.point;
         }
     }
+    public bool HitDetect(float range, out Transform hitTransform)
+    {
+        float rad = (range / 2 - indicator.eulerAngles.y + 90) * Mathf.Deg2Rad;
+        Vector3 orgin = indicator.position + Vector3.up * 2;
+        float far = attackRangeSize * 1f;
+        float near = attackRangeSize * 0.2f;
+        int layerMask = LayerMask.GetMask("Enemy");
+        hitTransform = null;
+        for (int i = 0; i < range; i++)
+        {
+            Vector3 dir = new Vector3(Mathf.Cos(rad), 0, Mathf.Sin(rad));
+            if (Physics.Raycast(orgin + near * dir, dir, out RaycastHit hit, far, layerMask))
+            {
+                hitTransform = hit.transform;
+                return true;
+            }
+            rad -= Mathf.Deg2Rad;
+        }
+        return false;
+    }
     public void MoveToTaget(TweenCallback onCompleted)
     {
         Sequence sequence = DOTween.Sequence();
@@ -43,15 +67,16 @@ public class Player : MonoBehaviour
     }
     public void RotateModel(Vector3 point)
     {
-        indicator.rotation = Quaternion.LookRotation(point - indicator.position);
+        if (point - indicator.position != Vector3.zero)
+            indicator.rotation = Quaternion.LookRotation(point - indicator.position);
     }
     public void ClampModelPosition(Vector3 newPosition)
     {
-        indicator.position = Vector3.ClampMagnitude(newPosition - transform.position, 1) + transform.position;
+        indicator.position = Vector3.ClampMagnitude(newPosition - transform.position, moveRangeSize) + transform.position;
     }
     public void MovementShow(bool show)
     {
-        movementRange.gameObject.SetActive(show);
+        moveRange.gameObject.SetActive(show);
     }
     public void AttackShow(bool show)
     {
@@ -65,5 +90,35 @@ public class Player : MonoBehaviour
         {
             ResetModel();
         }
+    }
+    void OnValidate()
+    {
+        if (moveRange)
+        {
+            moveRange.GetComponentInChildren<Projector>().orthographicSize = moveRangeSize * 1.2f;
+        }
+        if (attackRange)
+        {
+            attackRange.GetComponentInChildren<Projector>().orthographicSize = attackRangeSize;
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        if (indicator != null)
+        {
+            float rad = (45 - indicator.eulerAngles.y + 90) * Mathf.Deg2Rad;
+            float far = attackRangeSize * 1f;
+            float near = attackRangeSize * 0.2f;
+            Vector3 orgin = indicator.position + Vector3.up * 2;
+            Gizmos.color = Color.blue;
+            for (int i = 0; i < 90; i++)
+            {
+                Vector3 dir = new Vector3(Mathf.Cos(rad), 0, Mathf.Sin(rad));
+                Gizmos.DrawLine(orgin + near * dir, orgin + far * dir);
+                rad -= Mathf.Deg2Rad;
+            }
+        }
+
     }
 }
