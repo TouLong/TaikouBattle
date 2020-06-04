@@ -6,13 +6,15 @@ public class Player : MonoBehaviour
 {
     public Transform model;
     public Transform moveRange;
-    public Transform attackRange;
+    public AttackRange attackRange;
     [Range(1f, 20f)]
     public float moveRangeSize;
     [Range(1f, 20f)]
     public float attackRangeSize;
+    [Range(1, 180)]
+    public int attackRangeAngle;
     new Collider collider;
-    Transform indicator;
+    public Transform indicator;
     void Start()
     {
         collider = GetComponent<Collider>();
@@ -29,26 +31,6 @@ public class Player : MonoBehaviour
         {
             transform.position = hit.point;
         }
-    }
-    public bool HitDetect(float range, out Transform hitTransform)
-    {
-        float rad = (range / 2 - indicator.eulerAngles.y + 90) * Mathf.Deg2Rad;
-        Vector3 orgin = indicator.position + Vector3.up * 2;
-        float far = attackRangeSize * 1f;
-        float near = attackRangeSize * 0.2f;
-        int layerMask = LayerMask.GetMask("Enemy");
-        hitTransform = null;
-        for (int i = 0; i < range; i++)
-        {
-            Vector3 dir = new Vector3(Mathf.Cos(rad), 0, Mathf.Sin(rad));
-            if (Physics.Raycast(orgin + near * dir, dir, out RaycastHit hit, far, layerMask))
-            {
-                hitTransform = hit.transform;
-                return true;
-            }
-            rad -= Mathf.Deg2Rad;
-        }
-        return false;
     }
     public void MoveToTaget(TweenCallback onCompleted)
     {
@@ -99,7 +81,7 @@ public class Player : MonoBehaviour
         }
         if (attackRange)
         {
-            attackRange.GetComponentInChildren<Projector>().orthographicSize = attackRangeSize;
+            attackRange.Config(attackRangeAngle, attackRangeSize);
         }
     }
 

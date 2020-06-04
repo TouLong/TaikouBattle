@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BattleControl : MonoBehaviour
 {
     Player player;
-    Transform hightLightEnemy;
+    Enemies hightLightEnemies = new Enemies();
     Action stateUpdate;
     void Start()
     {
@@ -55,18 +56,24 @@ public class BattleControl : MonoBehaviour
         if (Mouse.Hit(out RaycastHit hit))
         {
             player.RotateModel(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
-            if (player.HitDetect(90, out Transform hitEnemy))
+            //if (HitDetect.RayCast(player, out hightLightEnemies))
+            if (HitDetect.Math(player, out hightLightEnemies))
             {
-                if (hightLightEnemy != hitEnemy)
+                foreach (Enemy enemy in Enemies.InScene)
                 {
-                    hightLightEnemy = hitEnemy;
-                    hightLightEnemy.GetComponent<MeshOutline>().enabled = true;
+                    if (hightLightEnemies.Contains(enemy))
+                    {
+                        enemy.HighLight(true);
+                    }
+                    else
+                    {
+                        enemy.HighLight(false);
+                    }
                 }
             }
-            else if (hightLightEnemy != null)
+            else
             {
-                hightLightEnemy.GetComponent<MeshOutline>().enabled = false;
-                hightLightEnemy = null;
+                Enemies.InScene.HighLight(false);
             }
             if (Mouse.RightDown)
             {
