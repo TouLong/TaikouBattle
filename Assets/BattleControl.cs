@@ -1,41 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BattleControl : MonoBehaviour
 {
     Player player;
-    Enemies hightLightEnemies = new Enemies();
+    Enemies hitEnemies = new Enemies();
     Action stateUpdate;
+    void Awake()
+    {
+        Enemies.Layer = LayerMask.GetMask("Enemy");
+        player = Player.self;
+    }
     void Start()
     {
         stateUpdate = Selecting;
     }
-
     void Update()
     {
         stateUpdate();
     }
     void Selecting()
     {
-        if (Mouse.Hit(out Player hit))
+        if (Mouse.HitPlayer())
         {
-            hit.MovementShow(true);
-            player = hit;
+            player.MovementShow(true);
             if (Mouse.LeftDown)
             {
                 player.ModelShow(true);
                 stateUpdate = SetPosition;
             }
         }
-        else if (player != null)
+        else
         {
             player.MovementShow(false);
         }
     }
     void SetPosition()
     {
-        if (Mouse.Hit(out RaycastHit hit))
+        if (Mouse.HitGround(out RaycastHit hit))
         {
             player.ClampModelPosition(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
             if (Mouse.LeftDown)
@@ -53,15 +57,15 @@ public class BattleControl : MonoBehaviour
     }
     void SetRotation()
     {
-        if (Mouse.Hit(out RaycastHit hit))
+        if (Mouse.HitGround(out RaycastHit hit))
         {
             player.RotateModel(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
             //if (HitDetect.RayCast(player, out hightLightEnemies))
-            if (HitDetect.Math(player, out hightLightEnemies))
+            if (HitDetect.Math(out hitEnemies))
             {
                 foreach (Enemy enemy in Enemies.InScene)
                 {
-                    if (hightLightEnemies.Contains(enemy))
+                    if (hitEnemies.Contains(enemy))
                     {
                         enemy.HighLight(true);
                     }
@@ -82,15 +86,36 @@ public class BattleControl : MonoBehaviour
             }
             if (Mouse.LeftDown)
             {
-                player.MoveToTaget(() => { stateUpdate = Selecting; });
+                player.MoveToTaget(() =>
+                {
+                    stateUpdate = Battle;
+                });
                 player.ModelShow(false);
                 player.MovementShow(false);
                 player.AttackShow(false);
-                stateUpdate = Moving;
+                Enemies.InScene.TrackPlayer();
+                stateUpdate = Animation;
+                Enemies.InScene.HighLight(false);
             }
         }
     }
-    void Moving()
+    void Battle()
+    {
+        if (HitDetect.Math(out hitEnemies))
+        {
+            player.Punch(() =>
+            {
+                Enemies.InScene.Freeze();
+                hitEnemies.Damage(1);
+            });
+        }
+        else
+        {
+            Enemies.InScene.Freeze();
+        }
+        stateUpdate = Selecting;
+    }
+    void Animation()
     {
     }
 }

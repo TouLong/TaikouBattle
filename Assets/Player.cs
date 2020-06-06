@@ -4,6 +4,7 @@ using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
+    static public Player self;
     public Transform model;
     public Transform moveRange;
     public AttackRange attackRange;
@@ -15,6 +16,16 @@ public class Player : MonoBehaviour
     public int attackRangeAngle;
     new Collider collider;
     public Transform indicator;
+    public float moveSpeed;
+    public float rotateSpeed;
+    AnimateBehaviour animator;
+    void Awake()
+    {
+        if (self == null)
+        {
+            self = this;
+        }
+    }
     void Start()
     {
         collider = GetComponent<Collider>();
@@ -24,21 +35,32 @@ public class Player : MonoBehaviour
         ModelShow(false);
         attackRange.transform.SetParent(indicator);
         OnGround();
+        animator = GetComponent<AnimateBehaviour>();
     }
     void OnGround()
     {
-        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("Ground")))
+        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, float.MaxValue, 512))
         {
             transform.position = hit.point;
         }
     }
+    public void Damage(int attackPoint)
+    {
+        TextUI.Pop(attackPoint.ToString(), Color.red, transform.position);
+    }
+    public void Punch(Action onCompleted)
+    {
+        animator.Play("Punch", onCompleted);
+    }
     public void MoveToTaget(TweenCallback onCompleted)
     {
+        float moveAngleOffset = Vector3.Angle(transform.forward, indicator.position - transform.position);
         Sequence sequence = DOTween.Sequence();
-        sequence.Append(transform.DOLookAt(indicator.position, 1));
-        sequence.Append(transform.DOMove(indicator.position, 1).OnUpdate(OnGround));
-        sequence.Append(transform.DORotateQuaternion(indicator.rotation, 1));
-        sequence.PrependInterval(0.1f);
+        sequence.SetEase(Ease.Linear);
+        sequence.Append(transform.DOLookAt(indicator.position, moveAngleOffset * Mathf.Deg2Rad / rotateSpeed));
+        sequence.Append(transform.DOMove(indicator.position, Vector3.Distance(indicator.position, transform.position) / moveSpeed).OnUpdate(OnGround));
+        sequence.Append(transform.DORotateQuaternion(indicator.rotation, 0.5f / rotateSpeed));
+        sequence.PrependInterval(0.05f);
         sequence.AppendCallback(ResetModel);
         sequence.OnComplete(onCompleted);
     }

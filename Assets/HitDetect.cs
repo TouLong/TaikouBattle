@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class HitDetect : MonoBehaviour
 {
-    static public bool RayCast(Player player, out Enemies hitEnemies)
+    static public bool RayCast(out Enemies hitEnemies)
     {
+        Player player = Player.self;
         float rad = (player.attackRange.range / 2 - player.indicator.eulerAngles.y + 90) * Mathf.Deg2Rad;
         Vector3 orgin = player.indicator.position + Vector3.up * 2;
         RaycastHit[] hits;
@@ -23,11 +24,12 @@ public class HitDetect : MonoBehaviour
         }
         return hitEnemies.Any();
     }
-    static public bool Math(Player player, out Enemies hitEnemies)
+    static public bool Math(out Enemies hitEnemies)
     {
         float distance;
         float angle;
         hitEnemies = new Enemies();
+        Player player = Player.self;
         foreach (Enemy enemy in Enemies.InScene)
         {
             distance = Vector3.Distance(enemy.transform.position, player.indicator.position);
@@ -42,5 +44,17 @@ public class HitDetect : MonoBehaviour
             }
         }
         return hitEnemies.Any();
+    }
+    static public bool Math(Enemy enemy)
+    {
+        float distance = Vector3.Distance(enemy.transform.position, Player.self.transform.position);
+        print("dist" + distance);
+        if (distance > enemy.attackRange.nearLength && distance < enemy.attackRange.farLength)
+        {
+            float angle = Vector3.Angle(enemy.transform.forward, Player.self.transform.position - enemy.transform.position);
+            print("angle" + angle);
+            return angle <= enemy.attackRange.range / 2;
+        }
+        return false;
     }
 }

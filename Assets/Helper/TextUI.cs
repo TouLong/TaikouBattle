@@ -4,7 +4,7 @@ using System;
 
 public class TextUI
 {
-    public static TextMesh Pop(string content, Vector3 position, float time = 0.5f)
+    public static TextMesh Pop(string content, Color color, Vector3 position, float time = 0.5f)
     {
         GameObject gameObject = new GameObject("Text Pop", typeof(TextMesh), typeof(TextPop));
         gameObject.transform.position = position;
@@ -13,7 +13,7 @@ public class TextUI
         textMesh.alignment = TextAlignment.Center;
         textMesh.text = content;
         textMesh.fontSize = 30;
-        textMesh.color = Color.cyan;
+        textMesh.color = color;
         TextPop pop = gameObject.GetComponent<TextPop>();
         pop.Init(textMesh.fontSize / 3);
         Timer.Set(time, () => { pop.DestorySelf(); });

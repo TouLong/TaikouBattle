@@ -32,6 +32,7 @@ public class GameHelper : EditorWindow
         UIHelper.Line();
 
         template = EditorGUILayout.ObjectField("模板", template, typeof(GameObject), true) as GameObject;
+        character = EditorGUILayout.ObjectField("小人", character, typeof(GameObject), true) as GameObject;
         if (GUILayout.Button("修改小人"))
         {
             BuildCharacter(character, template);

@@ -20,6 +20,14 @@ public static class Mouse
     {
         return Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity);
     }
+    static public bool HitGround(out RaycastHit hit)
+    {
+        return Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity, 512);
+    }
+    static public bool HitPlayer()
+    {
+        return Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), Mathf.Infinity, 256);
+    }
     static public bool Hit<T>(out T obj)
     {
         obj = default;

@@ -4,14 +4,25 @@ using UnityEngine;
 
 public class Enemies : List<Enemy>
 {
-    static public int Layer = LayerMask.GetMask("Enemy");
+    static public int Layer;
     static public Enemies InScene = new Enemies();
     public Enemies()
     {
     }
-
     public void HighLight(bool enable)
     {
         ForEach(x => x.HighLight(enable));
+    }
+    public void Damage(int attackPoint)
+    {
+        ForEach(x => x.Damage(attackPoint));
+    }
+    public void Freeze()
+    {
+        ForEach(x => x.Freeze());
+    }
+    public void TrackPlayer()
+    {
+        ForEach(x => x.TrackPlayer());
     }
 }
