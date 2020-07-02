@@ -11,7 +11,7 @@ public class BattleControl : MonoBehaviour
     void Awake()
     {
         Enemies.Layer = LayerMask.GetMask("Enemy");
-        player = Player.self;
+        player = Player.InScene;
     }
     void Start()
     {
@@ -28,7 +28,7 @@ public class BattleControl : MonoBehaviour
             player.MovementShow(true);
             if (Mouse.LeftDown)
             {
-                player.ModelShow(true);
+                player.ShowIndicator(true);
                 stateUpdate = SetPosition;
             }
         }
@@ -41,7 +41,7 @@ public class BattleControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            player.ClampModelPosition(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
+            player.MoveIndicator(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
             if (Mouse.LeftDown)
             {
                 stateUpdate = SetRotation;
@@ -51,7 +51,7 @@ public class BattleControl : MonoBehaviour
         if (Mouse.RightDown)
         {
             player.AttackShow(false);
-            player.ModelShow(false);
+            player.ShowIndicator(false);
             stateUpdate = Selecting;
         }
     }
@@ -59,7 +59,7 @@ public class BattleControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            player.RotateModel(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
+            player.RotateIndicator(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
             //if (HitDetect.RayCast(player, out hightLightEnemies))
             if (HitDetect.Math(out hitEnemies))
             {
@@ -81,23 +81,26 @@ public class BattleControl : MonoBehaviour
             }
             if (Mouse.RightDown)
             {
-                player.ResetModel();
+                player.ResetIndicator();
                 stateUpdate = SetPosition;
             }
             if (Mouse.LeftDown)
             {
-                player.MoveToTaget(() =>
+                player.MoveToIndicator(() =>
                 {
                     stateUpdate = Battle;
                 });
-                player.ModelShow(false);
+                player.ShowIndicator(false);
                 player.MovementShow(false);
                 player.AttackShow(false);
-                Enemies.InScene.TrackPlayer();
-                stateUpdate = Animation;
                 Enemies.InScene.HighLight(false);
+                Enemies.InScene.TrackPlayer();
+                stateUpdate = Moving;
             }
         }
+    }
+    void Moving()
+    {
     }
     void Battle()
     {
@@ -105,17 +108,9 @@ public class BattleControl : MonoBehaviour
         {
             player.Punch(() =>
             {
-                Enemies.InScene.Freeze();
                 hitEnemies.Damage(1);
             });
         }
-        else
-        {
-            Enemies.InScene.Freeze();
-        }
         stateUpdate = Selecting;
-    }
-    void Animation()
-    {
     }
 }

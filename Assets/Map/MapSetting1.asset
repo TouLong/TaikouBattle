@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: MapSetting1
   m_EditorClassIdentifier: 
   mapDimension: 1
-  chunkMesh: 100
-  mapHeight: 20
-  mapScale: 1
-  noiseScale: 154
+  chunkMesh: 10
+  mapHeight: 6
+  mapScale: 10
+  noiseScale: 40
   octaves: 3
-  lacunarity: 4
-  persistance: 0.125
-  seed: -225
+  lacunarity: 2
+  persistance: 0.5
+  seed: -651
   offset: {x: 0, y: 0}
   heightCurve:
     serializedVersion: 2
@@ -91,6 +91,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 9
   waterLayer: 0
   mountainLayer: 3
   layers:
@@ -99,7 +102,7 @@ MonoBehaviour:
     blendStrength: 0
   - color: {r: 0.38431376, g: 0.76470596, b: 0.18431373, a: 0}
     height: 0.043492068
-    blendStrength: 0.03
+    blendStrength: 0.07
   - color: {r: 0.14901961, g: 0.6509804, b: 0.04705883, a: 0}
     height: 0.09095815
     blendStrength: 0.55

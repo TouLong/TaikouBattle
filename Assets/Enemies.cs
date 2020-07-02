@@ -17,10 +17,6 @@ public class Enemies : List<Enemy>
     {
         ForEach(x => x.Damage(attackPoint));
     }
-    public void Freeze()
-    {
-        ForEach(x => x.Freeze());
-    }
     public void TrackPlayer()
     {
         ForEach(x => x.TrackPlayer());

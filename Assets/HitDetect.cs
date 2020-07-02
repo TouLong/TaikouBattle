@@ -7,7 +7,7 @@ public class HitDetect : MonoBehaviour
 {
     static public bool RayCast(out Enemies hitEnemies)
     {
-        Player player = Player.self;
+        Player player = Player.InScene;
         float rad = (player.attackRange.range / 2 - player.indicator.eulerAngles.y + 90) * Mathf.Deg2Rad;
         Vector3 orgin = player.indicator.position + Vector3.up * 2;
         RaycastHit[] hits;
@@ -29,7 +29,7 @@ public class HitDetect : MonoBehaviour
         float distance;
         float angle;
         hitEnemies = new Enemies();
-        Player player = Player.self;
+        Player player = Player.InScene;
         foreach (Enemy enemy in Enemies.InScene)
         {
             distance = Vector3.Distance(enemy.transform.position, player.indicator.position);
@@ -47,12 +47,10 @@ public class HitDetect : MonoBehaviour
     }
     static public bool Math(Enemy enemy)
     {
-        float distance = Vector3.Distance(enemy.transform.position, Player.self.transform.position);
-        print("dist" + distance);
+        float distance = Vector3.Distance(enemy.transform.position, Player.InScene.transform.position);
         if (distance > enemy.attackRange.nearLength && distance < enemy.attackRange.farLength)
         {
-            float angle = Vector3.Angle(enemy.transform.forward, Player.self.transform.position - enemy.transform.position);
-            print("angle" + angle);
+            float angle = Vector3.Angle(enemy.transform.forward, Player.InScene.transform.position - enemy.transform.position);
             return angle <= enemy.attackRange.range / 2;
         }
         return false;

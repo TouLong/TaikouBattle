@@ -61,16 +61,12 @@ public class SectorGenerator : MonoBehaviour
                 float angle = Vector2.Angle(Vector2.up, point - center);
                 float dist = Vector2.Distance(center, point);
                 float alpha = 1;
-                float width = (Mathf.Sin(range * Mathf.Deg2Rad / 2) * point.y);
                 Color color = Color.white;
                 if (angle >= 0 && angle <= range && dist > nearSide && dist < farSide)
                 {
                     float farRate = (1 - Mathf.InverseLerp(nearSide, farSide, dist)) * 1.5f;
                     float nearRate = Mathf.InverseLerp(nearSide, farSide, dist) * 30f;
-                    //float xRate = (width - Mathf.Abs(point.x)) / 6f;
-                    float xRate = 1;
                     alpha = Mathf.Min(farRate, nearRate, 1);
-                    //color = Color.white;
                 }
                 else
                 {

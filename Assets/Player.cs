@@ -2,127 +2,67 @@
 using UnityEngine;
 using DG.Tweening;
 
-public class Player : MonoBehaviour
+public class Player : Unit
 {
-    static public Player self;
+    static public Player InScene;
     public Transform model;
-    public Transform moveRange;
-    public AttackRange attackRange;
-    [Range(1f, 20f)]
-    public float moveRangeSize;
-    [Range(1f, 20f)]
-    public float attackRangeSize;
-    [Range(1, 180)]
-    public int attackRangeAngle;
     new Collider collider;
+    [HideInInspector]
     public Transform indicator;
-    public float moveSpeed;
-    public float rotateSpeed;
-    AnimateBehaviour animator;
     void Awake()
     {
-        if (self == null)
+        if (InScene == null)
         {
-            self = this;
+            InScene = this;
         }
     }
-    void Start()
+    new void Start()
     {
+        base.Start();
         collider = GetComponent<Collider>();
         indicator = Instantiate(model, transform);
-        MovementShow(false);
-        AttackShow(false);
-        ModelShow(false);
         attackRange.transform.SetParent(indicator);
-        OnGround();
-        animator = GetComponent<AnimateBehaviour>();
     }
-    void OnGround()
-    {
-        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, float.MaxValue, 512))
-        {
-            transform.position = hit.point;
-        }
-    }
-    public void Damage(int attackPoint)
-    {
-        TextUI.Pop(attackPoint.ToString(), Color.red, transform.position);
-    }
-    public void Punch(Action onCompleted)
-    {
-        animator.Play("Punch", onCompleted);
-    }
-    public void MoveToTaget(TweenCallback onCompleted)
+
+    public void MoveToIndicator(TweenCallback onCompleted)
     {
         float moveAngleOffset = Vector3.Angle(transform.forward, indicator.position - transform.position);
+        Vector3 toward = new Vector3(indicator.position.x, transform.position.y, indicator.position.z);
         Sequence sequence = DOTween.Sequence();
         sequence.SetEase(Ease.Linear);
-        sequence.Append(transform.DOLookAt(indicator.position, moveAngleOffset * Mathf.Deg2Rad / rotateSpeed));
+        sequence.Append(transform.DOLookAt(toward, moveAngleOffset * Mathf.Deg2Rad / rotateSpeed));
         sequence.Append(transform.DOMove(indicator.position, Vector3.Distance(indicator.position, transform.position) / moveSpeed).OnUpdate(OnGround));
         sequence.Append(transform.DORotateQuaternion(indicator.rotation, 0.5f / rotateSpeed));
         sequence.PrependInterval(0.05f);
-        sequence.AppendCallback(ResetModel);
+        sequence.AppendCallback(ResetIndicator);
         sequence.OnComplete(onCompleted);
     }
-    public void ResetModel()
+    public void ResetIndicator()
     {
         indicator.localPosition = Vector3.zero;
         indicator.localEulerAngles = Vector3.zero;
     }
-    public void RotateModel(Vector3 point)
+    public void RotateIndicator(Vector3 point)
     {
-        if (point - indicator.position != Vector3.zero)
-            indicator.rotation = Quaternion.LookRotation(point - indicator.position);
+        Vector3 forward = point - indicator.position;
+        forward.y = 0;
+        if (forward != Vector3.zero)
+            indicator.rotation = Quaternion.LookRotation(forward);
     }
-    public void ClampModelPosition(Vector3 newPosition)
+    public void MoveIndicator(Vector3 newPosition)
     {
-        indicator.position = Vector3.ClampMagnitude(newPosition - transform.position, moveRangeSize) + transform.position;
+        Vector3 newPos = Vector3.ClampMagnitude(newPosition - transform.position, moveRangeSize) + transform.position;
+        newPos.y = Map.GetHeight(newPos.x, newPos.z);
+        indicator.transform.position = newPos;
+
     }
-    public void MovementShow(bool show)
-    {
-        moveRange.gameObject.SetActive(show);
-    }
-    public void AttackShow(bool show)
-    {
-        attackRange.gameObject.SetActive(show);
-    }
-    public void ModelShow(bool show)
+    public void ShowIndicator(bool show)
     {
         indicator.gameObject.SetActive(show);
         collider.enabled = !show;
         if (!show)
         {
-            ResetModel();
+            ResetIndicator();
         }
-    }
-    void OnValidate()
-    {
-        if (moveRange)
-        {
-            moveRange.GetComponentInChildren<Projector>().orthographicSize = moveRangeSize * 1.2f;
-        }
-        if (attackRange)
-        {
-            attackRange.Config(attackRangeAngle, attackRangeSize);
-        }
-    }
-
-    void OnDrawGizmos()
-    {
-        if (indicator != null)
-        {
-            float rad = (45 - indicator.eulerAngles.y + 90) * Mathf.Deg2Rad;
-            float far = attackRangeSize * 1f;
-            float near = attackRangeSize * 0.2f;
-            Vector3 orgin = indicator.position + Vector3.up * 2;
-            Gizmos.color = Color.blue;
-            for (int i = 0; i < 90; i++)
-            {
-                Vector3 dir = new Vector3(Mathf.Cos(rad), 0, Mathf.Sin(rad));
-                Gizmos.DrawLine(orgin + near * dir, orgin + far * dir);
-                rad -= Mathf.Deg2Rad;
-            }
-        }
-
     }
 }

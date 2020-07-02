@@ -3,55 +3,25 @@ using UnityEngine;
 using UnityEngine.AI;
 using DG.Tweening;
 
-public class Enemy : MonoBehaviour
+public class Enemy : Unit
 {
     MeshOutline outline;
-    Action stateUpdate;
-    NavMeshAgent navAgent;
-    public float moveSpeed;
-    public float rotateSpeed;
-    public AttackRange attackRange;
-    AnimateBehaviour animator;
 
-    void Start()
+    new void Start()
     {
+        base.Start();
         outline = GetComponent<MeshOutline>();
-        navAgent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<AnimateBehaviour>();
-        stateUpdate = Freezing;
     }
-    void Update()
-    {
-        stateUpdate();
-    }
-    void Freezing()
-    {
-        navAgent.SetDestination(transform.position);
-    }
-    public void Punch(Action onCompleted)
-    {
-        animator.Play("Punch", onCompleted);
-        stateUpdate = Freezing;
-    }
-    public void Freeze()
-    {
-        stateUpdate = Freezing;
-    }
+
     public void TrackPlayer()
     {
-        navAgent.SetDestination(Player.self.transform.position);
-        stateUpdate = TrackPlayer;
-        if (HitDetect.Math(this))
-        {
-            Punch(() =>
-            {
-                Player.self.Damage(1);
-            });
-        }
-    }
-    public void Damage(int attackPoint)
-    {
-        TextUI.Pop(attackPoint.ToString(), Color.red, transform.position);
+        Vector3 newPos = Vector3.ClampMagnitude(Player.InScene.transform.position - transform.position, moveRangeSize) + transform.position;
+        float moveAngleOffset = Vector3.Angle(transform.forward, newPos - transform.position);
+        Vector3 toward = new Vector3(newPos.x, transform.position.y, newPos.z);
+        Sequence sequence = DOTween.Sequence();
+        sequence.SetEase(Ease.Linear);
+        sequence.Append(transform.DOLookAt(toward, moveAngleOffset * Mathf.Deg2Rad / rotateSpeed));
+        sequence.Append(transform.DOMove(newPos, Vector3.Distance(newPos, transform.position) / moveSpeed).OnUpdate(OnGround));
     }
     public void HighLight(bool enable)
     {

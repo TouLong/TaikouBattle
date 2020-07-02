@@ -23,6 +23,7 @@ public class MapSetting : ScriptableObject
     public int seed;
     public Vector2 offset;
     public AnimationCurve heightCurve;
+    public LayerMask layerMask = 0;
     public int waterLayer = -1;
     public int mountainLayer = -1;
     public List<Layer> layers;
@@ -53,24 +54,6 @@ public class MapSetting : ScriptableObject
                 return MapHeight;
         }
     }
-    public void CopyTo(ref MapSetting setting)
-    {
-        setting.mapDimension = mapDimension;
-        setting.chunkMesh = chunkMesh;
-        setting.mapHeight = mapHeight;
-        setting.mapScale = mapScale;
-        setting.noiseScale = noiseScale;
-        setting.octaves = octaves;
-        setting.persistance = persistance;
-        setting.lacunarity = lacunarity;
-        setting.seed = seed;
-        setting.offset = offset;
-        setting.heightCurve = new AnimationCurve(heightCurve.keys);
-        setting.waterLayer = waterLayer;
-        setting.mountainLayer = mountainLayer;
-        setting.layers = layers.Select(a => a.Clone()).ToList();
-        setting.objectsDistribution = objectsDistribution.Select(a => a.Clone()).ToList();
-    }
     [System.Serializable]
     public class Layer
     {
@@ -81,16 +64,6 @@ public class MapSetting : ScriptableObject
         {
             this.height = height;
         }
-        public Layer(Color color, float height, float blendStrength)
-        {
-            this.color = color;
-            this.height = height;
-            this.blendStrength = blendStrength;
-        }
-        public Layer Clone()
-        {
-            return new Layer(color, height, blendStrength);
-        }
     }
     [System.Serializable]
     public class ObjectDistribution
@@ -100,34 +73,9 @@ public class MapSetting : ScriptableObject
         {
             public Vector2 region;
             public float radius = 100;
-            public Distribution()
-            {
-            }
-            public Distribution(Vector2 region, float radius)
-            {
-                this.region = region;
-                this.radius = radius;
-            }
-            public Distribution Clone()
-            {
-                return new Distribution(region, radius);
-            }
         }
         public string groupName;
         public List<GameObject> objects = new List<GameObject>();
         public List<Distribution> distributions = new List<Distribution>();
-        public ObjectDistribution()
-        {
-        }
-        public ObjectDistribution Clone()
-        {
-            ObjectDistribution objectDistribution = new ObjectDistribution
-            {
-                groupName = groupName,
-                objects = objects,
-                distributions = distributions.Select(a => a.Clone()).ToList()
-            };
-            return objectDistribution;
-        }
     }
 }

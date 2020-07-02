@@ -2,7 +2,7 @@
 
 public static class TerrainHeight
 {
-    public static void Noise(out float[,] noise, int size, int seed, int octaves, float persistance, float lacunarity, int noiseScale, Vector2 offset)
+    public static void Noise(ref float[,] noise, int size, int seed, int octaves, float persistance, float lacunarity, int noiseScale, Vector2 offset)
     {
         noise = new float[size, size];
         System.Random prng = new System.Random(seed);
@@ -59,6 +59,17 @@ public static class TerrainHeight
             for (int y = 0; y < size; y++)
             {
                 height[x, y] = curve.Evaluate(noise[offset.x + x, offset.y + y]) * heightScale * scale;
+            }
+        }
+    }
+    public static void Evaluate(ref float[,] height, ref float[,] noise, int size, int scale, int heightScale, AnimationCurve curve)
+    {
+        height = new float[size, size];
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                height[x, y] = curve.Evaluate(noise[x, y]) * heightScale * scale;
             }
         }
     }
