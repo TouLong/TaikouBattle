@@ -1,19 +1,20 @@
 ﻿using System;
 using UnityEngine;
 using DG.Tweening;
+using System.Linq;
 
 public class Player : Unit
 {
-    static public Player InScene;
+    static public Player self;
     public Transform model;
     new Collider collider;
     [HideInInspector]
     public Transform indicator;
     void Awake()
     {
-        if (InScene == null)
+        if (self == null)
         {
-            InScene = this;
+            self = this;
         }
     }
     new void Start()
@@ -23,19 +24,17 @@ public class Player : Unit
         indicator = Instantiate(model, transform);
         attackRange.transform.SetParent(indicator);
     }
-
-    public void MoveToIndicator(TweenCallback onCompleted)
+    public CombatTween GetCombatTween()
     {
-        float moveAngleOffset = Vector3.Angle(transform.forward, indicator.position - transform.position);
-        Vector3 toward = new Vector3(indicator.position.x, transform.position.y, indicator.position.z);
-        Sequence sequence = DOTween.Sequence();
-        sequence.SetEase(Ease.Linear);
-        sequence.Append(transform.DOLookAt(toward, moveAngleOffset * Mathf.Deg2Rad / rotateSpeed));
-        sequence.Append(transform.DOMove(indicator.position, Vector3.Distance(indicator.position, transform.position) / moveSpeed).OnUpdate(OnGround));
-        sequence.Append(transform.DORotateQuaternion(indicator.rotation, 0.5f / rotateSpeed));
-        sequence.PrependInterval(0.05f);
-        sequence.AppendCallback(ResetIndicator);
-        sequence.OnComplete(onCompleted);
+        Vector3 newPos = indicator.position;
+        newPos.y = transform.position.y;
+        CombatTween combat = new CombatTween
+        {
+            lookat = LookAtTween(newPos),
+            move = MoveTween(newPos),
+            rotate = RotateTween(indicator.rotation),
+        };
+        return combat;
     }
     public void ResetIndicator()
     {
@@ -64,5 +63,25 @@ public class Player : Unit
         {
             ResetIndicator();
         }
+    }
+    public bool HitDetect(out Enemies hitEnemies)
+    {
+        float distance;
+        float angle;
+        hitEnemies = new Enemies();
+        foreach (Enemy enemy in Enemies.InScene)
+        {
+            distance = Vector3.Distance(enemy.transform.position, indicator.position);
+            if (distance > attackRange.nearLength && distance < attackRange.farLength)
+            {
+                angle = Vector3.Angle(indicator.forward, enemy.transform.position - indicator.position);
+
+                if (angle <= attackRange.range / 2)
+                {
+                    hitEnemies.Add(enemy);
+                }
+            }
+        }
+        return hitEnemies.Any();
     }
 }

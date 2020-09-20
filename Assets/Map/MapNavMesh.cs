@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
+#if UNITY_EDITOR
 public static class MapNavMesh
 {
     static readonly string path = "Assets/Map/NavMesh.asset";
@@ -27,6 +28,7 @@ public static class MapNavMesh
                 transform = meshFilter.transform.localToWorldMatrix,
             });
         }
+
         NavMeshBuildSettings settings = NavMesh.GetSettingsByIndex(0);
         NavMeshData navMeshData = NavMeshBuilder.BuildNavMeshData(settings, meshBuildSources, bounds, bounds.min, Quaternion.identity);
         NavMesh.AddNavMeshData(navMeshData);
@@ -37,3 +39,4 @@ public static class MapNavMesh
         NavMesh.RemoveAllNavMeshData();
     }
 }
+#endif

@@ -31,6 +31,18 @@ public class Unit : MonoBehaviour
         float y = Map.GetHeight(transform.position.x, transform.position.z);
         transform.position = new Vector3(transform.position.x, y, transform.position.z);
     }
+    public Tween MoveTween(Vector3 newPos)
+    {
+        return transform.DOMove(newPos, Vector3.Distance(newPos, transform.position) / moveSpeed).OnUpdate(OnGround);
+    }
+    public Tween LookAtTween(Vector3 toward)
+    {
+        return transform.DOLookAt(toward, 1.0f / rotateSpeed);
+    }
+    public Tween RotateTween(Quaternion newRot)
+    {
+        return transform.DORotateQuaternion(newRot, 1.0f / rotateSpeed);
+    }
     public void Damage(int attackPoint)
     {
         TextUI.Pop(attackPoint.ToString(), Color.red, transform.position);
@@ -49,7 +61,7 @@ public class Unit : MonoBehaviour
     }
     protected void OnValidate()
     {
-        attackRange = GetComponentInChildren<AttackRange>();
+        attackRange = transform.Find("AttackRange").GetComponent<AttackRange>();
         moveRange = transform.Find("MoveRange");
         if (moveRange)
         {

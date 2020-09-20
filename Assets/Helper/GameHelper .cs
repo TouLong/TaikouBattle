@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System;
 
+#if UNITY_EDITOR
 public class GameHelper : EditorWindow
 {
     [MenuItem("Window/Game Helper")]
@@ -182,4 +183,4 @@ public static class EditorHotkeysTracker
         };
     }
 }
-
+#endif

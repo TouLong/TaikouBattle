@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
-
+#if UNITY_EDITOR
 public class MapObjectGenerator
 {
     class MapObjectData
@@ -171,3 +171,4 @@ public class MapObjectGenerator
         }
     }
 }
+#endif

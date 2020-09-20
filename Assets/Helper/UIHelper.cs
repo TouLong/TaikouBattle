@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Linq;
 using System.Collections.Generic;
 using System;
-
+#if UNITY_EDITOR
 public class UIHelper
 {
     static public void Line()
@@ -46,3 +46,4 @@ public class UIHelper
         EditorGUIUtility.fieldWidth = 0;
     }
 }
+#endif

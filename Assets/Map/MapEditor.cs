@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Linq;
 using System.Collections.Generic;
 using System;
-
+#if UNITY_EDITOR
 public class MapEditor : EditorWindow
 {
     Map map;
@@ -349,3 +349,4 @@ public class MapEditor : EditorWindow
     }
 
 }
+#endif

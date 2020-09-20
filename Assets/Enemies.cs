@@ -17,8 +17,8 @@ public class Enemies : List<Enemy>
     {
         ForEach(x => x.Damage(attackPoint));
     }
-    public void TrackPlayer()
+    public void Circling()
     {
-        ForEach(x => x.TrackPlayer());
+        ForEach(x => x.Circling());
     }
 }
