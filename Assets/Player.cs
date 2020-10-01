@@ -22,24 +22,25 @@ public class Player : Unit
         base.Start();
         collider = GetComponent<Collider>();
         indicator = Instantiate(model, transform);
-        attackRange.transform.SetParent(indicator);
+        ResetIndicator();
     }
-    public CombatTween GetCombatTween()
+    public CombatTween Circling()
     {
         Vector3 newPos = indicator.position;
         newPos.y = transform.position.y;
-        CombatTween combat = new CombatTween
+        CombatTween tween = new CombatTween
         {
             lookat = LookAtTween(newPos),
             move = MoveTween(newPos),
             rotate = RotateTween(indicator.rotation),
         };
-        return combat;
+        return tween;
     }
     public void ResetIndicator()
     {
         indicator.localPosition = Vector3.zero;
         indicator.localEulerAngles = Vector3.zero;
+        attackRange.transform.SetParent(transform);
     }
     public void RotateIndicator(Vector3 point)
     {
@@ -59,7 +60,11 @@ public class Player : Unit
     {
         indicator.gameObject.SetActive(show);
         collider.enabled = !show;
-        if (!show)
+        if (show)
+        {
+            attackRange.transform.SetParent(indicator);
+        }
+        else
         {
             ResetIndicator();
         }

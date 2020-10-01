@@ -15,6 +15,10 @@ public class CombatControl : MonoBehaviour
     Player player;
     Enemies hitEnemies = new Enemies();
     Action stateUpdate;
+    public Transform a;
+    public Transform b;
+    public Transform c;
+    public Transform d;
     void Awake()
     {
         Enemies.Layer = LayerMask.GetMask("Enemy");
@@ -27,6 +31,7 @@ public class CombatControl : MonoBehaviour
     void Update()
     {
         stateUpdate();
+        //print(MathHepler.IntersectXZ(a.position, b.position, c.position, d.position));
     }
     void Selecting()
     {
@@ -92,13 +97,20 @@ public class CombatControl : MonoBehaviour
             }
             if (Mouse.LeftDown)
             {
-                CombatTween playerTween = player.GetCombatTween();
-                CombatTween enemyTween = Enemies.InScene[0].Circling();
+                CombatTween playerTween = player.Circling();
+                List<CombatTween> combatTween = Enemies.InScene.Circling();
                 Sequence sequence = DOTween.Sequence();
+                Sequence lookatSeq = DOTween.Sequence().Append(playerTween.lookat);
+                Sequence moveSeq = DOTween.Sequence().Append(playerTween.move);
+                Sequence rotateSeq = DOTween.Sequence().Append(playerTween.rotate);
+                foreach (CombatTween tween in combatTween)
+                {
+                    lookatSeq.Join(tween.lookat);
+                    moveSeq.Join(tween.move);
+                    rotateSeq.Join(tween.rotate);
+                }
                 sequence.SetEase(Ease.Linear);
-                sequence.Append(playerTween.lookat).Join(enemyTween.lookat);
-                sequence.Append(playerTween.move).Join(enemyTween.move);
-                sequence.Append(playerTween.rotate).Join(enemyTween.rotate);
+                sequence.Append(lookatSeq).Append(moveSeq).Append(rotateSeq);
                 sequence.OnComplete(() => { stateUpdate = Combat; });
                 player.ShowIndicator(false);
                 player.MovementShow(false);
@@ -116,8 +128,12 @@ public class CombatControl : MonoBehaviour
     {
         if (player.HitDetect(out hitEnemies))
         {
+            hitEnemies.HighLight(true);
+            player.AttackShow(true);
             player.Punch(() =>
             {
+                hitEnemies.HighLight(false);
+                player.AttackShow(false);
                 hitEnemies.Damage(1);
             });
         }
