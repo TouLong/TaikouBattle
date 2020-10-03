@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class Enemies : List<Enemy>
 {
@@ -22,43 +21,63 @@ public class Enemies : List<Enemy>
     public List<CombatTween> Circling()
     {
         List<CombatTween> tweens = new List<CombatTween>();
-        List<Vector3[]> attackPath = new List<Vector3[]>();
+        List<Vector3[]> paths = new List<Vector3[]>();
         Vector3 playerPosXZ = MathHepler.GetXZ(Player.self.transform.position);
+        float playerMoveRange = Player.self.moveRange;
+        bool IsPathBlocking(Vector3 start, Vector3 end)
+        {
+            for (int j = 0; j < paths.Count; j++)
+            {
+                if (Vector3.Distance(paths[j][1], end) < 4)
+                {
+                    return true;
+                }
+                if (MathHepler.IntersectXZ(paths[j][0], paths[j][1], start, end))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         foreach (Enemy enemy in this)
         {
-            Vector3 selfPosXZ = MathHepler.GetXZ(enemy.transform.position);
-            Vector3 newPos = Vector3.ClampMagnitude(playerPosXZ - selfPosXZ, enemy.moveRangeSize) + selfPosXZ;
-            Quaternion newRot = Quaternion.LookRotation(playerPosXZ - newPos);
-            for (int i = 0; i < 10; i++)
+            Vector3 startPosXZ = MathHepler.GetXZ(enemy.transform.position);
+            Vector3 endPosXZ = startPosXZ;
+            Quaternion newRot = Quaternion.LookRotation(playerPosXZ - endPosXZ);
+            if (Vector3.Distance(startPosXZ, playerPosXZ) < enemy.moveRange + enemy.attackRange + playerMoveRange)
             {
-                Vector3 guessPosXZ = V3Random.RangeXZ(-Player.self.moveRangeSize, Player.self.moveRangeSize) + playerPosXZ;
-                Vector3 attackPosXZ = V3Random.RangeXZ(-enemy.moveRangeSize, enemy.moveRangeSize) + selfPosXZ;
-
-                bool guessTooFar = Vector3.Distance(selfPosXZ, guessPosXZ) > enemy.moveRangeSize + enemy.attackRangeSize;
-                bool attackTooFar = Vector3.Distance(attackPosXZ, guessPosXZ) > enemy.attackRangeSize;
-                bool pathBlocking = false;
-                for (int j = 0; j < attackPath.Count; j++)
+                for (int i = 0; i < 20; i++)
                 {
-                    if (MathHepler.IntersectXZ(attackPath[j][0], attackPath[j][0], selfPosXZ, attackPosXZ))
+                    Vector3 movePosXZ = V3Random.RangeXZ(-enemy.moveRange, enemy.moveRange) + startPosXZ;
+                    Vector3 guessPosXZ = V3Random.RangeXZ(-playerMoveRange, playerMoveRange) + playerPosXZ;
+                    if (Vector3.Distance(movePosXZ, guessPosXZ) > enemy.attackRange)
                     {
-                        pathBlocking = true;
+                        continue;
+                    }
+                    if (!IsPathBlocking(startPosXZ, movePosXZ))
+                    {
+                        endPosXZ = movePosXZ;
+                        newRot = Quaternion.LookRotation(guessPosXZ - endPosXZ);
                         break;
                     }
                 }
-
-                if (!guessTooFar && !attackTooFar && !pathBlocking)
+            }
+            else
+            {
+                Vector3 movePosXZ = Vector3.ClampMagnitude(playerPosXZ - startPosXZ, enemy.moveRange) + startPosXZ;
+                if (!IsPathBlocking(startPosXZ, movePosXZ))
                 {
-                    attackPath.Add(new Vector3[] { selfPosXZ, attackPosXZ });
-                    newPos = attackPosXZ;
-                    newRot = Quaternion.LookRotation(guessPosXZ - newPos);
-                    break;
+                    endPosXZ = movePosXZ;
+                    newRot = Quaternion.LookRotation(playerPosXZ - endPosXZ);
                 }
             }
-            newPos.y = enemy.transform.position.y;
+
+            paths.Add(new Vector3[] { startPosXZ, endPosXZ });
+            endPosXZ.y = enemy.transform.position.y;
             tweens.Add(new CombatTween
             {
-                lookat = enemy.LookAtTween(newPos),
-                move = enemy.MoveTween(newPos),
+                lookat = enemy.LookAtTween(endPosXZ),
+                move = enemy.MoveTween(endPosXZ),
                 rotate = enemy.RotateTween(newRot),
             });
         }

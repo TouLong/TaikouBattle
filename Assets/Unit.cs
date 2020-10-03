@@ -5,20 +5,22 @@ using DG.Tweening;
 public class Unit : MonoBehaviour
 {
     [HideInInspector]
-    public Transform moveRange;
+    public Transform moveMask;
     [HideInInspector]
-    public AttackRange attackRange;
-    [Range(1f, 20f)]
-    public float moveRangeSize = 1;
-    [Range(1f, 20f)]
-    public float attackRangeSize = 1;
-    [Range(30, 180)]
-    public int attackRangeAngle;
+    public AttackRange attackMask;
+    [Range(1f, 20f), Min(1f)]
+    public float moveRange = 1;
+    [Range(1f, 20f), Min(1f)]
+    public float attackRange = 1;
+    [Range(30, 180), Min(30)]
+    public int attackAngle;
     [Range(1, 20)]
     public float moveSpeed;
     [Range(1, 10)]
     public float rotateSpeed;
     protected AnimateBehaviour animator;
+    [Range(1, 10)]
+    public int HP;
     protected void Start()
     {
         MovementShow(false);
@@ -37,6 +39,10 @@ public class Unit : MonoBehaviour
     }
     public Tween LookAtTween(Vector3 toward)
     {
+        if (toward == transform.position)
+        {
+            toward = transform.position + transform.forward;
+        }
         return transform.DOLookAt(toward, 1.0f / rotateSpeed);
     }
     public Tween RotateTween(Quaternion newRot)
@@ -53,23 +59,23 @@ public class Unit : MonoBehaviour
     }
     public void MovementShow(bool show)
     {
-        moveRange.gameObject.SetActive(show);
+        moveMask.gameObject.SetActive(show);
     }
     public void AttackShow(bool show)
     {
-        attackRange.gameObject.SetActive(show);
+        attackMask.gameObject.SetActive(show);
     }
     protected void OnValidate()
     {
-        attackRange = transform.Find("AttackRange").GetComponent<AttackRange>();
-        moveRange = transform.Find("MoveRange");
-        if (moveRange)
+        attackMask = transform.Find("AttackRange").GetComponent<AttackRange>();
+        moveMask = transform.Find("MoveRange");
+        if (moveMask)
         {
-            moveRange.GetComponentInChildren<Projector>().orthographicSize = moveRangeSize * 1.2f;
+            moveMask.GetComponentInChildren<Projector>().orthographicSize = moveRange * 1.2f;
         }
-        if (attackRange)
+        if (attackMask)
         {
-            attackRange.Config(attackRangeAngle, attackRangeSize);
+            attackMask.Config(attackAngle, attackRange);
         }
     }
 }

@@ -17,9 +17,9 @@ public class Enemy : Unit
     {
         float distance = Vector3.Distance(transform.position, player.transform.position);
         float angle = Vector3.Angle(transform.forward, player.transform.position - transform.position);
-        if (distance > attackRange.nearLength && distance < attackRange.farLength)
+        if (distance > attackMask.nearLength && distance < attackMask.farLength)
         {
-            return angle <= attackRange.range / 2;
+            return angle <= attackMask.range / 2;
         }
         return false;
     }

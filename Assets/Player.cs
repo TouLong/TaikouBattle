@@ -40,7 +40,7 @@ public class Player : Unit
     {
         indicator.localPosition = Vector3.zero;
         indicator.localEulerAngles = Vector3.zero;
-        attackRange.transform.SetParent(transform);
+        attackMask.transform.SetParent(transform);
     }
     public void RotateIndicator(Vector3 point)
     {
@@ -51,7 +51,7 @@ public class Player : Unit
     }
     public void MoveIndicator(Vector3 newPosition)
     {
-        Vector3 newPos = Vector3.ClampMagnitude(newPosition - transform.position, moveRangeSize) + transform.position;
+        Vector3 newPos = Vector3.ClampMagnitude(newPosition - transform.position, moveRange) + transform.position;
         newPos.y = Map.GetHeight(newPos.x, newPos.z);
         indicator.transform.position = newPos;
 
@@ -62,7 +62,7 @@ public class Player : Unit
         collider.enabled = !show;
         if (show)
         {
-            attackRange.transform.SetParent(indicator);
+            attackMask.transform.SetParent(indicator);
         }
         else
         {
@@ -77,11 +77,11 @@ public class Player : Unit
         foreach (Enemy enemy in Enemies.InScene)
         {
             distance = Vector3.Distance(enemy.transform.position, indicator.position);
-            if (distance > attackRange.nearLength && distance < attackRange.farLength)
+            if (distance > attackMask.nearLength && distance < attackMask.farLength)
             {
                 angle = Vector3.Angle(indicator.forward, enemy.transform.position - indicator.position);
 
-                if (angle <= attackRange.range / 2)
+                if (angle <= attackMask.range / 2)
                 {
                     hitEnemies.Add(enemy);
                 }
