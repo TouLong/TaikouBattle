@@ -88,7 +88,7 @@ public class SectorGenerator : MonoBehaviour
     }
     void OnValidate()
     {
-        Texture2D texture = GenerateTexture(range, far, near);
-        SaveTextureAsPNG(texture, "Assets/sector.png");
+        //Texture2D texture = GenerateTexture(range, far, near);
+        //SaveTextureAsPNG(texture, "Assets/sector.png");
     }
 }

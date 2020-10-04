@@ -23,7 +23,7 @@ public class Enemies : List<Enemy>
         List<CombatTween> tweens = new List<CombatTween>();
         List<Vector3[]> paths = new List<Vector3[]>();
         Vector3 playerPosXZ = MathHepler.GetXZ(Player.self.transform.position);
-        float playerMoveRange = Player.self.moveRange;
+        float playerMoveRange = Player.self.moveDistance;
         bool IsPathBlocking(Vector3 start, Vector3 end)
         {
             for (int j = 0; j < paths.Count; j++)
@@ -44,13 +44,13 @@ public class Enemies : List<Enemy>
             Vector3 startPosXZ = MathHepler.GetXZ(enemy.transform.position);
             Vector3 endPosXZ = startPosXZ;
             Quaternion newRot = Quaternion.LookRotation(playerPosXZ - endPosXZ);
-            if (Vector3.Distance(startPosXZ, playerPosXZ) < enemy.moveRange + enemy.attackRange + playerMoveRange)
+            if (Vector3.Distance(startPosXZ, playerPosXZ) < enemy.moveDistance + enemy.weapon.length + playerMoveRange)
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    Vector3 movePosXZ = V3Random.RangeXZ(-enemy.moveRange, enemy.moveRange) + startPosXZ;
+                    Vector3 movePosXZ = V3Random.RangeXZ(-enemy.moveDistance, enemy.moveDistance) + startPosXZ;
                     Vector3 guessPosXZ = V3Random.RangeXZ(-playerMoveRange, playerMoveRange) + playerPosXZ;
-                    if (Vector3.Distance(movePosXZ, guessPosXZ) > enemy.attackRange)
+                    if (Vector3.Distance(movePosXZ, guessPosXZ) > enemy.weapon.length)
                     {
                         continue;
                     }
@@ -64,7 +64,7 @@ public class Enemies : List<Enemy>
             }
             else
             {
-                Vector3 movePosXZ = Vector3.ClampMagnitude(playerPosXZ - startPosXZ, enemy.moveRange) + startPosXZ;
+                Vector3 movePosXZ = Vector3.ClampMagnitude(playerPosXZ - startPosXZ, enemy.moveDistance) + startPosXZ;
                 if (!IsPathBlocking(startPosXZ, movePosXZ))
                 {
                     endPosXZ = movePosXZ;

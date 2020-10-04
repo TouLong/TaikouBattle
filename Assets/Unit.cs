@@ -4,27 +4,25 @@ using DG.Tweening;
 
 public class Unit : MonoBehaviour
 {
+    [SerializeField]
+    bool showMovement = true, showAttack = false;
     [HideInInspector]
-    public Transform moveMask;
-    [HideInInspector]
-    public AttackRange attackMask;
-    [Range(1f, 20f), Min(1f)]
-    public float moveRange = 1;
-    [Range(1f, 20f), Min(1f)]
-    public float attackRange = 1;
-    [Range(30, 180), Min(30)]
-    public int attackAngle;
-    [Range(1, 20)]
+    public Transform movementMask, attackMask;
+    public Weapon weapon;
+    [Range(1f, 20f)]
+    public float moveDistance = 1;
+    [Range(1f, 20f)]
     public float moveSpeed;
-    [Range(1, 10)]
+    [Range(1f, 10f)]
     public float rotateSpeed;
-    protected AnimateBehaviour animator;
     [Range(1, 10)]
     public int HP;
+    protected AnimateBehaviour animator;
     protected void Start()
     {
-        MovementShow(false);
-        AttackShow(false);
+        ConfigMask();
+        MovementMask(false);
+        AttackMask(false);
         OnGround();
         animator = GetComponent<AnimateBehaviour>();
     }
@@ -57,25 +55,35 @@ public class Unit : MonoBehaviour
     {
         animator.Play("Punch", onCompleted);
     }
-    public void MovementShow(bool show)
+    public void MovementMask(bool b)
     {
-        moveMask.gameObject.SetActive(show);
+        movementMask.gameObject.SetActive(b);
     }
-    public void AttackShow(bool show)
+    public void AttackMask(bool b)
     {
-        attackMask.gameObject.SetActive(show);
+        attackMask.gameObject.SetActive(b);
+    }
+    public void ConfigMask()
+    {
+        Transform mask = transform.Find("Mask");
+        if (mask)
+        {
+            movementMask = mask.Find("Movement");
+            attackMask = mask.Find("Attack");
+            if (movementMask)
+                movementMask.GetComponent<Projector>().orthographicSize = moveDistance * 1.2f;
+            if (attackMask)
+            {
+                attackMask.GetComponent<Projector>().orthographicSize = weapon.length;
+                attackMask.GetComponent<Projector>().material = weapon.mask;
+            }
+        }
     }
     protected void OnValidate()
     {
-        attackMask = transform.Find("AttackRange").GetComponent<AttackRange>();
-        moveMask = transform.Find("MoveRange");
-        if (moveMask)
-        {
-            moveMask.GetComponentInChildren<Projector>().orthographicSize = moveRange * 1.2f;
-        }
-        if (attackMask)
-        {
-            attackMask.Config(attackAngle, attackRange);
-        }
+        ConfigMask();
+        MovementMask(showMovement);
+        AttackMask(showAttack);
+
     }
 }

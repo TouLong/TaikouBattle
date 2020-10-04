@@ -11,15 +11,15 @@ public class Enemy : Unit
         base.Start();
         outline = GetComponent<MeshOutline>();
         player = Player.self;
-        AttackShow(true);
+        AttackMask(true);
     }
-    public bool IsPlayerInFront()
+    public bool HitDetectPlayer()
     {
         float distance = Vector3.Distance(transform.position, player.transform.position);
-        float angle = Vector3.Angle(transform.forward, player.transform.position - transform.position);
-        if (distance > attackMask.nearLength && distance < attackMask.farLength)
+        float angle = Vector3.Angle(transform.forward, player.transform.position - transform.position) * 2;
+        if (distance > weapon.nearLength && distance < weapon.farLength)
         {
-            return angle <= attackMask.range / 2;
+            return angle <= weapon.angle;
         }
         return false;
     }

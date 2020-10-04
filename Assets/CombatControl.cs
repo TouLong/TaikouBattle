@@ -37,7 +37,7 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitPlayer())
         {
-            player.MovementShow(true);
+            player.MovementMask(true);
             if (Mouse.LeftDown)
             {
                 player.ShowIndicator(true);
@@ -46,7 +46,7 @@ public class CombatControl : MonoBehaviour
         }
         else
         {
-            player.MovementShow(false);
+            player.MovementMask(false);
         }
     }
     void SetPosition()
@@ -57,12 +57,12 @@ public class CombatControl : MonoBehaviour
             if (Mouse.LeftDown)
             {
                 stateUpdate = SetRotation;
-                player.AttackShow(true);
+                player.AttackMask(true);
             }
         }
         if (Mouse.RightDown)
         {
-            player.AttackShow(false);
+            player.AttackMask(false);
             player.ShowIndicator(false);
             stateUpdate = Selecting;
         }
@@ -113,8 +113,8 @@ public class CombatControl : MonoBehaviour
                 sequence.Append(lookatSeq).Append(moveSeq).Append(rotateSeq);
                 sequence.OnComplete(() => { stateUpdate = Combat; });
                 player.ShowIndicator(false);
-                player.MovementShow(false);
-                player.AttackShow(false);
+                player.MovementMask(false);
+                player.AttackMask(false);
                 Enemies.InScene.HighLight(false);
                 stateUpdate = Moving;
             }
@@ -129,17 +129,17 @@ public class CombatControl : MonoBehaviour
         if (player.HitDetect(out hitEnemies))
         {
             hitEnemies.HighLight(true);
-            player.AttackShow(true);
+            player.AttackMask(true);
             player.Punch(() =>
             {
                 hitEnemies.HighLight(false);
-                player.AttackShow(false);
+                player.AttackMask(false);
                 hitEnemies.Damage(1);
             });
         }
         foreach (Enemy enemy in Enemies.InScene)
         {
-            if (enemy.IsPlayerInFront())
+            if (enemy.HitDetectPlayer())
             {
                 enemy.Punch(() =>
                 {

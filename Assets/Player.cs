@@ -51,7 +51,7 @@ public class Player : Unit
     }
     public void MoveIndicator(Vector3 newPosition)
     {
-        Vector3 newPos = Vector3.ClampMagnitude(newPosition - transform.position, moveRange) + transform.position;
+        Vector3 newPos = Vector3.ClampMagnitude(newPosition - transform.position, moveDistance) + transform.position;
         newPos.y = Map.GetHeight(newPos.x, newPos.z);
         indicator.transform.position = newPos;
 
@@ -62,7 +62,7 @@ public class Player : Unit
         collider.enabled = !show;
         if (show)
         {
-            attackMask.transform.SetParent(indicator);
+            attackMask.SetParent(indicator);
         }
         else
         {
@@ -77,11 +77,10 @@ public class Player : Unit
         foreach (Enemy enemy in Enemies.InScene)
         {
             distance = Vector3.Distance(enemy.transform.position, indicator.position);
-            if (distance > attackMask.nearLength && distance < attackMask.farLength)
+            if (distance > weapon.nearLength && distance < weapon.farLength)
             {
-                angle = Vector3.Angle(indicator.forward, enemy.transform.position - indicator.position);
-
-                if (angle <= attackMask.range / 2)
+                angle = Vector3.Angle(indicator.forward, enemy.transform.position - indicator.position) * 2;
+                if (angle <= weapon.angle)
                 {
                     hitEnemies.Add(enemy);
                 }

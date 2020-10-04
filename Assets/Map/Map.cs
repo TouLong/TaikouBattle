@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using System.Linq;
 using UnityEditor;
+using System.Collections.Generic;
+using System.IO;
 
 [ExecuteInEditMode]
 public class Map : MonoBehaviour
 {
+    public NavMeshData navMesh;
     public MapSetting setting;
     [HideInInspector] public float[,] noiseHeights;
     [HideInInspector] public Material terrainMaterial;
@@ -23,7 +27,11 @@ public class Map : MonoBehaviour
             ConfigChunkData();
             UpdateMaterial();
         }
-        //MapNavMesh.Load();
+        if (navMesh != null)
+        {
+            NavMesh.RemoveAllNavMeshData();
+            NavMesh.AddNavMeshData(navMesh);
+        }
     }
     void Update()
     {
@@ -194,20 +202,42 @@ public class Map : MonoBehaviour
     {
         if (GetTerrain())
         {
-            terrain.position -= Vector3.one * 0.5f;
-            Bounds bounds = new Bounds
+            if (navMesh != null)
             {
-                min = new Vector3(0, setting.WaterHeight > 0 ? setting.WaterHeight - 2f : setting.WaterHeight, 0),
-                max = new Vector3(setting.MapSideLength, setting.MountainHeight, setting.MapSideLength)
-            };
-            MeshFilter[] meshFilters = terrain.GetComponentsInChildren<MeshFilter>();
-            MapNavMesh.Generate(bounds, meshFilters);
-            terrain.position += Vector3.one * 0.5f;
+                terrain.position -= Vector3.one * 0.5f;
+                Bounds bounds = new Bounds
+                {
+                    min = new Vector3(0, setting.WaterHeight > 0 ? setting.WaterHeight - 2f : setting.WaterHeight, 0),
+                    max = new Vector3(setting.MapSideLength, setting.MountainHeight, setting.MapSideLength)
+                };
+                MeshFilter[] meshFilters = terrain.GetComponentsInChildren<MeshFilter>();
+                List<NavMeshBuildSource> meshBuildSources = new List<NavMeshBuildSource>();
+                foreach (MeshFilter meshFilter in meshFilters)
+                {
+                    meshBuildSources.Add(new NavMeshBuildSource()
+                    {
+                        shape = NavMeshBuildSourceShape.Mesh,
+                        sourceObject = meshFilter.sharedMesh,
+                        transform = meshFilter.transform.localToWorldMatrix,
+                    });
+                }
+                terrain.position += Vector3.one * 0.5f;
+
+                NavMeshBuildSettings settings = NavMesh.GetSettingsByIndex(0);
+                NavMeshData newNavMeshData = NavMeshBuilder.BuildNavMeshData(settings, meshBuildSources, bounds, bounds.min, Quaternion.identity);
+                NavMesh.AddNavMeshData(newNavMeshData);
+                newNavMeshData.name = navMesh.name;
+                EditorUtility.CopySerialized(newNavMeshData, navMesh);
+            }
+            else
+            {
+                print("沒導航設定檔");
+            }
         }
     }
     public void ClearNav()
     {
-        MapNavMesh.Clear();
+        NavMesh.RemoveAllNavMeshData();
     }
 #endif
 }
