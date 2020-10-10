@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Enemies : List<Enemy>
+public class Enemies : List<Unit>
 {
     static public int Layer;
     static public Enemies InScene = new Enemies();
     public Enemies()
     {
+
     }
     public void HighLight(bool enable)
     {
@@ -18,12 +19,30 @@ public class Enemies : List<Enemy>
     {
         ForEach(x => x.Damage(attackPoint));
     }
+    public void Combat()
+    {
+        foreach (Unit unit in this)
+        {
+            if (unit.weapon.HitDetect(unit.transform, Player.unit))
+            {
+                unit.Punch(() =>
+                {
+                    Player.unit.Damage(1);
+                    unit.Idle();
+                });
+            }
+            else
+            {
+                unit.Idle();
+            }
+        }
+    }
     public List<CombatTween> Circling()
     {
         List<CombatTween> tweens = new List<CombatTween>();
         List<Vector3[]> paths = new List<Vector3[]>();
-        Vector3 playerPosXZ = MathHepler.GetXZ(Player.self.transform.position);
-        float playerMoveRange = Player.self.moveDistance;
+        Vector3 playerPosXZ = MathHepler.GetXZ(Player.unit.transform.position);
+        float playerMoveRange = Player.unit.moveDistance;
         bool IsPathBlocking(Vector3 start, Vector3 end)
         {
             for (int j = 0; j < paths.Count; j++)

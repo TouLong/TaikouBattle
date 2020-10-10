@@ -18,6 +18,10 @@ public class AnimateBehaviour : MonoBehaviour
     public void Start()
     {
         animator = GetComponent<Animator>();
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
     }
     public void Play(string name)
     {
@@ -37,7 +41,6 @@ public class AnimateBehaviour : MonoBehaviour
         while (true)
         {
             float normalizedTime = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            //print(normalizedTime);
             if (state == State.Ready)
             {
                 if (normalizedTime < 1)

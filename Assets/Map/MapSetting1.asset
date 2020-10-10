@@ -97,22 +97,22 @@ MonoBehaviour:
   waterLayer: 0
   mountainLayer: 3
   layers:
-  - color: {r: 0.59607846, g: 0.72156864, b: 0.8196079, a: 0}
+  - color: {r: 0.63529414, g: 0.86274517, b: 0.77647066, a: 0}
     height: 0
     blendStrength: 0
-  - color: {r: 0.9803922, g: 0.854902, b: 0.427451, a: 0}
+  - color: {r: 0.92549026, g: 0.8862746, b: 0.62352943, a: 0}
     height: 0.03641199
     blendStrength: 0.07
-  - color: {r: 0.49411768, g: 0.7137255, b: 0.47058827, a: 0}
+  - color: {r: 0.5372549, g: 0.69411767, b: 0.37647063, a: 0}
     height: 0.055588275
     blendStrength: 0.06
-  - color: {r: 0.32156864, g: 0.6509804, b: 0.49411768, a: 0}
+  - color: {r: 0.5372549, g: 0.69411767, b: 0.37647063, a: 0}
     height: 0.12249665
     blendStrength: 0.45
-  - color: {r: 0.29803923, g: 0.4666667, b: 0.40784317, a: 0}
+  - color: {r: 0.69803923, g: 0.70980394, b: 0.49411768, a: 0}
     height: 0.17381327
     blendStrength: 0.6
-  - color: {r: 0.46274513, g: 0.427451, b: 0.427451, a: 0}
+  - color: {r: 0.53333336, g: 0.50980395, b: 0.53333336, a: 0}
     height: 0.26982284
     blendStrength: 1
   objectsDistribution: []

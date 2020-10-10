@@ -12,17 +12,13 @@ public struct CombatTween
 }
 public class CombatControl : MonoBehaviour
 {
+    public Unit playerUnit;
     Player player;
-    Enemies hitEnemies = new Enemies();
     Action stateUpdate;
-    public Transform a;
-    public Transform b;
-    public Transform c;
-    public Transform d;
     void Awake()
     {
         Enemies.Layer = LayerMask.GetMask("Enemy");
-        player = Player.self;
+        player = new Player(playerUnit);
     }
     void Start()
     {
@@ -31,7 +27,6 @@ public class CombatControl : MonoBehaviour
     void Update()
     {
         stateUpdate();
-        //print(MathHepler.IntersectXZ(a.position, b.position, c.position, d.position));
     }
     void Selecting()
     {
@@ -40,7 +35,7 @@ public class CombatControl : MonoBehaviour
             player.MovementMask(true);
             if (Mouse.LeftDown)
             {
-                player.ShowIndicator(true);
+                player.Start();
                 stateUpdate = SetPosition;
             }
         }
@@ -53,7 +48,7 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            player.MoveIndicator(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
+            player.MoveTo(hit.point.x, hit.point.z);
             if (Mouse.LeftDown)
             {
                 stateUpdate = SetRotation;
@@ -63,7 +58,7 @@ public class CombatControl : MonoBehaviour
         if (Mouse.RightDown)
         {
             player.AttackMask(false);
-            player.ShowIndicator(false);
+            player.Reset();
             stateUpdate = Selecting;
         }
     }
@@ -71,31 +66,13 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            player.RotateIndicator(new Vector3(hit.point.x, player.transform.position.y, hit.point.z));
-            if (player.HitDetect(out hitEnemies))
-            {
-                foreach (Enemy enemy in Enemies.InScene)
-                {
-                    if (hitEnemies.Contains(enemy))
-                    {
-                        enemy.HighLight(true);
-                    }
-                    else
-                    {
-                        enemy.HighLight(false);
-                    }
-                }
-            }
-            else
-            {
-                Enemies.InScene.HighLight(false);
-            }
+            player.LookAt(hit.point.x, hit.point.z);
             if (Mouse.RightDown)
             {
-                player.ResetIndicator();
+                player.Reset();
                 stateUpdate = SetPosition;
             }
-            if (Mouse.LeftDown)
+            else if (Mouse.LeftDown)
             {
                 CombatTween playerTween = player.Circling();
                 List<CombatTween> combatTween = Enemies.InScene.Circling();
@@ -112,7 +89,7 @@ public class CombatControl : MonoBehaviour
                 sequence.SetEase(Ease.Linear);
                 sequence.Append(lookatSeq).Append(moveSeq).Append(rotateSeq);
                 sequence.OnComplete(() => { stateUpdate = Combat; });
-                player.ShowIndicator(false);
+                player.Reset();
                 player.MovementMask(false);
                 player.AttackMask(false);
                 Enemies.InScene.HighLight(false);
@@ -126,28 +103,9 @@ public class CombatControl : MonoBehaviour
     }
     void Combat()
     {
-        if (player.HitDetect(out hitEnemies))
-        {
-            hitEnemies.HighLight(true);
-            player.AttackMask(true);
-            player.Punch(() =>
-            {
-                hitEnemies.HighLight(false);
-                player.AttackMask(false);
-                hitEnemies.Damage(1);
-            });
-        }
-        foreach (Enemy enemy in Enemies.InScene)
-        {
-            if (enemy.HitDetectPlayer())
-            {
-                enemy.Punch(() =>
-                {
-                    player.Damage(1);
-                });
-            }
-        }
-        player.ResetIndicator();
+        player.Combat();
+        Enemies.InScene.Combat();
+        player.Reset();
         stateUpdate = Selecting;
     }
 }

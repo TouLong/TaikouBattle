@@ -9,6 +9,7 @@ public class Unit : MonoBehaviour
     [HideInInspector]
     public Transform movementMask, attackMask;
     public Weapon weapon;
+    public Transform model;
     [Range(1f, 20f)]
     public float moveDistance = 1;
     [Range(1f, 20f)]
@@ -17,14 +18,19 @@ public class Unit : MonoBehaviour
     public float rotateSpeed;
     [Range(1, 10)]
     public int HP;
-    protected AnimateBehaviour animator;
+    protected AnimateBehaviour upperAnim;
+    protected AnimateBehaviour lowerAnim;
+    MeshOutline outline;
+
     protected void Start()
     {
         ConfigMask();
         MovementMask(false);
         AttackMask(false);
         OnGround();
-        animator = GetComponent<AnimateBehaviour>();
+        upperAnim = model.Find("Armature/base/core").GetComponent<AnimateBehaviour>();
+        lowerAnim = model.Find("Armature/base/hip").GetComponent<AnimateBehaviour>();
+        outline = GetComponent<MeshOutline>();
     }
     protected void OnGround()
     {
@@ -33,7 +39,9 @@ public class Unit : MonoBehaviour
     }
     public Tween MoveTween(Vector3 newPos)
     {
-        return transform.DOMove(newPos, Vector3.Distance(newPos, transform.position) / moveSpeed).OnUpdate(OnGround);
+        return transform.DOMove(newPos, Vector3.Distance(newPos, transform.position) / moveSpeed)
+            .OnStart(() => { lowerAnim.Play("Walk"); })
+            .OnUpdate(OnGround);
     }
     public Tween LookAtTween(Vector3 toward)
     {
@@ -41,7 +49,7 @@ public class Unit : MonoBehaviour
         {
             toward = transform.position + transform.forward;
         }
-        return transform.DOLookAt(toward, 1.0f / rotateSpeed);
+        return transform.DOLookAt(toward, 1.0f / rotateSpeed).OnStart(() => { lowerAnim.Play("Turn"); });
     }
     public Tween RotateTween(Quaternion newRot)
     {
@@ -51,9 +59,14 @@ public class Unit : MonoBehaviour
     {
         TextUI.Pop(attackPoint.ToString(), Color.red, transform.position);
     }
+    public void Idle()
+    {
+        upperAnim.Play("Idle");
+        lowerAnim.Play("Idle");
+    }
     public void Punch(Action onCompleted)
     {
-        animator.Play("Punch", onCompleted);
+        upperAnim.Play("Attack", onCompleted);
     }
     public void MovementMask(bool b)
     {
@@ -62,6 +75,10 @@ public class Unit : MonoBehaviour
     public void AttackMask(bool b)
     {
         attackMask.gameObject.SetActive(b);
+    }
+    public void HighLight(bool enable)
+    {
+        outline.enabled = enable;
     }
     public void ConfigMask()
     {

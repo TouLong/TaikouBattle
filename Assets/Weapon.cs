@@ -1,8 +1,6 @@
-﻿using System.Collections;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.IO;
 using UnityEditor;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
@@ -20,6 +18,28 @@ public class Weapon : MonoBehaviour
     public Material mask;
     [SerializeField]
     Texture2D maskTexture;
+    public bool HitDetect(Transform owner, Unit target)
+    {
+        float distance = Vector3.Distance(target.transform.position, owner.position);
+        if (distance > nearLength && distance < farLength)
+        {
+            float angle = Vector3.Angle(owner.forward, target.transform.position - owner.position) * 2;
+            return angle <= this.angle;
+        }
+        return false;
+    }
+    public bool HitDetect(Transform owner, List<Unit> targets, out List<Unit> hits)
+    {
+        hits = new List<Unit>();
+        foreach (Unit target in targets)
+        {
+            if (HitDetect(owner, target))
+            {
+                hits.Add(target);
+            }
+        }
+        return hits.Any();
+    }
     void OnValidate()
     {
         farLength = length * far;

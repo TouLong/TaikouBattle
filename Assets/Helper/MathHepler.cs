@@ -8,6 +8,10 @@ class MathHepler
     {
         return new Vector3(vector.x, 0, vector.z);
     }
+    static public Vector2 V3ToV2(Vector3 vector)
+    {
+        return new Vector2(vector.x, vector.z);
+    }
     static public bool IntersectXZ(Vector3 aForm, Vector3 aTo, Vector3 bForm, Vector3 bTo)
     {
         float d = (aTo.x - aForm.x) * (bTo.z - bForm.z) - (aTo.z - aForm.z) * (bTo.x - bForm.x);

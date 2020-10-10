@@ -1,91 +1,98 @@
-﻿using System;
-using UnityEngine;
-using DG.Tweening;
-using System.Linq;
+﻿using UnityEngine;
+using System.Collections.Generic;
 
-public class Player : Unit
+public class Player
 {
-    static public Player self;
-    public Transform model;
-    new Collider collider;
-    [HideInInspector]
-    public Transform indicator;
-    void Awake()
+    public static Unit unit;
+    Transform dest;
+    Transform origin;
+    Collider collider;
+    public Player(Unit unit)
     {
-        if (self == null)
-        {
-            self = this;
-        }
+        Player.unit = unit;
+        dest = Player.unit.model;
+        origin = Object.Instantiate(dest, Player.unit.transform);
+        collider = Player.unit.GetComponent<Collider>();
     }
-    new void Start()
+    public void Start()
     {
-        base.Start();
-        collider = GetComponent<Collider>();
-        indicator = Instantiate(model, transform);
-        ResetIndicator();
+        origin.gameObject.SetActive(true);
+        collider.enabled = false;
+        unit.attackMask.SetParent(dest);
+    }
+    public void Reset()
+    {
+        dest.localPosition = Vector3.zero;
+        dest.localEulerAngles = Vector3.zero;
+        unit.attackMask.SetParent(unit.transform);
+        collider.enabled = true;
+        origin.gameObject.SetActive(false);
+    }
+    public void MovementMask(bool enable)
+    {
+        unit.MovementMask(enable);
+    }
+    public void AttackMask(bool enable)
+    {
+        unit.AttackMask(enable);
+    }
+    public void MoveTo(float x, float z)
+    {
+        Vector2 newPos = Vector2.ClampMagnitude(new Vector2(x, z) - MathHepler.V3ToV2(origin.position), unit.moveDistance) + MathHepler.V3ToV2(origin.position);
+        dest.position = new Vector3(newPos.x, Map.GetHeight(newPos.x, newPos.y), newPos.y);
+    }
+    public void LookAt(float x, float z)
+    {
+        Vector3 forward = new Vector3(x - dest.position.x, 0, z - dest.position.z);
+        if (forward != Vector3.zero)
+            dest.rotation = Quaternion.LookRotation(forward);
+        foreach (Unit unit in Enemies.InScene)
+        {
+            unit.HighLight(false);
+        }
+        if (unit.weapon.HitDetect(dest, Enemies.InScene, out List<Unit> hits))
+        {
+            foreach (Unit unit in hits)
+            {
+                unit.HighLight(true);
+            }
+        }
     }
     public CombatTween Circling()
     {
-        Vector3 newPos = indicator.position;
-        newPos.y = transform.position.y;
+        Vector3 newPos = dest.position;
+        newPos.y = origin.position.y;
         CombatTween tween = new CombatTween
         {
-            lookat = LookAtTween(newPos),
-            move = MoveTween(newPos),
-            rotate = RotateTween(indicator.rotation),
+            lookat = unit.LookAtTween(newPos),
+            move = unit.MoveTween(newPos),
+            rotate = unit.RotateTween(dest.rotation),
         };
         return tween;
     }
-    public void ResetIndicator()
+    public void Combat()
     {
-        indicator.localPosition = Vector3.zero;
-        indicator.localEulerAngles = Vector3.zero;
-        attackMask.transform.SetParent(transform);
-    }
-    public void RotateIndicator(Vector3 point)
-    {
-        Vector3 forward = point - indicator.position;
-        forward.y = 0;
-        if (forward != Vector3.zero)
-            indicator.rotation = Quaternion.LookRotation(forward);
-    }
-    public void MoveIndicator(Vector3 newPosition)
-    {
-        Vector3 newPos = Vector3.ClampMagnitude(newPosition - transform.position, moveDistance) + transform.position;
-        newPos.y = Map.GetHeight(newPos.x, newPos.z);
-        indicator.transform.position = newPos;
-
-    }
-    public void ShowIndicator(bool show)
-    {
-        indicator.gameObject.SetActive(show);
-        collider.enabled = !show;
-        if (show)
+        if (unit.weapon.HitDetect(unit.transform, Enemies.InScene, out List<Unit> hits))
         {
-            attackMask.SetParent(indicator);
+            AttackMask(true);
+            foreach (Unit hit in hits)
+            {
+                hit.HighLight(true);
+            }
+            unit.Punch(() =>
+            {
+                foreach (Unit hit in hits)
+                {
+                    hit.Damage(1);
+                    hit.HighLight(false);
+                }
+                AttackMask(false);
+                unit.Idle();
+            });
         }
         else
         {
-            ResetIndicator();
+            unit.Idle();
         }
-    }
-    public bool HitDetect(out Enemies hitEnemies)
-    {
-        float distance;
-        float angle;
-        hitEnemies = new Enemies();
-        foreach (Enemy enemy in Enemies.InScene)
-        {
-            distance = Vector3.Distance(enemy.transform.position, indicator.position);
-            if (distance > weapon.nearLength && distance < weapon.farLength)
-            {
-                angle = Vector3.Angle(indicator.forward, enemy.transform.position - indicator.position) * 2;
-                if (angle <= weapon.angle)
-                {
-                    hitEnemies.Add(enemy);
-                }
-            }
-        }
-        return hitEnemies.Any();
     }
 }
