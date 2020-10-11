@@ -18,15 +18,15 @@ public class CombatControl : MonoBehaviour
     void Awake()
     {
         Enemies.Layer = LayerMask.GetMask("Enemy");
-        player = new Player(playerUnit);
-    }
-    void Start()
-    {
-        stateUpdate = Selecting;
+        if (playerUnit != null)
+        {
+            player = new Player(playerUnit);
+            stateUpdate = Selecting;
+        }
     }
     void Update()
     {
-        stateUpdate();
+        stateUpdate?.Invoke();
     }
     void Selecting()
     {

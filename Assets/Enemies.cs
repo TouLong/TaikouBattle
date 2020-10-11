@@ -25,7 +25,7 @@ public class Enemies : List<Unit>
         {
             if (unit.weapon.HitDetect(unit.transform, Player.unit))
             {
-                unit.Punch(() =>
+                unit.Attack(() =>
                 {
                     Player.unit.Damage(1);
                     unit.Idle();

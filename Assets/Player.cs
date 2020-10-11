@@ -13,6 +13,7 @@ public class Player
         dest = Player.unit.model;
         origin = Object.Instantiate(dest, Player.unit.transform);
         collider = Player.unit.GetComponent<Collider>();
+        origin.gameObject.SetActive(false);
     }
     public void Start()
     {
@@ -79,7 +80,7 @@ public class Player
             {
                 hit.HighLight(true);
             }
-            unit.Punch(() =>
+            unit.Attack(() =>
             {
                 foreach (Unit hit in hits)
                 {
