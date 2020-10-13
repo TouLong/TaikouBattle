@@ -4,7 +4,8 @@ using System;
 
 public class TextUI
 {
-    public static TextMesh Pop(string content, Color color, Vector3 position, float time = 0.5f)
+    static public int defualtFonSize = 10;
+    public static TextMesh Pop(string content, Color color, Vector3 position, int fontSize = -1, float time = 0.5f)
     {
         GameObject gameObject = new GameObject("Text Pop", typeof(TextMesh), typeof(TextPop));
         gameObject.transform.position = position;
@@ -12,7 +13,10 @@ public class TextUI
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
         textMesh.text = content;
-        textMesh.fontSize = 30;
+        if (fontSize < 0)
+            textMesh.fontSize = defualtFonSize;
+        else
+            textMesh.fontSize = fontSize;
         textMesh.color = color;
         TextPop pop = gameObject.GetComponent<TextPop>();
         pop.Init(textMesh.fontSize / 3);
@@ -20,7 +24,7 @@ public class TextUI
         return textMesh;
     }
 
-    public static TextMesh Stay(string content, Vector3 position, int fontSize = 30)
+    public static TextMesh Stay(string content, Vector3 position, int fontSize = -1)
     {
         GameObject gameObject = new GameObject("Text Stay", typeof(TextMesh), typeof(TextStay));
         gameObject.transform.position = position;
@@ -28,7 +32,10 @@ public class TextUI
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
         textMesh.text = content;
-        textMesh.fontSize = fontSize;
+        if (fontSize < 0)
+            textMesh.fontSize = defualtFonSize;
+        else
+            textMesh.fontSize = fontSize;
         textMesh.color = Color.cyan;
         TextStay stay = gameObject.GetComponent<TextStay>();
         stay.Init();

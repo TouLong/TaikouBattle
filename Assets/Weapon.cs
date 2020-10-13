@@ -16,8 +16,7 @@ public class Weapon : MonoBehaviour
     [HideInInspector]
     public float farLength, nearLength;
     public Material mask;
-    [SerializeField]
-    Texture2D maskTexture;
+    public Texture2D maskTexture;
     public bool HitDetect(Transform owner, Unit target)
     {
         float distance = Vector3.Distance(target.transform.position, owner.position);

@@ -18,7 +18,8 @@ public class Unit : MonoBehaviour
     public float rotateSpeed;
     [Range(1, 10)]
     public int HP;
-    protected AnimateBehaviour animator;
+    AnimatorLayer moveAnim;
+    AnimatorLayer actionAnim;
     MeshOutline outline;
 
     protected void Start()
@@ -27,8 +28,9 @@ public class Unit : MonoBehaviour
         MovementMask(false);
         AttackMask(false);
         OnGround();
-        animator = GetComponent<AnimateBehaviour>();
         outline = GetComponent<MeshOutline>();
+        moveAnim = new AnimatorLayer(GetComponent<Animator>(), 0);
+        actionAnim = new AnimatorLayer(GetComponent<Animator>(), 1);
     }
     protected void OnGround()
     {
@@ -38,9 +40,15 @@ public class Unit : MonoBehaviour
     public Tween MoveTween(Vector3 newPos)
     {
         return transform.DOMove(newPos, Vector3.Distance(newPos, transform.position) / moveSpeed)
-            .OnStart(() => { animator.Play("move", 0); })
-            .OnUpdate(OnGround);
-        //.OnComplete(() => { animator.Play("stand", 0); });
+            .OnStart(() =>
+            {
+                moveAnim.CrossFade("move");
+            })
+            .OnUpdate(OnGround)
+            .OnComplete(() =>
+            {
+                moveAnim.CrossFade("stand");
+            });
     }
     public Tween LookAtTween(Vector3 toward)
     {
@@ -49,8 +57,14 @@ public class Unit : MonoBehaviour
             toward = transform.position + transform.forward;
         }
         return transform.DOLookAt(toward, 1.0f / rotateSpeed)
-            .OnStart(() => { animator.Play("turn", 0); });
-        //.OnComplete(() => { animator.Play("stand", 0); });
+            .OnStart(() =>
+            {
+                moveAnim.CrossFade("turn");
+            })
+            .OnComplete(() =>
+            {
+                moveAnim.CrossFade("stand");
+            });
     }
     public Tween RotateTween(Quaternion newRot)
     {
@@ -62,12 +76,12 @@ public class Unit : MonoBehaviour
     }
     public void Idle()
     {
-        animator.Play("stand", 0);
-        animator.Play("empty", 1);
+        moveAnim.CrossFade("stand");
+        actionAnim.CrossFade("empty");
     }
     public void Attack(Action onCompleted)
     {
-        animator.Play("sword", onCompleted, 1, 0.6f);
+        actionAnim.CrossFadeEvent("sword", onCompleted, 0.6f);
     }
     public void MovementMask(bool b)
     {

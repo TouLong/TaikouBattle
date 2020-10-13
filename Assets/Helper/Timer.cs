@@ -4,8 +4,7 @@ using System.Collections;
 
 public class Timer : MonoBehaviour
 {
-    static readonly GameObject timerGameObject = new GameObject("Timer");
-    static readonly Timer timer = timerGameObject.AddComponent<Timer>();
+    static readonly Timer timer = new GameObject("Timer").AddComponent<Timer>();
     public static Coroutine Set(float time, Action onCompleteAction)
     {
         return timer.StartCoroutine(timer.Action(time, onCompleteAction));
