@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
@@ -10,17 +11,15 @@ public class Unit : MonoBehaviour
     public Transform movementMask, attackMask;
     public Weapon weapon;
     public Transform model;
+    public Transform holdWeapon;
     [Range(1f, 20f)]
     public float moveDistance = 1;
     [Range(1f, 20f)]
     public float moveSpeed;
     [Range(1f, 10f)]
     public float rotateSpeed;
-    [Range(1, 10)]
-    public int HP;
     AnimatorLayer moveAnim;
     AnimatorLayer actionAnim;
-    MeshOutline outline;
 
     protected void Start()
     {
@@ -28,9 +27,10 @@ public class Unit : MonoBehaviour
         MovementMask(false);
         AttackMask(false);
         OnGround();
-        outline = GetComponent<MeshOutline>();
         moveAnim = new AnimatorLayer(GetComponent<Animator>(), 0);
         actionAnim = new AnimatorLayer(GetComponent<Animator>(), 1);
+        Instantiate(weapon, holdWeapon, false);
+        Idle();
     }
     protected void OnGround()
     {
@@ -77,11 +77,11 @@ public class Unit : MonoBehaviour
     public void Idle()
     {
         moveAnim.CrossFade("stand");
-        actionAnim.CrossFade("empty");
+        actionAnim.CrossFade(weapon.type.ToString() + "_idle");
     }
     public void Attack(Action onCompleted)
     {
-        actionAnim.CrossFadeEvent("sword", onCompleted, 0.6f);
+        actionAnim.CrossFadeEvent(weapon.type.ToString(), onCompleted, 0.6f);
     }
     public void MovementMask(bool b)
     {
@@ -93,7 +93,6 @@ public class Unit : MonoBehaviour
     }
     public void HighLight(bool enable)
     {
-        outline.enabled = enable;
     }
     public void ConfigMask()
     {
@@ -103,11 +102,11 @@ public class Unit : MonoBehaviour
             movementMask = mask.Find("Movement");
             attackMask = mask.Find("Attack");
             if (movementMask)
-                movementMask.GetComponent<Projector>().orthographicSize = moveDistance * 1.2f;
+                movementMask.localScale = (Vector3.right + Vector3.up) * moveDistance * 2.2f + Vector3.forward;
             if (attackMask)
             {
-                attackMask.GetComponent<Projector>().orthographicSize = weapon.length;
-                attackMask.GetComponent<Projector>().material = weapon.mask;
+                attackMask.GetComponent<MeshRenderer>().material = weapon.mask;
+                attackMask.localScale = (Vector3.right + Vector3.up) * weapon.length * 2 + Vector3.forward;
             }
         }
     }
@@ -116,6 +115,5 @@ public class Unit : MonoBehaviour
         ConfigMask();
         MovementMask(showMovement);
         AttackMask(showAttack);
-
     }
 }

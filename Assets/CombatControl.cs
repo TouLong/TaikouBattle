@@ -27,6 +27,7 @@ public class CombatControl : MonoBehaviour
     void Update()
     {
         stateUpdate?.Invoke();
+        Mouse.Hit(out RaycastHit hit);
     }
     void Selecting()
     {

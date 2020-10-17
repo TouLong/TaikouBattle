@@ -4,53 +4,44 @@ using System;
 
 public class TextUI
 {
-    static public int defualtFonSize = 10;
+    static public int defualtFontSize = 10;
     public static TextMesh Pop(string content, Color color, Vector3 position, int fontSize = -1, float time = 0.5f)
     {
         GameObject gameObject = new GameObject("Text Pop", typeof(TextMesh), typeof(TextPop));
         gameObject.transform.position = position;
-        TextMesh textMesh = gameObject.GetComponent<TextMesh>();
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.text = content;
-        if (fontSize < 0)
-            textMesh.fontSize = defualtFonSize;
-        else
-            textMesh.fontSize = fontSize;
-        textMesh.color = color;
         TextPop pop = gameObject.GetComponent<TextPop>();
-        pop.Init(textMesh.fontSize / 3);
+        pop.Setup((fontSize > 0 ? fontSize : defualtFontSize) / 2f);
         Timer.Set(time, () => { pop.DestorySelf(); });
-        return textMesh;
+        return ConfigTextMesh(gameObject.GetComponent<TextMesh>(), content, color, fontSize);
     }
 
-    public static TextMesh Stay(string content, Vector3 position, int fontSize = -1)
+    public static TextMesh Stay(string content, Vector3 position, Color color, int fontSize = -1)
     {
         GameObject gameObject = new GameObject("Text Stay", typeof(TextMesh), typeof(TextStay));
         gameObject.transform.position = position;
-        TextMesh textMesh = gameObject.GetComponent<TextMesh>();
+        gameObject.GetComponent<TextStay>().Setup();
+        return ConfigTextMesh(gameObject.GetComponent<TextMesh>(), content, color, fontSize);
+    }
+    static TextMesh ConfigTextMesh(TextMesh textMesh, string content, Color color, int fontSize)
+    {
+        int size = fontSize > 0 ? fontSize : defualtFontSize;
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
         textMesh.text = content;
-        if (fontSize < 0)
-            textMesh.fontSize = defualtFonSize;
-        else
-            textMesh.fontSize = fontSize;
-        textMesh.color = Color.cyan;
-        TextStay stay = gameObject.GetComponent<TextStay>();
-        stay.Init();
+        textMesh.characterSize = size / (float)100;
+        textMesh.fontSize = size * 10;
+        textMesh.color = color;
         return textMesh;
     }
-
     class TextPop : MonoBehaviour
     {
         float xOffset;
         float yOffset;
-        float speed;
         Transform cam;
+        float speed;
         Vector3 movement;
 
-        public void Init(float speed)
+        public void Setup(float speed)
         {
             cam = Camera.main.transform;
             xOffset = UnityEngine.Random.Range(-0.5f, 0.5f);
@@ -74,7 +65,8 @@ public class TextUI
     class TextStay : MonoBehaviour
     {
         Transform cam;
-        public void Init()
+
+        public void Setup()
         {
             cam = Camera.main.transform;
         }
