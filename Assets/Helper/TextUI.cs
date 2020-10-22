@@ -5,7 +5,7 @@ using System;
 public class TextUI
 {
     static public int defualtFontSize = 10;
-    public static TextMesh Pop(string content, Color color, Vector3 position, int fontSize = -1, float time = 0.5f)
+    public static TextMesh Pop<T>(T content, Color color, Vector3 position, int fontSize = -1, float time = 0.5f)
     {
         GameObject gameObject = new GameObject("Text Pop", typeof(TextMesh), typeof(TextPop));
         gameObject.transform.position = position;
@@ -15,19 +15,18 @@ public class TextUI
         return ConfigTextMesh(gameObject.GetComponent<TextMesh>(), content, color, fontSize);
     }
 
-    public static TextMesh Stay(string content, Vector3 position, Color color, int fontSize = -1)
+    public static TextMesh Stay<T>(T content, Vector3 position, Color color, int fontSize = -1)
     {
-        GameObject gameObject = new GameObject("Text Stay", typeof(TextMesh), typeof(TextStay));
+        GameObject gameObject = new GameObject("Text Stay", typeof(TextMesh), typeof(LookatCamera));
         gameObject.transform.position = position;
-        gameObject.GetComponent<TextStay>().Setup();
         return ConfigTextMesh(gameObject.GetComponent<TextMesh>(), content, color, fontSize);
     }
-    static TextMesh ConfigTextMesh(TextMesh textMesh, string content, Color color, int fontSize)
+    static TextMesh ConfigTextMesh<T>(TextMesh textMesh, T content, Color color, int fontSize)
     {
         int size = fontSize > 0 ? fontSize : defualtFontSize;
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
-        textMesh.text = content;
+        textMesh.text = content.ToString();
         textMesh.characterSize = size / (float)100;
         textMesh.fontSize = size * 10;
         textMesh.color = color;
@@ -37,13 +36,10 @@ public class TextUI
     {
         float xOffset;
         float yOffset;
-        Transform cam;
         float speed;
-        Vector3 movement;
 
         public void Setup(float speed)
         {
-            cam = Camera.main.transform;
             xOffset = UnityEngine.Random.Range(-0.5f, 0.5f);
             yOffset = 1f;
             this.speed = speed;
@@ -51,9 +47,8 @@ public class TextUI
 
         void LateUpdate()
         {
-            transform.LookAt(transform.position + cam.rotation * Vector3.forward, cam.rotation * Vector3.up);
-            movement = transform.right * xOffset + transform.up * yOffset;
-            transform.position += movement * speed * Time.deltaTime;
+            transform.forward = Camera.main.transform.forward;
+            transform.position += (transform.right * xOffset + transform.up * yOffset) * speed * Time.deltaTime;
         }
 
         public void DestorySelf()
@@ -62,24 +57,5 @@ public class TextUI
         }
     }
 
-    class TextStay : MonoBehaviour
-    {
-        Transform cam;
-
-        public void Setup()
-        {
-            cam = Camera.main.transform;
-        }
-
-        void LateUpdate()
-        {
-            transform.LookAt(transform.position + cam.rotation * Vector3.forward, cam.rotation * Vector3.up);
-        }
-
-        public void DestorySelf()
-        {
-            Destroy(gameObject);
-        }
-    }
 }
 

@@ -4,62 +4,59 @@ using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
-public struct CombatTween
-{
-    public Tween lookat;
-    public Tween move;
-    public Tween rotate;
-}
 public class CombatControl : MonoBehaviour
 {
     public Unit playerUnit;
-    Player player;
     Action stateUpdate;
     void Awake()
     {
-        Enemies.Layer = LayerMask.GetMask("Enemy");
         if (playerUnit != null)
         {
-            player = new Player(playerUnit);
+            PlayerControl.Setup(playerUnit);
+        }
+    }
+    void Start()
+    {
+        if (playerUnit != null)
+        {
             stateUpdate = Selecting;
         }
     }
     void Update()
     {
         stateUpdate?.Invoke();
-        Mouse.Hit(out RaycastHit hit);
     }
     void Selecting()
     {
-        if (Mouse.HitPlayer())
+        if (Mouse.Hit(out Unit unit))
         {
-            player.MovementMask(true);
-            if (Mouse.LeftDown)
+            unit.status.Display(RangeDisplayType.Moving);
+            if (Mouse.LeftDown && unit.gameObject.layer == 8)//Player
             {
-                player.Start();
+                PlayerControl.Start();
                 stateUpdate = SetPosition;
             }
         }
         else
         {
-            player.MovementMask(false);
+            Unit.InScene.ForEach(x => x.status.Display(RangeDisplayType.Attack));
         }
     }
     void SetPosition()
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            player.MoveTo(hit.point.x, hit.point.z);
+            PlayerControl.MoveTo(hit.point.x, hit.point.z);
             if (Mouse.LeftDown)
             {
                 stateUpdate = SetRotation;
-                player.AttackMask(true);
+                PlayerControl.unit.status.Display(RangeDisplayType.Attack);
             }
         }
         if (Mouse.RightDown)
         {
-            player.AttackMask(false);
-            player.Reset();
+            PlayerControl.unit.status.Display(RangeDisplayType.Attack);
+            PlayerControl.Reset();
             stateUpdate = Selecting;
         }
     }
@@ -67,46 +64,27 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            player.LookAt(hit.point.x, hit.point.z);
+            PlayerControl.LookAt(hit.point.x, hit.point.z);
             if (Mouse.RightDown)
             {
-                player.Reset();
+                PlayerControl.Reset();
                 stateUpdate = SetPosition;
             }
             else if (Mouse.LeftDown)
             {
-                CombatTween playerTween = player.Circling();
-                List<CombatTween> combatTween = Enemies.InScene.Circling();
-                Sequence sequence = DOTween.Sequence();
-                Sequence lookatSeq = DOTween.Sequence().Append(playerTween.lookat);
-                Sequence moveSeq = DOTween.Sequence().Append(playerTween.move);
-                Sequence rotateSeq = DOTween.Sequence().Append(playerTween.rotate);
-                foreach (CombatTween tween in combatTween)
-                {
-                    lookatSeq.Join(tween.lookat);
-                    moveSeq.Join(tween.move);
-                    rotateSeq.Join(tween.rotate);
-                }
-                sequence.SetEase(Ease.Linear);
-                sequence.Append(lookatSeq).Append(moveSeq).Append(rotateSeq);
-                sequence.OnComplete(() => { stateUpdate = Combat; });
-                player.Reset();
-                player.MovementMask(false);
-                player.AttackMask(false);
-                Enemies.InScene.HighLight(false);
-                stateUpdate = Moving;
+                Unit.InScene.ForEach(x => x.status.Display(RangeDisplayType.Attack));
+                PlayerControl.Action();
+                Enemy.InSceneAction();
+                PlayerControl.Reset();
+                stateUpdate = Action;
             }
         }
     }
-    void Moving()
+    void Action()
     {
-
-    }
-    void Combat()
-    {
-        player.Combat();
-        Enemies.InScene.Combat();
-        player.Reset();
-        stateUpdate = Selecting;
+        if (!Unit.InScene.All(x => x.action.IsPlaying()))
+        {
+            stateUpdate = Selecting;
+        }
     }
 }

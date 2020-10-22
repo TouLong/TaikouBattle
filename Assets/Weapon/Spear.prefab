@@ -92,11 +92,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de3de55dcc52a8348b822401d2f03daf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 1
+  type: 2
   far: 1
   near: 0.55
   angle: 45
   length: 3
+  weight: 2
+  attack: 1
   farLength: 3
   nearLength: 1.6500001
   mask: {fileID: 0}

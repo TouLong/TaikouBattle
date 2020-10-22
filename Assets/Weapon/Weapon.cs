@@ -7,7 +7,8 @@ public class Weapon : MonoBehaviour
 {
     public enum Type
     {
-        sword,
+        sword1,
+        sword2,
         spear,
     }
     public Type type;
@@ -19,10 +20,15 @@ public class Weapon : MonoBehaviour
     public int angle;
     [Range(0.1f, 10f)]
     public float length;
+    [Range(0f, 10f)]
+    public float weight;
+    [Range(1, 5)]
+    public int attack;
     [HideInInspector]
     public float farLength, nearLength;
     [HideInInspector]
     public Material mask;
+
     public bool HitDetect(Transform owner, Unit target)
     {
         float distance = Vector3.Distance(target.transform.position, owner.position);

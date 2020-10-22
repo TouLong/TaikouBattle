@@ -5,37 +5,37 @@ using DG.Tweening;
 
 public class Unit : MonoBehaviour
 {
-    [SerializeField]
-    bool showMovement = true, showAttack = false;
-    [HideInInspector]
-    public Transform movementMask, attackMask;
+    static public List<Unit> InScene = new List<Unit>();
+
     public Weapon weapon;
     public Transform model;
     public Transform holdWeapon;
-    [Range(1f, 20f)]
-    public float moveDistance = 1;
-    [Range(1f, 20f)]
-    public float moveSpeed;
-    [Range(1f, 10f)]
-    public float rotateSpeed;
+
+    [HideInInspector]
+    public float moveDistance;
+    [Range(1, 5)]
+    public int maxHealth, health;
+    float moveSpeed;
+    float rotateSpeed;
+
     AnimatorLayer moveAnim;
     AnimatorLayer actionAnim;
+    public Sequence action;
+    [HideInInspector]
+    public UnitStatus status;
 
-    protected void Start()
+    void Start()
     {
-        ConfigMask();
-        MovementMask(false);
-        AttackMask(false);
-        OnGround();
+        weapon = Instantiate(weapon, holdWeapon, false);
+        rotateSpeed = 5f - weapon.weight / 10;
+        moveDistance = 2f - weapon.weight * 4 / 10;
+        moveSpeed = moveDistance * 2f;
+        status = GetComponent<UnitStatus>();
+        status.Setup(this);
         moveAnim = new AnimatorLayer(GetComponent<Animator>(), 0);
         actionAnim = new AnimatorLayer(GetComponent<Animator>(), 1);
-        Instantiate(weapon, holdWeapon, false);
+        OnGround();
         Idle();
-    }
-    protected void OnGround()
-    {
-        float y = Map.GetHeight(transform.position.x, transform.position.z);
-        transform.position = new Vector3(transform.position.x, y, transform.position.z);
     }
     public Tween MoveTween(Vector3 newPos)
     {
@@ -70,50 +70,74 @@ public class Unit : MonoBehaviour
     {
         return transform.DORotateQuaternion(newRot, 1.0f / rotateSpeed);
     }
-    public void Damage(int attackPoint)
+    public void Combat(List<Unit> units)
     {
-        TextUI.Pop(attackPoint.ToString(), Color.red, transform.position);
+        if (weapon.HitDetect(transform, units, out List<Unit> hits))
+        {
+            Attack(() =>
+            {
+                hits.ForEach(x => x.DamageBy(this));
+                Idle();
+            });
+        }
+        else
+        {
+            Idle();
+        }
+    }
+    public void DamageBy(Unit unit)
+    {
+        TextUI.Pop(unit.weapon.attack, Color.red, transform.position);
+        health = Mathf.Max(health - unit.weapon.attack, 0);
+        status.SetHealthBar(health);
+        if (health <= 0)
+        {
+            weapon.transform.SetParent(null);
+            weapon.gameObject.AddComponent<Rigidbody>();
+            weapon.gameObject.AddComponent<BoxCollider>();
+            enabled = false;
+            status.Disable();
+            moveAnim.CrossFade("none");
+            actionAnim.CrossFade("none");
+            Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
+            rigidbody.AddForceAtPosition(unit.transform.forward, transform.position, ForceMode.Impulse);
+            SphereCollider sphereCollider = gameObject.AddComponent<SphereCollider>();
+            sphereCollider.isTrigger = true;
+            sphereCollider.center = Vector3.up * 2;
+            gameObject.AddComponent<OnTriggerGorund>().Setup(() =>
+            {
+                Destroy(rigidbody);
+                Destroy(sphereCollider);
+                GetComponent<Animator>().enabled = false;
+                GetComponent<Collider>().enabled = false;
+            }, 1.5f);
+        }
     }
     public void Idle()
     {
         moveAnim.CrossFade("stand");
-        actionAnim.CrossFade(weapon.type.ToString() + "_idle");
+        actionAnim.CrossFade(weapon.type.ToString() + "-idle");
     }
     public void Attack(Action onCompleted)
     {
-        actionAnim.CrossFadeEvent(weapon.type.ToString(), onCompleted, 0.6f);
+        actionAnim.CrossFadeEvent(weapon.type.ToString() + "-attack", onCompleted, 0.5f);
     }
-    public void MovementMask(bool b)
+    void OnGround()
     {
-        movementMask.gameObject.SetActive(b);
+        transform.position.Set(transform.position.x,
+            Map.GetHeight(transform.position.x, transform.position.z),
+            transform.position.z);
     }
-    public void AttackMask(bool b)
+    void OnEnable()
     {
-        attackMask.gameObject.SetActive(b);
+        InScene.Add(this);
     }
-    public void HighLight(bool enable)
+    void OnDisable()
     {
+        InScene.Remove(this);
     }
-    public void ConfigMask()
+    void OnDestroy()
     {
-        Transform mask = transform.Find("Mask");
-        if (mask)
-        {
-            movementMask = mask.Find("Movement");
-            attackMask = mask.Find("Attack");
-            if (movementMask)
-                movementMask.localScale = (Vector3.right + Vector3.up) * moveDistance * 2.2f + Vector3.forward;
-            if (attackMask)
-            {
-                attackMask.GetComponent<MeshRenderer>().material = weapon.mask;
-                attackMask.localScale = (Vector3.right + Vector3.up) * weapon.length * 2 + Vector3.forward;
-            }
-        }
-    }
-    protected void OnValidate()
-    {
-        ConfigMask();
-        MovementMask(showMovement);
-        AttackMask(showAttack);
+        InScene.Remove(this);
     }
 }

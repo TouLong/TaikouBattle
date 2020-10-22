@@ -1,0 +1,12 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LookatCamera : MonoBehaviour
+{
+
+    void LateUpdate()
+    {
+        transform.forward = -Camera.main.transform.forward;
+    }
+}
