@@ -25,17 +25,19 @@ public class Weapon : MonoBehaviour
     [Range(1, 5)]
     public int attack;
     [HideInInspector]
-    public float farLength, nearLength;
+    public float farLength, nearLength, size;
     [HideInInspector]
     public Material mask;
 
     public bool HitDetect(Transform owner, Unit target)
     {
-        float distance = Vector3.Distance(target.transform.position, owner.position);
-        if (distance > nearLength && distance < farLength)
+        Pose ownerXZ = new Pose(Vector.XZ(owner.position), owner.rotation);
+        Vector3 targetXZ = Vector.XZ(target.transform.position);
+        float distance = Vector3.Distance(targetXZ, ownerXZ.position);
+        if (distance >= nearLength && distance <= farLength)
         {
-            float angle = Vector3.Angle(owner.forward, target.transform.position - owner.position) * 2;
-            return angle <= this.angle;
+            float angle = Vector3.Angle(ownerXZ.forward, targetXZ - ownerXZ.position) * 2;
+            return (int)angle <= this.angle;
         }
         return false;
     }
@@ -55,6 +57,7 @@ public class Weapon : MonoBehaviour
     {
         farLength = length * far;
         nearLength = length * near;
+        size = farLength - nearLength;
         Texture texture = SectorGenerator.GenerateTexture(angle / 2, far, near, Color.gray, Color.red);
         if (mask == null)
         {

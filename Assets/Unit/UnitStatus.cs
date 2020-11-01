@@ -10,25 +10,26 @@ public enum RangeDisplayType
 }
 public class UnitStatus : MonoBehaviour
 {
-    [HideInInspector]
-    public MeshRenderer movingRange, attackRange;
+    MeshRenderer movingRangeMesh, attackRangeMesh;
     Healthbar healthBar;
+    public Transform MovingRange => movingRangeMesh.transform;
+    public Transform AttackRange => attackRangeMesh.transform;
     public void Setup(Unit unit)
     {
-        movingRange = transform.Find("MovingRange").GetComponent<MeshRenderer>();
-        attackRange = transform.Find("AttackRange").GetComponent<MeshRenderer>();
+        movingRangeMesh = transform.Find("MovingRange").GetComponent<MeshRenderer>();
+        attackRangeMesh = transform.Find("AttackRange").GetComponent<MeshRenderer>();
         healthBar = transform.Find("Status").GetComponentInChildren<Healthbar>();
-        movingRange.transform.localScale = (Vector3.right + Vector3.up) * unit.moveDistance * 2.2f + Vector3.forward;
-        attackRange.transform.localScale = (Vector3.right + Vector3.up) * unit.weapon.length * 2 + Vector3.forward;
-        attackRange.material = unit.weapon.mask;
+        movingRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.moveDistance * 2.2f + Vector3.forward;
+        attackRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.weapon.length * 2 + Vector3.forward;
+        attackRangeMesh.material = unit.weapon.mask;
         Display(RangeDisplayType.Attack);
         healthBar.Setup(unit.maxHealth);
         healthBar.Set(unit.maxHealth);
     }
     public void Display(RangeDisplayType type)
     {
-        movingRange.enabled = type.HasFlag(RangeDisplayType.Moving);
-        attackRange.enabled = type.HasFlag(RangeDisplayType.Attack);
+        movingRangeMesh.enabled = type.HasFlag(RangeDisplayType.Moving);
+        attackRangeMesh.enabled = type.HasFlag(RangeDisplayType.Attack);
     }
     public void SetHealthBar(float health)
     {
@@ -36,7 +37,6 @@ public class UnitStatus : MonoBehaviour
     }
     public void Disable()
     {
-        enabled = false;
         Display(RangeDisplayType.Nothing);
         healthBar.gameObject.SetActive(false);
     }

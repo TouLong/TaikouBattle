@@ -94,11 +94,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   far: 1
-  near: 0.1
+  near: 0.2
   angle: 70
   length: 1.5
   weight: 1
   attack: 1
   farLength: 1.5
-  nearLength: 0.15
+  nearLength: 0.3
+  size: 1.2
   mask: {fileID: 0}

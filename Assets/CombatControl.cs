@@ -6,18 +6,11 @@ using UnityEngine;
 
 public class CombatControl : MonoBehaviour
 {
-    public Unit playerUnit;
     Action stateUpdate;
-    void Awake()
-    {
-        if (playerUnit != null)
-        {
-            PlayerControl.Setup(playerUnit);
-        }
-    }
     void Start()
     {
-        if (playerUnit != null)
+        UserControl.Setup();
+        if (UserControl.team != null)
         {
             stateUpdate = Selecting;
         }
@@ -30,33 +23,41 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.Hit(out Unit unit))
         {
-            unit.status.Display(RangeDisplayType.Moving);
-            if (Mouse.LeftDown && unit.gameObject.layer == 8)//Player
+            if (Mouse.LeftDown && UserControl.team.members.Contains(unit))
             {
-                PlayerControl.Start();
+                UserControl.Select(unit);
                 stateUpdate = SetPosition;
+            }
+            else
+            {
+                unit.status.Display(RangeDisplayType.Moving);
             }
         }
         else
         {
             Unit.InScene.ForEach(x => x.status.Display(RangeDisplayType.Attack));
         }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            UserControl.Action();
+            Team.NonUser.ForEach(x => x.Action());
+            stateUpdate = InAction;
+        }
     }
     void SetPosition()
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            PlayerControl.MoveTo(hit.point.x, hit.point.z);
+            UserControl.MoveTo(hit.point.x, hit.point.z);
             if (Mouse.LeftDown)
             {
+                UserControl.unit.status.Display(RangeDisplayType.Attack);
                 stateUpdate = SetRotation;
-                PlayerControl.unit.status.Display(RangeDisplayType.Attack);
             }
         }
         if (Mouse.RightDown)
         {
-            PlayerControl.unit.status.Display(RangeDisplayType.Attack);
-            PlayerControl.Reset();
+            UserControl.Deselect();
             stateUpdate = Selecting;
         }
     }
@@ -64,26 +65,31 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            PlayerControl.LookAt(hit.point.x, hit.point.z);
+            UserControl.LookAt(hit.point.x, hit.point.z);
             if (Mouse.RightDown)
             {
-                PlayerControl.Reset();
                 stateUpdate = SetPosition;
             }
             else if (Mouse.LeftDown)
             {
-                Unit.InScene.ForEach(x => x.status.Display(RangeDisplayType.Attack));
-                PlayerControl.Action();
-                Enemy.InSceneAction();
-                PlayerControl.Reset();
-                stateUpdate = Action;
+                stateUpdate = Selecting;
+                UserControl.Complete();
             }
         }
     }
-    void Action()
+    void InAction()
     {
-        if (!Unit.InScene.All(x => x.action.IsPlaying()))
+        if (!Unit.InScene.FindAll(x => x.action.IsPlaying()).Any())
         {
+            Unit.InScene.ForEach(x => x.Combat());
+            stateUpdate = InCombat;
+        }
+    }
+    void InCombat()
+    {
+        if (!Unit.InScene.FindAll(x => x.inCombat).Any())
+        {
+            Team.All.ForEach(x => x.UpdateTeam());
             stateUpdate = Selecting;
         }
     }

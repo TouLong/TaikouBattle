@@ -101,4 +101,5 @@ MonoBehaviour:
   attack: 1
   farLength: 3
   nearLength: 1.6500001
+  size: 1.3499999
   mask: {fileID: 0}
