@@ -64,6 +64,24 @@ class ListRandom
 {
     static public T In<T>(List<T> list)
     {
-        return list[Random.Range(0, list.Count - 1)];
+        return list[Random.Range(0, list.Count)];
+    }
+}
+
+class ColorRandom
+{
+    static public Color Palette(float fixed1, float fixed2)
+    {
+        float random = Random.value;
+        Color[] colors = new Color[]
+        {
+            new Color(fixed1,fixed2,random),
+            new Color(fixed2,fixed1,random),
+            new Color(fixed1,random,fixed2),
+            new Color(fixed2,random,fixed1),
+            new Color(random,fixed1,fixed2),
+            new Color(random,fixed2,fixed1),
+        };
+        return colors[Random.Range(0, colors.Length)];
     }
 }
