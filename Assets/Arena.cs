@@ -16,6 +16,15 @@ public class Arena : MonoBehaviour
     {
         public Groups() : base() { }
         public Groups(IEnumerable<Teams> group) : base(group) { }
+        public int GetWinnerCount()
+        {
+            int count = 0;
+            foreach (Teams teams in this)
+            {
+                count += teams[0].members;
+            }
+            return count;
+        }
     }
     public class Teams : List<Team>
     {
@@ -25,111 +34,87 @@ public class Arena : MonoBehaviour
     public class Team
     {
         public int members;
+        public Team(int members)
+        {
+            this.members = members;
+        }
     }
-    public const int maxGuy = 16;
-    public const int maxGroup = 2;
-    public const int maxRound = 4;
+    public const int minGuy = 8;
+    public const int maxGuy = 24;
+    public const int maxGroup = 3;
     public const int maxTeam = 6;
-    [Range(4, maxGuy)]
+    [Range(minGuy, maxGuy)]
     public int guyCount;
     public List<Groups> rule;
     static public void RandomGenerate()
     {
-        int guyCount = Random.Range(4, maxGuy + 1);
+        int guyCount = Random.Range(minGuy, maxGuy + 1);
         GameObject.Find("Game").GetComponent<Arena>().guyCount = guyCount;
         Generate(guyCount);
     }
     static public Rounds Generate(int guyCount)
     {
-        int remain = guyCount;
-        int CommonFactorCount(int number)
+        List<int> CommonFactor(int number)
         {
-            int count = 0;
-            for (int i = 2; i <= number; i++)
+            List<int> cf = new List<int>();
+            for (int i = 2; i <= maxTeam; i++)
             {
                 if (number % i == 0)
-                    count++;
+                    cf.Add(i);
             }
-            return count;
+            return cf;
         }
         Groups RandomGroups(int guys)
         {
-            print(guys);
-            int guysCFCount = CommonFactorCount(guys);
-            print(guysCFCount);
-            List<int> vaildGroupCount = new List<int>();
-            for (int i = 1; i <= maxGroup; i++)
+            List<int> guysCF = CommonFactor(guys);
+            int groupCount = 1;
+            if (guys >= 4)
             {
-                if (guysCFCount >= i)
-                    vaildGroupCount.Add(i);
+                int minGroup = guysCF.Count > 1 && guys <= maxTeam ? 1 : 2;
+                groupCount = Random.Range(minGroup, maxGroup + 1);
             }
-            int groupCount = ListRandom.In(vaildGroupCount);
-            print(groupCount);
             int groupRemain = guys;
             Groups groups = new Groups();
-            remain = 0;
-            for (int i = 1; i <= groupCount; i++)
+            bool done = false;
+            int repeatCount = 0;
+            while (!done && repeatCount++ < 200)
             {
-                if (groupRemain == 2 || i == groupCount)
+                int groupGuys = Random.Range(2, groupRemain + 1);
+                List<int> groupGuysCF = CommonFactor(groupGuys);
+                if (groupGuysCF.Any())
                 {
-                    groups.Add(new Teams(RandomTeams(groupRemain)));
-                    break;
-                }
-                else
-                {
-                    int groupGuys = guys / groupCount;
+                    int teamCount = ListRandom.In(groupGuysCF);
+                    groups.Add(new Teams(Enumerable.Repeat(new Team(groupGuys / teamCount), teamCount)));
                     groupRemain -= groupGuys;
-                    print(groupGuys);
-                    print(groupRemain);
-                    groups.Add(new Teams(RandomTeams(groupGuys)));
                 }
-                if (groupRemain == 0)
-                    break;
+                if (groupRemain == 1 || groups.Count > groupCount)
+                {
+                    groups.Clear();
+                    groupRemain = guys;
+                }
+                done = groups.Count <= groupCount && groupRemain == 0;
             }
+            if (repeatCount > 200)
+                print("fail");
             return groups;
         }
-        Teams RandomTeams(int guys)
-        {
-            List<int> vaildTeamCount = new List<int>();
-            int limit = Mathf.Min(guys, maxTeam);
-            for (int i = 2; i <= limit; i++)
-            {
-                if (guys % i == 0)
-                    vaildTeamCount.Add(i);
-            }
-            int teamCount = ListRandom.In(vaildTeamCount);
-            int memberCount = guys / teamCount;
-            remain += memberCount;
-            print(string.Format("{0},{1}", teamCount, memberCount));
-            return new Teams(Enumerable.Repeat(new Team() { members = memberCount }, teamCount));
-        }
+        int remain = guyCount;
         Rounds rounds = new Rounds();
-        for (int i = 1; i <= maxRound; i++)
+        while (remain != 1)
         {
-            if (remain == 1)
-                break;
-            Groups groups;
-            if (i == maxRound)
-            {
-                groups = new Groups
-                {
-                    new Teams(Enumerable.Repeat(new Team() { members = 1 }, remain))
-                };
-            }
-            else
-            {
-                groups = new Groups(RandomGroups(remain));
-            }
+            Groups groups = new Groups(RandomGroups(remain));
+            remain = groups.GetWinnerCount();
             rounds.Add(groups);
         }
-        GameObject.Find("ArenaUI").GetComponent<RuleUI>().UpdateUI(rounds);
+        GameObject.Find("UI").GetComponent<ArenaMenu>().UpdateUI(rounds);
         return rounds;
     }
 }
 
+#if UNITY_EDITOR
 [CanEditMultipleObjects]
 [CustomEditor(typeof(Arena))]
-public class LookAtPointEditor : Editor
+public class ArenaRuleEditor : Editor
 {
     public override void OnInspectorGUI()
     {
@@ -146,3 +131,4 @@ public class LookAtPointEditor : Editor
         }
     }
 }
+#endif

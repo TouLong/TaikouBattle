@@ -62,7 +62,7 @@ class Q4Random
 
 class ListRandom
 {
-    static public T In<T>(List<T> list)
+    static public T In<T>(IList<T> list)
     {
         return list[Random.Range(0, list.Count)];
     }
