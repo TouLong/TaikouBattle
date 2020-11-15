@@ -33,9 +33,6 @@ public class Map : MonoBehaviour
             NavMesh.AddNavMeshData(navMesh);
         }
     }
-    void Update()
-    {
-    }
     bool GetTerrain()
     {
         terrain = transform.Find(terrainGroup);

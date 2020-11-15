@@ -1,58 +1,188 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
-using UnityEditor.VersionControl;
 
 public class Arena : MonoBehaviour
 {
-    public class Rounds : List<Groups>
+    public class Schedule : List<Round>
     {
-        public Rounds() : base() { }
-        public Rounds(List<Groups> round) : base(round) { }
+        int roundId = 0;
+        int groupId = 0;
+        public int userId = 0;
+        public int winTeamId = -1;
+        public List<UnitInfo> present = new List<UnitInfo>();
+        public List<UnitInfo> promoted = new List<UnitInfo>();
+        public Schedule() : base() { }
+        public bool NextRound()
+        {
+            if (roundId + 1 < Count)
+            {
+                present.Clear();
+                present.AddRange(promoted);
+                promoted.Clear();
+                roundId++;
+                groupId = 0;
+                CurrentRound.RandomAssign(present);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public bool NextGroup()
+        {
+            return ++groupId < this[roundId].Count;
+        }
+        public Round CurrentRound => this[roundId];
+        public Group CurrentGroup => this[roundId][groupId];
+        public Team CurrentWinTeam => winTeamId < 0 ? null : this[roundId][groupId][winTeamId];
     }
-    public class Groups : List<Teams>
+    public class Round : List<Group>
     {
-        public Groups() : base() { }
-        public Groups(IEnumerable<Teams> group) : base(group) { }
-        public int GetWinnerCount()
+        public Round() : base() { }
+        public Round(IEnumerable<Group> group) : base(group) { }
+        public void RandomAssign(List<UnitInfo> units)
+        {
+            List<int> Ids = Enumerable.Range(0, units.Count).ToList();
+            foreach (Group group in this)
+            {
+                foreach (Team team in group)
+                {
+                    for (int i = 0; i < group.eachTeamMember; i++)
+                    {
+                        int id = ListRandom.In(Ids);
+                        Ids.Remove(id);
+                        UnitInfo unit = units[id];
+                        unit.team = team;
+                        team.members.Add(unit);
+                    }
+                }
+            }
+        }
+        public void Assign(List<UnitInfo> units)
         {
             int count = 0;
-            foreach (Teams teams in this)
+            foreach (Group group in this)
             {
-                count += teams[0].members;
+                foreach (Team team in group)
+                {
+                    for (int i = 0; i < group.eachTeamMember; i++)
+                    {
+                        UnitInfo unit = units[count++];
+                        unit.team = team;
+                        team.members.Add(unit);
+                    }
+                }
             }
-            return count;
         }
     }
-    public class Teams : List<Team>
+    public class Group : List<Team>
     {
-        public Teams() : base() { }
-        public Teams(IEnumerable<Team> teams) : base(teams) { }
+        public int eachTeamMember;
+        public Group() : base() { }
     }
-    public class Team
+    public class UnitInfo
     {
-        public int members;
-        public Team(int members)
+        public int id;
+        public string name;
+        public Sprite icon;
+        public Team team;
+        public Unit unit;
+        public UnitInfo(int id, string name, Sprite icon)
         {
-            this.members = members;
+            this.id = id;
+            this.name = name;
+            this.icon = icon;
         }
     }
-    public const int minGuy = 8;
-    public const int maxGuy = 24;
-    public const int maxGroup = 3;
-    public const int maxTeam = 6;
-    [Range(minGuy, maxGuy)]
-    public int guyCount;
-    public List<Groups> rule;
-    static public void RandomGenerate()
+    static public int minGuy = 4;
+    static public int maxGuy = 8;
+    static public int maxGroup = 2;
+    static public int maxTeam = 6;
+    static public Arena self;
+    static public Schedule schedule;
+
+    public Unit unitPrefab;
+    public Weapon[] weaponPrefab;
+    public Sprite[] iconPrefab;
+    public Transform teamSpawn;
+    public Transform guySpawn;
+
+    void Awake()
     {
-        int guyCount = Random.Range(minGuy, maxGuy + 1);
-        GameObject.Find("Game").GetComponent<Arena>().guyCount = guyCount;
-        Generate(guyCount);
+        if (self == null)
+            self = this;
     }
-    static public Rounds Generate(int guyCount)
+    public void Spawn()
+    {
+        Transform Take(Transform poseList, List<int> idList)
+        {
+            int id = ListRandom.In(idList);
+            idList.Remove(id);
+            return poseList.GetChild(id);
+        }
+        Unit.player = null;
+        Group group = schedule.CurrentGroup;
+        List<int> teamSpawnIDs = Enumerable.Range(0, teamSpawn.childCount).ToList();
+        foreach (Team team in group)
+        {
+            Transform teamPose = Take(teamSpawn, teamSpawnIDs);
+            List<int> guySpawnIDs = Enumerable.Range(0, guySpawn.childCount).ToList();
+            foreach (UnitInfo unitInfo in team.members)
+            {
+                Transform pose = Take(guySpawn, guySpawnIDs);
+                Unit unit = Instantiate(unitPrefab, pose.localPosition + teamPose.position, teamPose.rotation);
+                if (unitInfo.id == 0)
+                {
+                    unit.weapon = weaponPrefab.Last();
+                    Unit.player = unit;
+                }
+                else
+                {
+                    //unit.weapon = ListRandom.In(weaponPrefab);
+                    unit.weapon = weaponPrefab[0];
+                }
+                unitInfo.unit = unit;
+            }
+            team.Create();
+        }
+        Timer.Set(0.2f, CombatControl.self.Startup);
+    }
+    static public void WinTeam(Team team)
+    {
+        Group group = schedule.CurrentGroup;
+        schedule.promoted.AddRange(team.members);
+        schedule.winTeamId = group.IndexOf(team);
+    }
+    static public void RandomJudge()
+    {
+        Group group = schedule.CurrentGroup;
+        int win = Random.Range(0, group.Count);
+        Team winOfTeam = group[win];
+        schedule.promoted.AddRange(winOfTeam.members);
+        schedule.winTeamId = win;
+    }
+    static public void NextContest()
+    {
+        if (schedule.NextGroup())
+        {
+        }
+        else
+        {
+            if (schedule.NextRound())
+            {
+            }
+            else
+            {
+            }
+        }
+    }
+    static public Schedule RandomRule()
+    {
+        return RandomRule(Random.Range(minGuy, maxGuy + 1));
+    }
+    static public Schedule RandomRule(int guyCount)
     {
         List<int> CommonFactor(int number)
         {
@@ -64,7 +194,7 @@ public class Arena : MonoBehaviour
             }
             return cf;
         }
-        Groups RandomGroups(int guys)
+        Round RandomGroups(int guys)
         {
             List<int> guysCF = CommonFactor(guys);
             int groupCount = 1;
@@ -74,7 +204,7 @@ public class Arena : MonoBehaviour
                 groupCount = Random.Range(minGroup, maxGroup + 1);
             }
             int groupRemain = guys;
-            Groups groups = new Groups();
+            Round round = new Round();
             bool done = false;
             int repeatCount = 0;
             while (!done && repeatCount++ < 200)
@@ -84,51 +214,42 @@ public class Arena : MonoBehaviour
                 if (groupGuysCF.Any())
                 {
                     int teamCount = ListRandom.In(groupGuysCF);
-                    groups.Add(new Teams(Enumerable.Repeat(new Team(groupGuys / teamCount), teamCount)));
+                    Group group = new Group();
+                    for (int i = 0; i < teamCount; i++)
+                    {
+                        group.Add(new Team());
+                    }
+                    group.eachTeamMember = groupGuys / teamCount;
+                    round.Add(group);
                     groupRemain -= groupGuys;
                 }
-                if (groupRemain == 1 || groups.Count > groupCount)
+                if (groupRemain == 1 || round.Count > groupCount)
                 {
-                    groups.Clear();
+                    round.Clear();
                     groupRemain = guys;
                 }
-                done = groups.Count <= groupCount && groupRemain == 0;
+                done = round.Count <= groupCount && groupRemain == 0;
             }
             if (repeatCount > 200)
                 print("fail");
-            return groups;
+            return round;
         }
         int remain = guyCount;
-        Rounds rounds = new Rounds();
+        Schedule newSchedule = new Schedule();
         while (remain != 1)
         {
-            Groups groups = new Groups(RandomGroups(remain));
-            remain = groups.GetWinnerCount();
-            rounds.Add(groups);
+            Round round = new Round(RandomGroups(remain));
+            remain = round.Sum(x => x.eachTeamMember);
+            newSchedule.Add(round);
         }
-        GameObject.Find("UI").GetComponent<ArenaMenu>().UpdateUI(rounds);
-        return rounds;
+        newSchedule.present = new List<UnitInfo>();
+        for (int i = 0; i < guyCount; i++)
+        {
+            UnitInfo info = new UnitInfo(i, string.Format("參賽者{0}號", i + 1), ListRandom.In(self.iconPrefab));
+            newSchedule.present.Add(info);
+        }
+        newSchedule.CurrentRound.Assign(newSchedule.present);
+        schedule = newSchedule;
+        return newSchedule;
     }
 }
-
-#if UNITY_EDITOR
-[CanEditMultipleObjects]
-[CustomEditor(typeof(Arena))]
-public class ArenaRuleEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        Arena arena = target as Arena;
-        if (GUILayout.Button("Ramdom"))
-        {
-            Arena.RandomGenerate();
-        }
-        if (GUILayout.Button("Custom"))
-        {
-            Arena.Generate(arena.guyCount);
-        }
-    }
-}
-#endif

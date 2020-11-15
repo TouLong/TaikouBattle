@@ -6,7 +6,9 @@ using System.Linq;
 
 public class Unit : MonoBehaviour
 {
-    static public List<Unit> InScene = new List<Unit>();
+    static public List<Unit> All = new List<Unit>();
+    static public List<Unit> Alive = new List<Unit>();
+    static public Unit player;
     public Transform model;
     public Transform holdWeapon;
     [HideInInspector]
@@ -72,6 +74,7 @@ public class Unit : MonoBehaviour
     public void Combat()
     {
         inCombat = true;
+
         if (weapon.HitDetect(transform, team.enemies, out List<Unit> hits))
         {
             Attack(() =>
@@ -93,12 +96,11 @@ public class Unit : MonoBehaviour
         status.SetHealthBar(health);
         if (health <= 0)
         {
+            Alive.Remove(this);
+            team.alives.Remove(this);
             weapon.transform.SetParent(null);
             weapon.gameObject.AddComponent<Rigidbody>();
             weapon.gameObject.AddComponent<BoxCollider>();
-            enabled = false;
-            team.members.Remove(this);
-            team = null;
             status.Disable();
             moveAnim.CrossFade("none");
             actionAnim.CrossFade("none");
@@ -152,10 +154,11 @@ public class Unit : MonoBehaviour
     }
     void OnEnable()
     {
-        InScene.Add(this);
+        All.Add(this);
+        Alive.Add(this);
     }
     void OnDisable()
     {
-        InScene.Remove(this);
+        Alive.Remove(this);
     }
 }

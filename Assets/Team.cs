@@ -3,7 +3,7 @@ using DG.Tweening;
 using System.Linq;
 using UnityEngine;
 
-public class Team : MonoBehaviour
+public class Team
 {
     public class ActionPath
     {
@@ -15,34 +15,37 @@ public class Team : MonoBehaviour
             this.end = end;
         }
     }
-    public static List<Team> All = new List<Team>();
+    public static List<Team> InScene = new List<Team>();
     public static List<Team> NonUser = new List<Team>();
-    public bool userControl;
-    public List<Unit> members = new List<Unit>();
+    public List<Arena.UnitInfo> members = new List<Arena.UnitInfo>();
+    [HideInInspector]
+    public List<Unit> alives = new List<Unit>();
     [HideInInspector]
     public List<Unit> enemies = new List<Unit>();
     [HideInInspector]
     public Vector3 center;
-    void Start()
+    public void Create()
     {
-        UpdateTeam();
+        InScene.Add(this);
+        NonUser.Add(this);
+        alives.AddRange(members.Select(x => x.unit));
     }
-    public void UpdateTeam()
+    public void Update()
     {
         center = Vector3.zero;
-        enemies = new List<Unit>();
-        enemies.AddRange(Unit.InScene);
-        foreach (Unit unit in members)
+        enemies.Clear();
+        enemies.AddRange(Unit.Alive);
+        foreach (Unit unit in alives)
         {
             unit.team = this;
             enemies.Remove(unit);
-            center += unit.transform.position / members.Count;
+            center += unit.transform.position / alives.Count;
         }
     }
     public void Action()
     {
         List<ActionPath> paths = new List<ActionPath>();
-        foreach (Unit unit in members)
+        foreach (Unit unit in alives)
         {
             Unit target = enemies.OrderBy(x => Vector3.Distance(unit.transform.position, x.transform.position)).First();
             Pose dest;
@@ -79,7 +82,7 @@ public class Team : MonoBehaviour
             }
             while (isBlocking && blockingCount < 100);
             if (blockingCount == 100)
-                print(unit.name + "blocking" + blockingCount);
+                Debug.Log(unit.name + "blocking" + blockingCount);
             paths.Add(new ActionPath(originXZ, dest.position));
             dest.position.y = unit.transform.position.y;
             unit.action = DOTween.Sequence()
@@ -87,15 +90,5 @@ public class Team : MonoBehaviour
                .Append(unit.MoveTween(dest.position))
                .Append(unit.RotateTween(dest.rotation));
         }
-    }
-    void OnEnable()
-    {
-        All.Add(this);
-        NonUser.Add(this);
-    }
-    void OnDisable()
-    {
-        All.Remove(this);
-        NonUser.Remove(this);
     }
 }

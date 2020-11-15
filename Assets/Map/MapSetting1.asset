@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapDimension: 1
   chunkMesh: 100
-  mapHeight: 30
+  mapHeight: 20
   mapScale: 1
   noiseScale: 250
   octaves: 5
   lacunarity: 2.5
   persistance: 0.3
-  seed: 723
+  seed: -735
   offset: {x: 0, y: 0}
   heightCurve:
     serializedVersion: 2
@@ -35,26 +35,17 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.86654335
     - serializedVersion: 3
-      time: 0.11015712
-      value: 0.03641199
-      inSlope: 1.2940316
-      outSlope: 0.4075347
-      tangentMode: 65
-      weightedMode: 0
-      inWeight: 0.27831122
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.15721148
-      value: 0.055588275
-      inSlope: 0.4075347
-      outSlope: 0.22322217
+      time: 0.089341104
+      value: 0.029700104
+      inSlope: 0.33243492
+      outSlope: 0.24558751
       tangentMode: 69
       weightedMode: 0
       inWeight: 0.42537168
       outWeight: 0.36650285
     - serializedVersion: 3
-      time: 0.45695043
-      value: 0.12249665
+      time: 0.4192307
+      value: 0.110716864
       inSlope: 0.5166503
       outSlope: 0.5166503
       tangentMode: 0
@@ -62,23 +53,23 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.45880708
     - serializedVersion: 3
-      time: 0.5901487
-      value: 0.17381327
-      inSlope: 0.76797444
-      outSlope: 0.76797444
+      time: 0.5795896
+      value: 0.1926121
+      inSlope: 0.3312307
+      outSlope: 0.3312307
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.58794445
-      outWeight: 0.77982056
+      outWeight: 0.7550709
     - serializedVersion: 3
-      time: 0.6900289
-      value: 0.26982284
-      inSlope: 1.7420968
-      outSlope: 1.7420968
+      time: 0.70962787
+      value: 0.293345
+      inSlope: 1.5521678
+      outSlope: 1.5521678
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.1344315
+      outWeight: 0.20114407
     - serializedVersion: 3
       time: 1
       value: 1
@@ -94,25 +85,22 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 9
-  waterLayer: 0
+  waterLayer: -1
   mountainLayer: 3
   layers:
-  - color: {r: 0.63529414, g: 0.86274517, b: 0.77647066, a: 0}
+  - color: {r: 0.9294118, g: 0.882353, b: 0.61960787, a: 0}
     height: 0
     blendStrength: 0
-  - color: {r: 0.92549026, g: 0.8862746, b: 0.62352943, a: 0}
-    height: 0.03641199
+  - color: {r: 0.5372549, g: 0.69411767, b: 0.37647063, a: 0}
+    height: 0.029700104
     blendStrength: 0.07
   - color: {r: 0.5372549, g: 0.69411767, b: 0.37647063, a: 0}
-    height: 0.055588275
-    blendStrength: 0.06
-  - color: {r: 0.5372549, g: 0.69411767, b: 0.37647063, a: 0}
-    height: 0.12249665
+    height: 0.110716864
     blendStrength: 0.45
   - color: {r: 0.69803923, g: 0.70980394, b: 0.49411768, a: 0}
-    height: 0.17381327
+    height: 0.1926121
     blendStrength: 0.6
   - color: {r: 0.53333336, g: 0.50980395, b: 0.53333336, a: 0}
-    height: 0.26982284
+    height: 0.293345
     blendStrength: 1
   objectsDistribution: []

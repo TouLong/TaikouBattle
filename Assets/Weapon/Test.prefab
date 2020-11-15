@@ -96,9 +96,10 @@ MonoBehaviour:
   far: 1
   near: 0
   angle: 180
-  length: 5
-  weight: 2
+  length: 10
+  weight: 0.001
   attack: 5
-  farLength: 5
+  farLength: 10
   nearLength: 0
+  size: 10
   mask: {fileID: 0}

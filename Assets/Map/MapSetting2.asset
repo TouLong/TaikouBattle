@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9400f869c790725468864517712c999f, type: 3}
+  m_Name: MapSetting2
+  m_EditorClassIdentifier: 
+  mapDimension: 1
+  chunkMesh: 100
+  mapHeight: 20
+  mapScale: 1
+  noiseScale: 250
+  octaves: 5
+  lacunarity: 2.5
+  persistance: 0.3
+  seed: -888
+  offset: {x: 0, y: 0}
+  heightCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.13226454
+      outSlope: 0.13226454
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.86654335
+    - serializedVersion: 3
+      time: 0.096878946
+      value: 0.02030069
+      inSlope: 0.20329252
+      outSlope: 0.20329252
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.20704627
+      value: 0.04200785
+      inSlope: 0.3312307
+      outSlope: 0.3312307
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.58794445
+      outWeight: 0.7550709
+    - serializedVersion: 3
+      time: 0.29939303
+      value: 0.13336058
+      inSlope: 0.98923594
+      outSlope: 1.8873031
+      tangentMode: 5
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.08637941
+    - serializedVersion: 3
+      time: 0.86692727
+      value: 0.9550286
+      inSlope: 1.6085967
+      outSlope: 0.39900303
+      tangentMode: 1
+      weightedMode: 0
+      inWeight: 0.095070764
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.31200016
+      outSlope: 0.31200016
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.118406266
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 9
+  waterLayer: -1
+  mountainLayer: 3
+  layers:
+  - color: {r: 0.9294118, g: 0.882353, b: 0.61960787, a: 0}
+    height: 0
+    blendStrength: 0
+  - color: {r: 0.5372549, g: 0.69411767, b: 0.37647063, a: 0}
+    height: 0.02030069
+    blendStrength: 0.07
+  - color: {r: 0.69803923, g: 0.70980394, b: 0.49411768, a: 0}
+    height: 0.04200785
+    blendStrength: 0.6
+  - color: {r: 0.53333336, g: 0.50980395, b: 0.53333336, a: 0}
+    height: 0.13336058
+    blendStrength: 1
+  - color: {r: 0.53333336, g: 0.50980395, b: 0.53333336, a: 0}
+    height: 0.9550286
+    blendStrength: 0
+  objectsDistribution: []

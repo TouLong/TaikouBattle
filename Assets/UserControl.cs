@@ -11,15 +11,16 @@ public class UserControl
     static Dictionary<Unit, Transform> destUnits = new Dictionary<Unit, Transform>();
     static public void Setup()
     {
-        team = Team.All.First(x => x.userControl);
-        if (Team.NonUser.Contains(team))
+        team = null;
+        if (Unit.player != null)
         {
+            team = Unit.player.team;
             Team.NonUser.Remove(team);
-        }
-        foreach (Unit unit in team.members)
-        {
-            destUnits.Add(unit, Object.Instantiate(unit.model, unit.transform));
-            destUnits[unit].gameObject.SetActive(false);
+            foreach (Unit unit in team.alives)
+            {
+                destUnits.Add(unit, Object.Instantiate(unit.model, unit.transform));
+                destUnits[unit].gameObject.SetActive(false);
+            }
         }
     }
     static public void Select(Unit unit)
@@ -59,7 +60,7 @@ public class UserControl
     }
     static public void Action()
     {
-        foreach (Unit unit in team.members)
+        foreach (Unit unit in team.alives)
         {
             Vector3 newPos = destUnits[unit].position;
             newPos.y = unit.transform.position.y;
