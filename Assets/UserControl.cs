@@ -60,6 +60,8 @@ public class UserControl
     }
     static public void Action()
     {
+        if (team == null)
+            return;
         foreach (Unit unit in team.alives)
         {
             Vector3 newPos = destUnits[unit].position;

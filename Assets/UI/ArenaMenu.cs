@@ -8,114 +8,83 @@ using System;
 
 public class ArenaMenu : MonoBehaviour
 {
+    [Serializable]
+    public struct UI
+    {
+        public RectTransform main;
+
+        public RectTransform schedule;
+        public RectTransform round;
+        public Text roundTitle;
+        public RectTransform roundContent;
+        public RectTransform group;
+        public Text groupTitle;
+        public RectTransform groupContent;
+        public RectTransform team;
+        public RectTransform member;
+
+        public RectTransform action;
+        public Button change;
+        public Button start;
+        public Button skip;
+        public Button view;
+        public Button end;
+        public Button quit;
+    }
+    public UI ui;
     public string[] roundTexts = new string[] { "I", "II", "III", "IV", };
     public string[] groupTexts = new string[] { "I", "II", "III", "IV", };
     public Color[] groupColors = new Color[] { };
     public Color[] teamColors = new Color[] { };
-    struct Framework
-    {
-        public Transform main;
-        public Transform rule;
-        public Transform menu;
-    }
-    struct Prefab
-    {
-        public Transform round;
-        public Transform roundTitle;
-        public Transform roundContent;
-        public Transform group;
-        public Transform groupTitle;
-        public Transform groupContent;
-        public Transform team;
-        public Transform member;
-    }
+
     static public ArenaMenu self;
-    Dictionary<Arena.Round, Transform> roundDict;
-    Dictionary<Arena.Group, Transform> groupDict;
+    Dictionary<Round, Transform> roundDict;
+    Dictionary<Group, Transform> groupDict;
     Dictionary<Team, Transform> teamDict;
-    Prefab prefab;
-    Framework framework;
     void Awake()
     {
         if (self == null)
             self = this;
     }
-    void Start()
+    public T InstantiateWithoutChild<T>(T original, Transform parent) where T : Component
     {
-        Setup();
-        RandomRule();
-    }
-    public void Setup()
-    {
-        framework.main = transform.Find("ArenaMenu/Main");
-        framework.menu = transform.Find("ArenaMenu/Menu");
-        framework.rule = framework.main.GetChild(0);
-        Button startButton = framework.menu.Find("Start").GetComponent<Button>();
-        Button randomButton = framework.menu.Find("Random").GetComponent<Button>();
-        startButton.onClick.AddListener(Confirm);
-        randomButton.onClick.AddListener(RandomRule);
-        prefab.round = framework.rule.GetChild(0);
-        prefab.roundTitle = prefab.round.GetChild(0);
-        prefab.roundContent = prefab.round.GetChild(1);
-        prefab.group = prefab.roundContent.GetChild(0);
-        prefab.groupTitle = prefab.group.GetChild(0);
-        prefab.groupContent = prefab.group.GetChild(1);
-        prefab.team = prefab.groupContent.GetChild(0);
-        prefab.member = prefab.team.GetChild(0);
-        ClearMain();
-    }
-    public void RandomRule()
-    {
-        Arena.RandomRule();
-        CreateMain();
-    }
-    public void Confirm()
-    {
-        Arena.self.Spawn();
-        gameObject.SetActive(false);
-    }
-    public Transform InstantiateWithoutChild(Transform original, Transform parent)
-    {
-        Transform clone = Instantiate(original, parent);
+        T clone = Instantiate(original, parent);
         clone.gameObject.SetActive(true);
-        while (clone.childCount != 0)
+        while (clone.transform.childCount != 0)
         {
-            DestroyImmediate(clone.GetChild(0).gameObject);
+            DestroyImmediate(clone.transform.GetChild(0).gameObject);
         }
         return clone;
     }
     public void ClearMain()
     {
-        roundDict = new Dictionary<Arena.Round, Transform>();
-        groupDict = new Dictionary<Arena.Group, Transform>();
+        roundDict = new Dictionary<Round, Transform>();
+        groupDict = new Dictionary<Group, Transform>();
         teamDict = new Dictionary<Team, Transform>();
-        while (framework.rule.childCount != 1)
-            DestroyImmediate(framework.rule.GetChild(1).gameObject);
-        prefab.round.gameObject.SetActive(false);
+        while (ui.schedule.childCount != 1)
+            DestroyImmediate(ui.schedule.GetChild(1).gameObject);
+        ui.round.gameObject.SetActive(false);
     }
-    public void CreateMain()
+    public void CreateMain(Schedule schedule)
     {
         ClearMain();
-        Arena.Schedule schedule = Arena.schedule;
         schedule.Reverse();
         int roundCount = schedule.Count;
-        int memberCount = 0;
-
-        foreach (Arena.Round arenaRound in schedule)
+        foreach (Round arenaRound in schedule)
         {
-            Transform round = InstantiateWithoutChild(prefab.round, framework.rule);
-            Transform roundTitle = InstantiateWithoutChild(prefab.roundTitle, round);
-            roundTitle.GetComponent<Text>().text = string.Format("回合{0}", roundTexts[--roundCount]);
-            Transform roundContent = InstantiateWithoutChild(prefab.roundContent, round);
+            Transform round = InstantiateWithoutChild(ui.round, ui.schedule);
+            Text roundTitle = InstantiateWithoutChild(ui.roundTitle, round);
+            roundTitle.text = string.Format("回合{0}", roundTexts[--roundCount]);
+            Transform roundContent = InstantiateWithoutChild(ui.roundContent, round);
             roundDict.Add(arenaRound, roundContent);
             int groupCount = 0;
             int maxTeamMemberCount = arenaRound.Max(x => x.eachTeamMember);
-            foreach (Arena.Group arenaGroup in arenaRound)
+            foreach (Group arenaGroup in arenaRound)
             {
-                Transform group = InstantiateWithoutChild(prefab.group, roundContent);
-                Transform groupTitle = InstantiateWithoutChild(prefab.groupTitle, group);
-                groupTitle.GetComponent<Text>().text = string.Format("場次{0}", groupTexts[groupCount++]);
-                Transform groupContent = InstantiateWithoutChild(prefab.groupContent, group);
+                Transform group = InstantiateWithoutChild(ui.group, roundContent);
+                Text groupTitle = InstantiateWithoutChild(ui.groupTitle, group);
+                groupTitle.text = string.Format("場次{0}", groupTexts[groupCount++]);
+                Transform groupContent = InstantiateWithoutChild(ui.groupContent, group);
                 groupDict.Add(arenaGroup, groupContent);
                 VerticalLayoutGroup groupLayout = group.GetComponent<VerticalLayoutGroup>();
                 GridLayoutGroup groupContentLayout = groupContent.GetComponent<GridLayoutGroup>();
@@ -134,7 +103,7 @@ public class ArenaMenu : MonoBehaviour
                 int teamCount = 0;
                 foreach (Team arenaTeam in arenaGroup)
                 {
-                    Transform teamContent = InstantiateWithoutChild(prefab.team, groupContent);
+                    Transform teamContent = InstantiateWithoutChild(ui.team, groupContent);
                     teamDict.Add(arenaTeam, teamContent);
                     GridLayoutGroup teamLayout = teamContent.GetComponent<GridLayoutGroup>();
                     if (arenaGroup.eachTeamMember > 4)
@@ -143,7 +112,7 @@ public class ArenaMenu : MonoBehaviour
                     }
                     for (int i = 0; i < arenaGroup.eachTeamMember; i++)
                     {
-                        Transform unitContent = Instantiate(prefab.member, teamContent);
+                        Transform unitContent = Instantiate(ui.member, teamContent);
                         unitContent.GetComponent<Image>().color = teamColors[teamCount];
                     }
                     teamCount++;
@@ -151,29 +120,24 @@ public class ArenaMenu : MonoBehaviour
             }
         }
         schedule.Reverse();
-        UpdaheRound();
     }
-    public void UpdateWinTeam()
+    public void UpdateWinTeam(Group currentGroup, Team winTeam)
     {
-        Team winTeam = Arena.schedule.CurrentWinTeam;
-        if (winTeam != null)
+        foreach (Team team in currentGroup)
         {
-            foreach (Team team in Arena.schedule.CurrentGroup)
+            if (winTeam != team)
             {
-                if (winTeam != team)
+                Transform teamContent = teamDict[team];
+                for (int i = 0; i < teamContent.childCount; i++)
                 {
-                    Transform teamContent = teamDict[team];
-                    for (int i = 0; i < teamContent.childCount; i++)
-                    {
-                        teamContent.GetChild(i).GetComponent<Image>().color = Color.gray;
-                    }
+                    teamContent.GetChild(i).GetComponent<Image>().color = Color.gray;
                 }
             }
         }
     }
-    public void UpdaheRound()
+    public void UpdateSchedule(List<UnitInfo> units)
     {
-        foreach (Arena.UnitInfo unit in Arena.schedule.present)
+        foreach (UnitInfo unit in units)
         {
             Transform teamContent = teamDict[unit.team];
             int childID = unit.team.members.IndexOf(unit);
@@ -188,38 +152,33 @@ public class ArenaMenu : MonoBehaviour
     [CustomEditor(typeof(ArenaMenu))]
     public class RuleUIEditor : Editor
     {
-        int unitCount = Arena.maxGuy;
+        int unitCount = Arena.maxUnit;
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
+            ArenaMenu ui = target as ArenaMenu;
             if (Arena.self == null)
             {
                 Arena.self = FindObjectOfType<Arena>();
+                Arena.menu = ui;
             }
-            ArenaMenu ui = target as ArenaMenu;
-            unitCount = EditorGUILayout.IntSlider("人數", unitCount, Arena.minGuy, Arena.maxGuy);
+            unitCount = EditorGUILayout.IntSlider("人數", unitCount, Arena.minUnit, Arena.maxUnit);
             if (GUILayout.Button("重置"))
             {
-                ui.Setup();
+                ui.ClearMain();
             }
             if (GUILayout.Button("隨機生成"))
             {
-                ui.Setup();
-                ui.RandomRule();
-                unitCount = Arena.schedule.present.Count;
+                Arena.RandomRule();
+                unitCount = Arena.schedule.units.Count;
             }
             if (GUILayout.Button("固定生成"))
             {
-                ui.Setup();
                 Arena.RandomRule(unitCount);
-                ui.CreateMain();
             }
             if (GUILayout.Button("下一輪"))
             {
-                Arena.RandomJudge();
-                ui.UpdateWinTeam();
-                Arena.NextContest();
-                ui.UpdaheRound();
+                Arena.ContestComplete();
             }
         }
     }

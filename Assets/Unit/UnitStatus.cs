@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum RangeDisplayType
-{
-    Nothing = 0b001,
-    Moving = 0b010,
-    Attack = 0b100,
-}
 public class UnitStatus : MonoBehaviour
 {
+    public enum Type
+    {
+        Nothing = 0b001,
+        Moving = 0b010,
+        Attack = 0b100,
+    }
     MeshRenderer movingRangeMesh, attackRangeMesh;
     Healthbar healthBar;
     public Transform MovingRange => movingRangeMesh.transform;
@@ -22,14 +22,14 @@ public class UnitStatus : MonoBehaviour
         movingRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.moveDistance * 2.2f + Vector3.forward;
         attackRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.weapon.length * 2 + Vector3.forward;
         attackRangeMesh.material = unit.weapon.mask;
-        Display(RangeDisplayType.Attack);
+        Display(Type.Attack);
         healthBar.Setup(unit.maxHealth);
         healthBar.Set(unit.maxHealth);
     }
-    public void Display(RangeDisplayType type)
+    public void Display(Type type)
     {
-        movingRangeMesh.enabled = type.HasFlag(RangeDisplayType.Moving);
-        attackRangeMesh.enabled = type.HasFlag(RangeDisplayType.Attack);
+        movingRangeMesh.enabled = type.HasFlag(Type.Moving);
+        attackRangeMesh.enabled = type.HasFlag(Type.Attack);
     }
     public void SetHealthBar(float health)
     {
@@ -37,7 +37,7 @@ public class UnitStatus : MonoBehaviour
     }
     public void Disable()
     {
-        Display(RangeDisplayType.Nothing);
+        Display(Type.Nothing);
         healthBar.gameObject.SetActive(false);
     }
 }

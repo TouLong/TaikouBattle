@@ -15,12 +15,9 @@ public class CombatControl : MonoBehaviour
     }
     public void Startup()
     {
-        Team.InScene.ForEach(x => x.Update());
+        Team.All.ForEach(x => x.Update());
         UserControl.Setup();
-        if (UserControl.team != null)
-        {
-            stateUpdate = Selecting;
-        }
+        stateUpdate = Selecting;
     }
     void Update()
     {
@@ -37,12 +34,12 @@ public class CombatControl : MonoBehaviour
             }
             else
             {
-                unit.status.Display(RangeDisplayType.Moving);
+                unit.status.Display(UnitStatus.Type.Moving);
             }
         }
         else
         {
-            Unit.Alive.ForEach(x => x.status.Display(RangeDisplayType.Attack));
+            Unit.Alive.ForEach(x => x.status.Display(UnitStatus.Type.Attack));
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -58,7 +55,7 @@ public class CombatControl : MonoBehaviour
             UserControl.MoveTo(hit.point.x, hit.point.z);
             if (Mouse.LeftDown)
             {
-                UserControl.unit.status.Display(RangeDisplayType.Attack);
+                UserControl.unit.status.Display(UnitStatus.Type.Attack);
                 stateUpdate = SetRotation;
             }
             else if (Mouse.RightDown)
@@ -96,31 +93,23 @@ public class CombatControl : MonoBehaviour
     {
         if (!Unit.Alive.FindAll(x => x.inCombat).Any())
         {
-            Team.InScene.RemoveAll(x => x.alives.Count == 0);
+            Team.All.RemoveAll(x => x.alives.Count == 0);
             Team.NonUser.RemoveAll(x => x.alives.Count == 0);
-            if (Team.InScene.Count == 1)
+            if (Team.All.Count == 1)
             {
                 stateUpdate = null;
                 Timer.Set(2f, () =>
                 {
-                    Arena.WinTeam(Team.InScene[0]);
-                    Team.InScene.Clear();
+                    Arena.ContestComplete(Team.All.First());
+                    Team.All.Clear();
                     Team.NonUser.Clear();
-                    ArenaMenu.self.UpdateWinTeam();
-                    Arena.NextContest();
-                    ArenaMenu.self.UpdaheRound();
-                    ArenaMenu.self.gameObject.SetActive(true);
-                    while (Unit.All.Count != 0)
-                    {
-                        Destroy(Unit.All[0].gameObject);
-                        Unit.All.RemoveAt(0);
-                    }
+                    Unit.All.Clear();
                     Unit.Alive.Clear();
                 });
             }
             else
             {
-                Team.InScene.ForEach(x => x.Update());
+                Team.All.ForEach(x => x.Update());
                 stateUpdate = Selecting;
             }
         }

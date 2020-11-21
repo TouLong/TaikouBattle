@@ -167,21 +167,4 @@ public class GameHelper : EditorWindow
         obj.transform.position = origin;
     }
 }
-[InitializeOnLoad]
-public static class EditorHotkeysTracker
-{
-    static EditorHotkeysTracker()
-    {
-        SceneView.duringSceneGui += view =>
-        {
-            if (GameHelper.snapObject)
-            {
-                if (Event.current.keyCode == KeyCode.BackQuote)
-                {
-                    GameHelper.Land(Selection.gameObjects);
-                }
-            }
-        };
-    }
-}
 #endif

@@ -94,7 +94,7 @@ public class Unit : MonoBehaviour
         TextUI.Pop(unit.weapon.attack, Color.red, transform.position);
         health = Mathf.Max(health - unit.weapon.attack, 0);
         status.SetHealthBar(health);
-        if (health <= 0)
+        if (health <= 0 && Alive.Contains(this))
         {
             Alive.Remove(this);
             team.alives.Remove(this);

@@ -15,9 +15,9 @@ public class Team
             this.end = end;
         }
     }
-    public static List<Team> InScene = new List<Team>();
+    public static List<Team> All = new List<Team>();
     public static List<Team> NonUser = new List<Team>();
-    public List<Arena.UnitInfo> members = new List<Arena.UnitInfo>();
+    public List<UnitInfo> members = new List<UnitInfo>();
     [HideInInspector]
     public List<Unit> alives = new List<Unit>();
     [HideInInspector]
@@ -26,7 +26,7 @@ public class Team
     public Vector3 center;
     public void Create()
     {
-        InScene.Add(this);
+        All.Add(this);
         NonUser.Add(this);
         alives.AddRange(members.Select(x => x.unit));
     }
@@ -90,5 +90,25 @@ public class Team
                .Append(unit.MoveTween(dest.position))
                .Append(unit.RotateTween(dest.rotation));
         }
+    }
+}
+public class UnitInfo
+{
+    public int id;
+    public string name;
+    public Sprite icon;
+    public Group group;
+    public Team team;
+    public Unit unit;
+    public UnitInfo(Team team, Unit unit)
+    {
+        this.team = team;
+        this.unit = unit;
+    }
+    public UnitInfo(int id, string name, Sprite icon)
+    {
+        this.id = id;
+        this.name = name;
+        this.icon = icon;
     }
 }
