@@ -182,5 +182,5 @@ public class ArenaMenu : MonoBehaviour
             }
         }
     }
-}
 #endif
+}

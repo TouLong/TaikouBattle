@@ -3,7 +3,6 @@ using UnityEditor;
 using System.Linq;
 using System.Collections.Generic;
 using System;
-using UnityEditor.Profiling;
 
 #if UNITY_EDITOR
 public class GameHelper : EditorWindow
