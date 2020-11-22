@@ -34,9 +34,7 @@ public class ArenaMenu : MonoBehaviour
     public UI ui;
     public string[] roundTexts = new string[] { "I", "II", "III", "IV", };
     public string[] groupTexts = new string[] { "I", "II", "III", "IV", };
-    public Color[] groupColors = new Color[] { };
-    public Color[] teamColors = new Color[] { };
-
+    public Color disableColor;
     static public ArenaMenu self;
     Dictionary<Round, Transform> roundDict;
     Dictionary<Group, Transform> groupDict;
@@ -113,7 +111,7 @@ public class ArenaMenu : MonoBehaviour
                     for (int i = 0; i < arenaGroup.eachTeamMember; i++)
                     {
                         Transform unitContent = Instantiate(ui.member, teamContent);
-                        unitContent.GetComponent<Image>().color = teamColors[teamCount];
+                        unitContent.GetComponent<Image>().color = arenaTeam.color;
                     }
                     teamCount++;
                 }
@@ -121,16 +119,16 @@ public class ArenaMenu : MonoBehaviour
         }
         schedule.Reverse();
     }
-    public void UpdateWinTeam(Group currentGroup, Team winTeam)
+    public void UpdateWinTeam(List<Team> teams, Team winTeam)
     {
-        foreach (Team team in currentGroup)
+        foreach (Team team in teams)
         {
             if (winTeam != team)
             {
                 Transform teamContent = teamDict[team];
                 for (int i = 0; i < teamContent.childCount; i++)
                 {
-                    teamContent.GetChild(i).GetComponent<Image>().color = Color.gray;
+                    teamContent.GetChild(i).GetComponent<Image>().color = disableColor;
                 }
             }
         }

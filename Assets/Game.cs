@@ -11,6 +11,8 @@ public class Game : MonoBehaviour
     }
     void Start()
     {
+        if (!tesing)
+            return;
         Unit[] units = FindObjectsOfType<Unit>();
         Team userTeam = new Team();
         Team npcTeam = new Team();
@@ -22,10 +24,11 @@ public class Game : MonoBehaviour
             else
                 npcTeam.members.Add(new UnitInfo(npcTeam, units[count]));
             count++;
+            unit.GetComponent<UnitStatus>().Setup(unit);
         }
         Unit.player = userTeam.members[0].unit;
-        userTeam.Create();
-        npcTeam.Create();
+        userTeam.Setup();
+        npcTeam.Setup();
         CombatControl.self.Startup();
     }
 }

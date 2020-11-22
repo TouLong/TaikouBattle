@@ -18,13 +18,14 @@ public class Team
     public static List<Team> All = new List<Team>();
     public static List<Team> NonUser = new List<Team>();
     public List<UnitInfo> members = new List<UnitInfo>();
+    public Color color = Color.black;
     [HideInInspector]
     public List<Unit> alives = new List<Unit>();
     [HideInInspector]
     public List<Unit> enemies = new List<Unit>();
     [HideInInspector]
     public Vector3 center;
-    public void Create()
+    public void Setup()
     {
         All.Add(this);
         NonUser.Add(this);
@@ -97,6 +98,7 @@ public class UnitInfo
     public int id;
     public string name;
     public Sprite icon;
+    public Color color;
     public Group group;
     public Team team;
     public Unit unit;

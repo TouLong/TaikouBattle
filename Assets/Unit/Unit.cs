@@ -9,6 +9,7 @@ public class Unit : MonoBehaviour
     static public List<Unit> All = new List<Unit>();
     static public List<Unit> Alive = new List<Unit>();
     static public Unit player;
+
     public Transform model;
     public Transform holdWeapon;
     [HideInInspector]
@@ -24,13 +25,17 @@ public class Unit : MonoBehaviour
     [HideInInspector]
     public float radius, height;
 
-    AnimatorLayer moveAnim;
-    AnimatorLayer actionAnim;
+    AnimatorLayer moveAnim, actionAnim;
     public Sequence action;
     [HideInInspector]
     public bool inCombat;
     [HideInInspector]
     public UnitStatus status;
+    void Awake()
+    {
+        All.Add(this);
+        Alive.Add(this);
+    }
     void Start()
     {
         weapon = Instantiate(weapon, holdWeapon, false);
@@ -74,18 +79,18 @@ public class Unit : MonoBehaviour
     public void Combat()
     {
         inCombat = true;
-
         if (weapon.HitDetect(transform, team.enemies, out List<Unit> hits))
         {
             Attack(() =>
             {
-
                 hits.ForEach(x => x.DamageBy(this));
+                inCombat = false;
                 Idle();
             });
         }
         else
         {
+            inCombat = false;
             Idle();
         }
     }
@@ -118,7 +123,6 @@ public class Unit : MonoBehaviour
     }
     public void Idle()
     {
-        inCombat = false;
         moveAnim.CrossFade("stand");
         actionAnim.CrossFade(weapon.type.ToString() + "-idle");
     }
@@ -151,14 +155,5 @@ public class Unit : MonoBehaviour
         {
             action.Kill();
         }
-    }
-    void OnEnable()
-    {
-        All.Add(this);
-        Alive.Add(this);
-    }
-    void OnDisable()
-    {
-        Alive.Remove(this);
     }
 }

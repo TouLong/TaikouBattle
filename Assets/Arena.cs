@@ -32,6 +32,7 @@ public class Arena : MonoBehaviour
     public Unit unitPrefab;
     public Weapon[] weaponPrefab;
     public Sprite[] iconPrefab;
+    public Color[] teamColors = new Color[] { };
     public Transform teamLayout;
     public Transform unitLayout;
 
@@ -88,11 +89,16 @@ public class Arena : MonoBehaviour
                 {
                     Unit.player = unit;
                 }
+                unit.gameObject.name = string.Format("{0}-{1}", unitInfo.id, unitInfo.name);
+                unit.GetComponent<UnitStatus>().Setup(unitInfo);
             }
-            team.Create();
+            team.Setup();
         }
-        Timer.Set(0.2f, CombatControl.self.Startup);
-        menu.gameObject.SetActive(false);
+        Timer.Set(0.2f, () =>
+        {
+            CombatControl.self.Startup();
+            menu.gameObject.SetActive(false);
+        });
     }
     static public void ContestComplete(Team winTeam)
     {
@@ -148,13 +154,22 @@ public class Arena : MonoBehaviour
         for (int i = 0; i < unitCount; i++)
         {
             if (i != user.id)
-            {
-                schedule.units.Add(new UnitInfo(i, string.Format("參賽者{0}號", count++), ListRandom.In(self.iconPrefab)));
-            }
+                schedule.units.Add(new UnitInfo(i, string.Format("參賽者 {0}號", ++count), ListRandom.In(self.iconPrefab)));
             else
             {
                 user.info = new UnitInfo(user.id, "玩家", ListRandom.In(self.iconPrefab));
                 schedule.units.Add(user.info);
+            }
+        }
+        foreach (Round round in schedule)
+        {
+            foreach (Group group in round)
+            {
+                int teamCount = 0;
+                foreach (Team team in group)
+                {
+                    team.color = self.teamColors[teamCount++];
+                }
             }
         }
         schedule.CurrentRound.Assign(schedule.units);

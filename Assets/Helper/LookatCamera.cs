@@ -7,6 +7,6 @@ public class LookatCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        transform.forward = -Camera.main.transform.forward;
+        transform.forward = Camera.main.transform.forward;
     }
 }

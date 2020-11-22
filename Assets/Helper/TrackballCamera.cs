@@ -3,16 +3,14 @@ using UnityEngine.EventSystems;
 
 public class TrackballCamera : MonoBehaviour
 {
-    public float rotateSensitivity = 10;
-    public float zoomSensitivity = 10;
-    public float mouseMoveSensitivity = 10;
-    public float keyboradMoveSensitivity = 10;
-
-    readonly float zoomAdjust = 100;
-    readonly float rotateAdjust = 100;
-    readonly float mouseMoveAdjust = 300;
-    readonly float keyboradMoveAdjust = 10;
-    readonly float rayHitDistMax = 200;
+    [Range(1, 10)]
+    public float rotateSensitivity = 5;
+    [Range(1, 10)]
+    public float zoomSensitivity = 5;
+    [Range(1, 10)]
+    public float mouseMoveSensitivity = 5;
+    public float keyboradMoveSensitivity = 100;
+    public float rayHitDistMax = 200;
 
     float rayHitDist;
     Vector3 position;
@@ -21,12 +19,11 @@ public class TrackballCamera : MonoBehaviour
     Quaternion keyboradMoveDir;
     float keyboradMoveSpeed;
 
-    void Start()
+    public void Start()
     {
         angleX = transform.eulerAngles.y;
         angleY = -transform.eulerAngles.x;
         position = transform.position;
-        transform.position = Vector3.zero;
     }
 
     void LateUpdate()
@@ -36,15 +33,15 @@ public class TrackballCamera : MonoBehaviour
 
         rayHitDist = RayHitDistance();
         keyboradMoveDir = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-        keyboradMoveSpeed = rayHitDist * keyboradMoveSensitivity / keyboradMoveAdjust * Time.deltaTime;
+        keyboradMoveSpeed = rayHitDist / rayHitDistMax * keyboradMoveSensitivity * Time.deltaTime;
 
         if (Input.mouseScrollDelta.y != 0)
-            position += transform.forward * Input.mouseScrollDelta.y * rayHitDist * zoomSensitivity / zoomAdjust;
+            position += transform.forward * Input.mouseScrollDelta.y * rayHitDist * zoomSensitivity / rayHitDistMax;
 
         if (Input.GetMouseButton(1))
         {
-            angleX += Input.GetAxis("Mouse X") * rotateSensitivity * rotateAdjust * Time.deltaTime;
-            angleY += Input.GetAxis("Mouse Y") * rotateSensitivity * rotateAdjust * Time.deltaTime;
+            angleX += Input.GetAxis("Mouse X") * rotateSensitivity;
+            angleY += Input.GetAxis("Mouse Y") * rotateSensitivity;
             Clamp(ref angleX);
             Clamp(ref angleY);
             transform.rotation = Quaternion.Euler(-angleY, angleX, 0);
@@ -52,8 +49,8 @@ public class TrackballCamera : MonoBehaviour
 
         if (Input.GetMouseButton(2))
         {
-            position += transform.right * -Input.GetAxis("Mouse X") * rayHitDist * mouseMoveSensitivity / mouseMoveAdjust;
-            position += transform.up * -Input.GetAxis("Mouse Y") * rayHitDist * mouseMoveSensitivity / mouseMoveAdjust;
+            position += transform.right * -Input.GetAxis("Mouse X") * rayHitDist * mouseMoveSensitivity / rayHitDistMax;
+            position += transform.up * -Input.GetAxis("Mouse Y") * rayHitDist * mouseMoveSensitivity / rayHitDistMax;
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
