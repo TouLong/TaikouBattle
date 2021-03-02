@@ -11,21 +11,21 @@ public class AnimatorLayer
         this.animator = animator;
         this.layer = layer;
     }
-    public void CrossFade(string stateName)
+    public void Play(string stateName)
     {
-        animator.CrossFade(stateName, 0.1f, layer);
+        animator.Play(stateName, layer);
     }
-    public void CrossFadeEvent(string stateName, Action action, float actionTime)
+    public void Play(string stateName, Action action, float actionTime)
     {
-        animator.CrossFade(stateName, 0.1f, layer);
-        AnimatorTool.Event(this, stateName, action, actionTime);
+        Play(stateName);
+        AnimatorEvent.Create(this, stateName, action, actionTime);
     }
 }
 
-public class AnimatorTool : MonoBehaviour
+public class AnimatorEvent : MonoBehaviour
 {
-    static readonly AnimatorTool animatorTool = new GameObject("AnimatorTool").AddComponent<AnimatorTool>();
-    static public void Event(AnimatorLayer animator, string stateName, Action action, float actionTime)
+    static readonly AnimatorEvent animatorTool = new GameObject("AnimatorTool").AddComponent<AnimatorEvent>();
+    static public void Create(AnimatorLayer animator, string stateName, Action action, float actionTime)
     {
         animatorTool.StartCoroutine(animatorTool.UpdateState(animator, stateName, action, actionTime));
     }

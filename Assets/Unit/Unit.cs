@@ -107,8 +107,8 @@ public class Unit : MonoBehaviour
             weapon.gameObject.AddComponent<Rigidbody>();
             weapon.gameObject.AddComponent<BoxCollider>();
             status.Disable();
-            moveAnim.CrossFade("none");
-            actionAnim.CrossFade("none");
+            moveAnim.Play("none");
+            actionAnim.Play("none");
             GetComponentsInChildren<SphereCollider>().ToList().ForEach(x => x.enabled = true);
             Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
             rigidbody.AddForceAtPosition(unit.transform.forward, transform.position + Vector3.up * height / 2f, ForceMode.Impulse);
@@ -123,24 +123,24 @@ public class Unit : MonoBehaviour
     }
     public void Idle()
     {
-        moveAnim.CrossFade("stand");
-        actionAnim.CrossFade(weapon.type.ToString() + "-idle");
+        moveAnim.Play("stand");
+        actionAnim.Play(weapon.type.ToString() + "-idle");
     }
     public void Standing()
     {
-        moveAnim.CrossFade("stand");
+        moveAnim.Play("stand");
     }
     public void Moving()
     {
-        moveAnim.CrossFade("move");
+        moveAnim.Play("move");
     }
     public void Turning()
     {
-        moveAnim.CrossFade("turn");
+        moveAnim.Play("turn");
     }
     public void Attack(Action onCompleted)
     {
-        actionAnim.CrossFadeEvent(weapon.type.ToString() + "-attack", onCompleted, 0.5f);
+        actionAnim.Play(weapon.type.ToString() + "-attack", onCompleted, 0.5f);
     }
     void OnGround()
     {
