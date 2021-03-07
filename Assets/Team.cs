@@ -17,6 +17,7 @@ public class Team
     }
     public static List<Team> All = new List<Team>();
     public static List<Team> NonUser = new List<Team>();
+    public static List<Team> Dummy = new List<Team>();
     public List<UnitInfo> members = new List<UnitInfo>();
     public Color color = Color.black;
     [HideInInspector]
@@ -43,7 +44,14 @@ public class Team
             center += unit.transform.position / alives.Count;
         }
     }
-    public void Action()
+    public void NotPlan()
+    {
+        foreach (Unit unit in alives)
+        {
+            unit.StartAction();
+        }
+    }
+    public void PlanA()
     {
         List<ActionPath> paths = new List<ActionPath>();
         foreach (Unit unit in alives)
@@ -51,18 +59,18 @@ public class Team
             Unit target = enemies.OrderBy(x => Vector3.Distance(unit.transform.position, x.transform.position)).First();
             Pose dest;
             Vector3 originXZ = Vector.XZ(unit.transform.position);
-            Vector3 guessPosXZ = V3Random.RangeXZ(-target.moveDistance, target.moveDistance) + Vector.XZ(target.transform.position);
+            Vector3 guessPosXZ = V3Random.RangeXZ(-target.maxMoving, target.maxMoving) + Vector.XZ(target.transform.position);
             float guessDist = Vector3.Distance(originXZ, guessPosXZ);
             bool isBlocking;
             int blockingCount = -1;
             do
             {
-                if (guessDist < unit.moveDistance + unit.weapon.farLength)
+                if (guessDist < unit.maxMoving + unit.weapon.farLength)
                 {
                     Vector3 guessDir = (guessPosXZ - originXZ).normalized;
                     float guessAngle = Vector3.SignedAngle(Vector3.forward, guessDir, Vector3.up);
                     float randomMoveAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
-                    float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.nearLength, unit.weapon.farLength), -unit.moveDistance, unit.moveDistance);
+                    float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.nearLength, unit.weapon.farLength), -unit.maxMoving, unit.maxMoving);
                     Vector3 randomMoveDir = Vector.DegreeToXZ(guessAngle + randomMoveAngle);
                     dest.position = randomMoveDir * randomMoveDist + originXZ;
                     float randomPoseAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
@@ -71,7 +79,7 @@ public class Team
                 }
                 else
                 {
-                    dest.position = Vector3.ClampMagnitude(guessPosXZ - originXZ, unit.moveDistance) + originXZ;
+                    dest.position = Vector3.ClampMagnitude(guessPosXZ - originXZ, unit.maxMoving) + originXZ;
                     dest.rotation = Quaternion.LookRotation(guessPosXZ - originXZ);
                 }
                 isBlocking = false;
@@ -86,10 +94,7 @@ public class Team
                 Debug.Log(unit.name + "blocking" + blockingCount);
             paths.Add(new ActionPath(originXZ, dest.position));
             dest.position.y = unit.transform.position.y;
-            unit.action = DOTween.Sequence()
-               .Append(unit.LookAtTween(dest.position))
-               .Append(unit.MoveTween(dest.position))
-               .Append(unit.RotateTween(dest.rotation));
+            unit.StartAction();
         }
     }
 }

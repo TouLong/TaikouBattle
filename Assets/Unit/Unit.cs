@@ -15,22 +15,19 @@ public class Unit : MonoBehaviour
     [HideInInspector]
     public Team team;
     public Weapon weapon;
-
     [HideInInspector]
-    public float moveDistance;
-    [Range(1, 100)]
-    public int maxHealth, health;
-    float moveSpeed;
-    float rotateSpeed;
-    [HideInInspector]
-    public float radius, height;
-
-    AnimatorLayer moveAnim, actionAnim;
+    public float maxMoving, maxTurning, moving, turning, ap;
+    [Range(1, 5)]
+    public int maxHp, hp;
+    AnimatorLayer anim;
     public Sequence action;
+    public Pose destination;
     [HideInInspector]
     public bool inCombat;
     [HideInInspector]
     public UnitStatus status;
+    [HideInInspector]
+    public UnitColliders colliders;
     void Awake()
     {
         All.Add(this);
@@ -39,42 +36,65 @@ public class Unit : MonoBehaviour
     void Start()
     {
         weapon = Instantiate(weapon, holdWeapon, false);
-        rotateSpeed = 5f - weapon.weight / 10;
-        moveDistance = 2f - weapon.weight * 4 / 10;
-        moveSpeed = moveDistance * 2f;
-        radius = GetComponent<CapsuleCollider>().radius;
-        height = GetComponent<CapsuleCollider>().height;
+        destination.position = transform.position;
+        destination.rotation = transform.rotation;
+        maxMoving = 1.6f - weapon.weight * 4 / 10;
+        maxTurning = 180f;
+        ap = 1;
         status = GetComponent<UnitStatus>();
+        colliders = GetComponentInChildren<UnitColliders>();
+        colliders.transform.SetParent(model);
         status.Setup(this);
-        moveAnim = new AnimatorLayer(GetComponent<Animator>(), 0);
-        actionAnim = new AnimatorLayer(GetComponent<Animator>(), 1);
+        anim = new AnimatorLayer(GetComponent<Animator>(), 0);
         OnGround();
-        Idle();
+        Standing();
     }
-    public Tween MoveTween(Vector3 newPos)
+    public void MoveModel(Vector3 point)
     {
-        newPos.Set(newPos.x, Map.GetHeight(newPos.x, newPos.z), newPos.z);
-        return transform.DOMove(newPos, Vector3.Distance(newPos, transform.position) / moveSpeed)
-            .OnStart(Moving)
-            .OnUpdate(OnGround)
-            .OnUpdate(TouchCheck)
-            .OnComplete(Standing)
-            .OnKill(Standing);
+        Vector3 newPos = Vector3.ClampMagnitude(point - transform.position, maxMoving) + transform.position;
+        moving = Vector3.Distance(transform.position, newPos);
+        if (ApEstimate())
+            model.position = newPos;
     }
-    public Tween LookAtTween(Vector3 toward)
+    public void RotateModel(Vector3 point)
     {
-        if (toward == transform.position)
-        {
-            toward = transform.position + transform.forward;
-        }
-        return transform.DOLookAt(toward, 1.0f / rotateSpeed)
-            .OnStart(Turning)
-            .OnComplete(Standing)
-            .OnKill(Standing);
+        Vector3 newDir = new Vector3(point.x - transform.position.x, 0, point.z - transform.position.z);
+        turning = Vector3.Angle(transform.forward, newDir);
+        if (ApEstimate())
+            model.rotation = Quaternion.LookRotation(newDir);
     }
-    public Tween RotateTween(Quaternion newRot)
+    bool ApEstimate()
     {
-        return transform.DORotateQuaternion(newRot, 1.0f / rotateSpeed);
+        float moveConsume = moving / maxMoving;
+        float rotateConsume = turning / maxTurning;
+        ap = 1 - moveConsume - rotateConsume;
+        if (ap > 0)
+            status.SetActionBar(ap);
+        else
+            status.SetActionBar(0);
+        return ap > 0;
+    }
+    public void StartAction()
+    {
+        string animation = weapon.type.ToString();
+        if (Vector3.Angle(transform.forward, destination.position - transform.position) < 90)
+            animation += "-front";
+        else
+            animation += "-back";
+        action = DOTween.Sequence()
+            .Append(transform.DORotateQuaternion(destination.rotation, 4 / 24f)
+            .OnStart(() => { anim.Play(animation + "1"); })
+            .OnKill(() => { anim.Play(animation + "3"); }))
+            .Append(transform.DOMove(destination.position, 4 / 24f)
+            .OnStart(() => { anim.Play(animation + "2"); })
+            .OnUpdate(() =>
+            {
+                OnGround();
+                if (colliders.IsTouch())
+                    action.Kill();
+            })
+            .OnComplete(() => { anim.Play(animation + "3"); })
+            .OnKill(() => { anim.Play(animation + "3"); }));
     }
     public void Combat()
     {
@@ -85,21 +105,29 @@ public class Unit : MonoBehaviour
             {
                 hits.ForEach(x => x.DamageBy(this));
                 inCombat = false;
-                Idle();
+                //Idle();
             });
         }
         else
         {
-            inCombat = false;
             Idle();
         }
+    }
+    public void Idle()
+    {
+        inCombat = false;
+        ap = 1;
+        moving = 0;
+        turning = 0;
+        status.SetActionBar(ap);
+        Standing();
     }
     public void DamageBy(Unit unit)
     {
         TextUI.Pop(unit.weapon.attack, Color.red, transform.position);
-        health = Mathf.Max(health - unit.weapon.attack, 0);
-        status.SetHealthBar(health);
-        if (health <= 0 && Alive.Contains(this))
+        hp = Mathf.Max(hp - unit.weapon.attack, 0);
+        status.SetHealthBar(hp);
+        if (hp <= 0 && Alive.Contains(this))
         {
             Alive.Remove(this);
             team.alives.Remove(this);
@@ -107,11 +135,10 @@ public class Unit : MonoBehaviour
             weapon.gameObject.AddComponent<Rigidbody>();
             weapon.gameObject.AddComponent<BoxCollider>();
             status.Disable();
-            moveAnim.Play("none");
-            actionAnim.Play("none");
+            anim.Play("empty");
             GetComponentsInChildren<SphereCollider>().ToList().ForEach(x => x.enabled = true);
             Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
-            rigidbody.AddForceAtPosition(unit.transform.forward, transform.position + Vector3.up * height / 2f, ForceMode.Impulse);
+            rigidbody.AddForceAtPosition(unit.transform.forward, transform.position + Vector3.up * colliders.height / 2f, ForceMode.Impulse);
             gameObject.AddComponent<OnTriggerGorund>().Setup(() =>
             {
                 Destroy(rigidbody);
@@ -121,39 +148,18 @@ public class Unit : MonoBehaviour
             }, 1.5f);
         }
     }
-    public void Idle()
-    {
-        moveAnim.Play("stand");
-        actionAnim.Play(weapon.type.ToString() + "-idle");
-    }
     public void Standing()
     {
-        moveAnim.Play("stand");
-    }
-    public void Moving()
-    {
-        moveAnim.Play("move");
-    }
-    public void Turning()
-    {
-        moveAnim.Play("turn");
+        anim.Play(weapon.type.ToString() + "-idle");
     }
     public void Attack(Action onCompleted)
     {
-        actionAnim.Play(weapon.type.ToString() + "-attack", onCompleted, 0.5f);
+        anim.Play(weapon.type.ToString() + "-attack", onCompleted, 0.5f);
     }
     void OnGround()
     {
         transform.position = new Vector3(transform.position.x,
             Map.GetHeight(transform.position.x, transform.position.z),
             transform.position.z);
-    }
-    void TouchCheck()
-    {
-        if (Physics.CapsuleCast(transform.position, transform.position + Vector3.up * height, radius, transform.forward
-            , out RaycastHit hit, radius / 2f, LayerMask.GetMask("Unit")))
-        {
-            action.Kill();
-        }
     }
 }

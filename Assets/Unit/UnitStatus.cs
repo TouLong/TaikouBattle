@@ -14,7 +14,7 @@ public class UnitStatus : MonoBehaviour
     [SerializeField]
     MeshRenderer movingRangeMesh, attackRangeMesh;
     [SerializeField]
-    Healthbar healthBar;
+    Bar healthBar, actionBar;
     [SerializeField]
     Image icon;
     [SerializeField]
@@ -23,12 +23,14 @@ public class UnitStatus : MonoBehaviour
     public Transform AttackRange => attackRangeMesh.transform;
     public void Setup(Unit unit)
     {
-        movingRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.moveDistance * 2.2f + Vector3.forward;
+        movingRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.maxMoving * 2.2f + Vector3.forward;
         attackRangeMesh.transform.localScale = (Vector3.right + Vector3.up) * unit.weapon.length * 2 + Vector3.forward;
         attackRangeMesh.material = unit.weapon.mask;
         Display(Type.Attack);
-        healthBar.Setup(unit.maxHealth);
-        healthBar.Set(unit.maxHealth);
+        healthBar.Setup(unit.maxHp);
+        healthBar.Set(unit.maxHp);
+        actionBar.Setup(unit.ap);
+        actionBar.Set(unit.ap);
     }
     public void Setup(UnitInfo info)
     {
@@ -42,9 +44,13 @@ public class UnitStatus : MonoBehaviour
         movingRangeMesh.enabled = type.HasFlag(Type.Moving);
         attackRangeMesh.enabled = type.HasFlag(Type.Attack);
     }
-    public void SetHealthBar(float health)
+    public void SetHealthBar(float hp)
     {
-        healthBar.Set(health);
+        healthBar.Set(hp);
+    }
+    public void SetActionBar(float ap)
+    {
+        actionBar.Set(ap);
     }
     public void Disable()
     {

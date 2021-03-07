@@ -7,6 +7,8 @@ using UnityEngine;
 public class CombatControl : MonoBehaviour
 {
     static public CombatControl self;
+    [HideInInspector]
+    public bool testing;
     Action stateUpdate;
     void Awake()
     {
@@ -30,8 +32,9 @@ public class CombatControl : MonoBehaviour
     }
     void Selecting()
     {
-        if (Mouse.Hit(out Unit unit))
+        if (Mouse.Hit(out RaycastHit hit, LayerMask.GetMask("Unit")))
         {
+            Unit unit = hit.transform.parent.parent.GetComponent<Unit>();
             if (Mouse.LeftDown && UserControl.team.alives.Contains(unit))
             {
                 UserControl.Select(unit);
@@ -49,7 +52,8 @@ public class CombatControl : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             UserControl.Action();
-            Team.NonUser.ForEach(x => x.Action());
+            Team.NonUser.ForEach(x => x.PlanA());
+            Team.Dummy.ForEach(x => x.NotPlan());
             stateUpdate = InAction;
         }
     }
@@ -57,7 +61,7 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            UserControl.MoveTo(hit.point.x, hit.point.z);
+            UserControl.unit.MoveModel(hit.point);
             if (Mouse.LeftDown)
             {
                 UserControl.unit.status.Display(UnitStatus.Type.Attack);
@@ -74,7 +78,7 @@ public class CombatControl : MonoBehaviour
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            UserControl.LookAt(hit.point.x, hit.point.z);
+            UserControl.unit.RotateModel(hit.point);
             if (Mouse.LeftDown)
             {
                 stateUpdate = Selecting;
@@ -100,7 +104,7 @@ public class CombatControl : MonoBehaviour
         {
             Team.All.RemoveAll(x => x.alives.Count == 0);
             Team.NonUser.RemoveAll(x => x.alives.Count == 0);
-            if (Team.All.Count == 1)
+            if (Team.All.Count == 1 && !testing)
             {
                 stateUpdate = null;
                 Timer.Set(2f, () =>
