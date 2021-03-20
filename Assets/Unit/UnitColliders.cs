@@ -7,12 +7,16 @@ public class UnitColliders : MonoBehaviour
     [HideInInspector]
     public float radius, height;
     [HideInInspector]
-    public CapsuleCollider model;
+    CapsuleCollider model;
     void Start()
     {
         model = GetComponent<CapsuleCollider>();
         radius = model.radius;
         height = model.height;
+    }
+    public void Enable(bool enable)
+    {
+        model.enabled = enable;
     }
     public bool IsTouch()
     {

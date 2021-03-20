@@ -10,22 +10,39 @@ public class Unit : MonoBehaviour
     static public List<Unit> Alive = new List<Unit>();
     static public Unit player;
 
+    public enum Range
+    {
+        Nothing = 0b001,
+        Moving = 0b010,
+        Attack = 0b100,
+        All = 0b110,
+    }
     public Transform model;
     public Transform holdWeapon;
-    [HideInInspector]
-    public Team team;
     public Weapon weapon;
+
+    public const int maxHp = 5;
+    public const float maxAp = 1;
+    [Range(1, maxHp)]
+    public int hp = maxHp;
+    [Range(0, maxAp)]
+    public float ap = maxAp;
     [HideInInspector]
-    public float maxMoving, maxTurning, moving, turning, ap;
-    [Range(1, 5)]
-    public int maxHp, hp;
-    AnimatorLayer anim;
-    public Sequence action;
+    public float maxMoving, maxTurning, moveConsume, turnConsume;
+    int roundOfHurt;
+
+    [HideInInspector]
+    public MovingRange movingRange;
+    [HideInInspector]
+    public AttackRange attackRange;
+    UnitStatus status;
+    [HideInInspector]
     public Pose destination;
     [HideInInspector]
-    public bool inCombat;
+    public Team team;
+    AnimatorLayer anim;
     [HideInInspector]
-    public UnitStatus status;
+    public bool inCombat, inAction;
     [HideInInspector]
     public UnitColliders colliders;
     void Awake()
@@ -38,128 +55,87 @@ public class Unit : MonoBehaviour
         weapon = Instantiate(weapon, holdWeapon, false);
         destination.position = transform.position;
         destination.rotation = transform.rotation;
-        maxMoving = 1.6f - weapon.weight * 4 / 10;
+        //maxMoving = 1.8f - weapon.weight * 0.5f;
+        maxMoving = 1f;
         maxTurning = 180f;
-        ap = 1;
-        status = GetComponent<UnitStatus>();
+        anim = new AnimatorLayer(GetComponent<Animator>(), 0);
+        status = GetComponentInChildren<UnitStatus>();
+        status.Setup(this);
         colliders = GetComponentInChildren<UnitColliders>();
         colliders.transform.SetParent(model);
-        status.Setup(this);
-        anim = new AnimatorLayer(GetComponent<Animator>(), 0);
-        OnGround();
+        movingRange = GetComponentInChildren<MovingRange>();
+        movingRange.Setup(maxMoving);
+        attackRange = GetComponentInChildren<AttackRange>();
+        attackRange.Setup(weapon);
+        attackRange.transform.SetParent(model);
         Standing();
+        Display(Range.Nothing);
     }
-    public void MoveModel(Vector3 point)
+    public void SetInfo(UnitInfo info)
     {
-        Vector3 newPos = Vector3.ClampMagnitude(point - transform.position, maxMoving) + transform.position;
-        moving = Vector3.Distance(transform.position, newPos);
-        if (ApEstimate())
-            model.position = newPos;
+        status.Set(info);
     }
-    public void RotateModel(Vector3 point)
+    public void Display(Range range)
     {
-        Vector3 newDir = new Vector3(point.x - transform.position.x, 0, point.z - transform.position.z);
-        turning = Vector3.Angle(transform.forward, newDir);
-        if (ApEstimate())
-            model.rotation = Quaternion.LookRotation(newDir);
-    }
-    bool ApEstimate()
-    {
-        float moveConsume = moving / maxMoving;
-        float rotateConsume = turning / maxTurning;
-        ap = 1 - moveConsume - rotateConsume;
-        if (ap > 0)
-            status.SetActionBar(ap);
-        else
-            status.SetActionBar(0);
-        return ap > 0;
+        movingRange.gameObject.SetActive(range.HasFlag(Range.Moving));
+        attackRange.gameObject.SetActive(range.HasFlag(Range.Attack));
     }
     public void StartAction()
     {
-        string animation = weapon.type.ToString();
-        if (Vector3.Angle(transform.forward, destination.position - transform.position) < 90)
-            animation += "-front";
-        else
-            animation += "-back";
-        action = DOTween.Sequence()
-            .Append(transform.DORotateQuaternion(destination.rotation, 4 / 24f)
-            .OnStart(() => { anim.Play(animation + "1"); })
-            .OnKill(() => { anim.Play(animation + "3"); }))
-            .Append(transform.DOMove(destination.position, 4 / 24f)
-            .OnStart(() => { anim.Play(animation + "2"); })
-            .OnUpdate(() =>
-            {
-                OnGround();
-                if (colliders.IsTouch())
-                    action.Kill();
-            })
-            .OnComplete(() => { anim.Play(animation + "3"); })
-            .OnKill(() => { anim.Play(animation + "3"); }));
+        inAction = true;
+        transform.DORotateQuaternion(destination.rotation, 4 / 24f)
+            .OnStart(() => {; });
+        float dist = Vector3.Distance(destination.position, transform.position);
+        transform.DOJump(destination.position, dist * 0.5f, 1, 4 / 24f)
+            .OnComplete(() => { inAction = false; });
     }
-    public void Combat()
+    public void StartCombat()
     {
         inCombat = true;
         if (weapon.HitDetect(transform, team.enemies, out List<Unit> hits))
         {
-            Attack(() =>
-            {
-                hits.ForEach(x => x.DamageBy(this));
-                inCombat = false;
-                //Idle();
-            });
+            hits.ForEach(x => x.DamageBy(this));
         }
-        else
-        {
-            Idle();
-        }
-    }
-    public void Idle()
-    {
-        inCombat = false;
-        ap = 1;
-        moving = 0;
-        turning = 0;
-        status.SetActionBar(ap);
         Standing();
+        inCombat = false;
+        ResetModel();
     }
-    public void DamageBy(Unit unit)
+    public void EndCombat()
     {
-        TextUI.Pop(unit.weapon.attack, Color.red, transform.position);
-        hp = Mathf.Max(hp - unit.weapon.attack, 0);
-        status.SetHealthBar(hp);
+        if (roundOfHurt == 0)
+            return;
+        TextUI.Pop(roundOfHurt, Color.red, transform.position);
+        hp = Mathf.Max(hp - roundOfHurt, 0);
+        status.healthBar.Set(hp);
+        roundOfHurt = 0;
         if (hp <= 0 && Alive.Contains(this))
         {
             Alive.Remove(this);
             team.alives.Remove(this);
-            weapon.transform.SetParent(null);
-            weapon.gameObject.AddComponent<Rigidbody>();
-            weapon.gameObject.AddComponent<BoxCollider>();
-            status.Disable();
-            anim.Play("empty");
-            GetComponentsInChildren<SphereCollider>().ToList().ForEach(x => x.enabled = true);
-            Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
-            rigidbody.AddForceAtPosition(unit.transform.forward, transform.position + Vector3.up * colliders.height / 2f, ForceMode.Impulse);
-            gameObject.AddComponent<OnTriggerGorund>().Setup(() =>
-            {
-                Destroy(rigidbody);
-                GetComponent<Animator>().enabled = false;
-                GetComponent<CapsuleCollider>().enabled = false;
-                GetComponentsInChildren<SphereCollider>().ToList().ForEach(x => x.enabled = false);
-            }, 1.5f);
+            gameObject.SetActive(false);
         }
+    }
+    public void ResetModel()
+    {
+        moveConsume = 0;
+        turnConsume = 0;
+        model.localPosition = Vector3.zero;
+        model.localEulerAngles = Vector3.zero;
+        movingRange.transform.localScale = Vector3.one;
+        movingRange.transform.rotation = transform.rotation;
+        SetAp(maxAp);
+    }
+    public void SetAp(float value)
+    {
+        ap = Mathf.Clamp(value, 0, maxAp);
+        status.actionBar.Set(ap);
+    }
+    public void DamageBy(Unit unit)
+    {
+        roundOfHurt += unit.weapon.attack;
     }
     public void Standing()
     {
-        anim.Play(weapon.type.ToString() + "-idle");
-    }
-    public void Attack(Action onCompleted)
-    {
-        anim.Play(weapon.type.ToString() + "-attack", onCompleted, 0.5f);
-    }
-    void OnGround()
-    {
-        transform.position = new Vector3(transform.position.x,
-            Map.GetHeight(transform.position.x, transform.position.z),
-            transform.position.z);
+        anim.Play(weapon.handleType.ToString() + "-" + weapon.attackType.ToString());
     }
 }

@@ -11,11 +11,10 @@ public class TrackballCamera : MonoBehaviour
     public float mouseMoveSensitivity = 5;
     public float keyboradMoveSensitivity = 100;
     public float rayHitDistMax = 200;
-
+    public Bounds bounding;
     float rayHitDist;
     Vector3 position;
-    float angleX;
-    float angleY;
+    float angleX, angleY;
     Quaternion keyboradMoveDir;
     float keyboradMoveSpeed;
 
@@ -42,8 +41,8 @@ public class TrackballCamera : MonoBehaviour
         {
             angleX += Input.GetAxis("Mouse X") * rotateSensitivity;
             angleY += Input.GetAxis("Mouse Y") * rotateSensitivity;
-            Clamp(ref angleX);
-            Clamp(ref angleY);
+            angleX %= 360;
+            angleY = Mathf.Clamp(angleY, -89, 0);
             transform.rotation = Quaternion.Euler(-angleY, angleX, 0);
         }
 
@@ -64,16 +63,11 @@ public class TrackballCamera : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
             position -= keyboradMoveDir * Vector3.right * keyboradMoveSpeed;
 
-        position.y = Mathf.Max(position.y, 1f);
+        position.x = Mathf.Clamp(position.x, bounding.min.x, bounding.max.x);
+        position.y = Mathf.Clamp(position.y, bounding.min.y, bounding.max.y);
+        position.z = Mathf.Clamp(position.z, bounding.min.z, bounding.max.z);
         transform.position = position;
     }
-
-    void Clamp(ref float angle)
-    {
-        if (angle >= 360) angle -= 360;
-        else if (angle < 0) angle += 360;
-    }
-
     float RayHitDistance()
     {
         Physics.Raycast(transform.position, transform.forward, out RaycastHit hit);

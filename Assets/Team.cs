@@ -58,8 +58,8 @@ public class Team
         {
             Unit target = enemies.OrderBy(x => Vector3.Distance(unit.transform.position, x.transform.position)).First();
             Pose dest;
-            Vector3 originXZ = Vector.XZ(unit.transform.position);
-            Vector3 guessPosXZ = V3Random.RangeXZ(-target.maxMoving, target.maxMoving) + Vector.XZ(target.transform.position);
+            Vector3 originXZ = Vector.Xz(unit.transform.position);
+            Vector3 guessPosXZ = V3Random.RangeXz(-target.maxMoving, target.maxMoving) + Vector.Xz(target.transform.position);
             float guessDist = Vector3.Distance(originXZ, guessPosXZ);
             bool isBlocking;
             int blockingCount = -1;
@@ -71,10 +71,10 @@ public class Team
                     float guessAngle = Vector3.SignedAngle(Vector3.forward, guessDir, Vector3.up);
                     float randomMoveAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
                     float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.nearLength, unit.weapon.farLength), -unit.maxMoving, unit.maxMoving);
-                    Vector3 randomMoveDir = Vector.DegreeToXZ(guessAngle + randomMoveAngle);
+                    Vector3 randomMoveDir = Vector.DegToXz(guessAngle + randomMoveAngle);
                     dest.position = randomMoveDir * randomMoveDist + originXZ;
                     float randomPoseAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
-                    Vector3 randomPoseDir = Vector.DegreeToXZ(guessAngle + randomPoseAngle);
+                    Vector3 randomPoseDir = Vector.DegToXz(guessAngle + randomPoseAngle);
                     dest.rotation = Quaternion.LookRotation(randomPoseDir);
                 }
                 else

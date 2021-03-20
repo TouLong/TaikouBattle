@@ -6,7 +6,7 @@ public class OnTriggerGorund : MonoBehaviour
     float delayTime;
     Action onEnter;
     Coroutine delayTimer;
-    public void Setup(Action onEnter, float delayTime = 0)
+    public void Create(Action onEnter, float delayTime = 0)
     {
         this.onEnter = onEnter;
         this.delayTime = delayTime;

@@ -90,13 +90,13 @@ public class Arena : MonoBehaviour
                     Unit.player = unit;
                 }
                 unit.gameObject.name = string.Format("{0}-{1}", unitInfo.id, unitInfo.name);
-                unit.GetComponent<UnitStatus>().Setup(unitInfo);
+                unit.SetInfo(unitInfo);
             }
             team.Setup();
         }
         Timer.Set(0.2f, () =>
         {
-            CombatControl.self.Startup();
+            CombatControl.self.Setup();
             menu.gameObject.SetActive(false);
         });
     }

@@ -41,11 +41,11 @@ class V3Random
     {
         return new Vector3(Random.Range(xMin, xMax), Random.Range(yMin, yMax), Random.Range(zMin, zMax));
     }
-    static public Vector3 RangeXZ(float min, float max)
+    static public Vector3 RangeXz(float min, float max)
     {
         return new Vector3(Random.Range(min, max), 0, Random.Range(min, max));
     }
-    static public Vector3 DirectionXZ()
+    static public Vector3 DirectionXz()
     {
         Vector2 vector = Random.insideUnitCircle.normalized;
         return new Vector3(vector.x, 0, vector.y);

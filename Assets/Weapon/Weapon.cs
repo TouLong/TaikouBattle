@@ -1,17 +1,23 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public enum Type
+    public enum HandleType
     {
-        sword1,
-        sword2,
-        spear,
+        single,
+        both,
+        pole,
+        shield,
     }
-    public Type type;
+    public enum AttackType
+    {
+        hack,
+        stab,
+    }
+    public HandleType handleType;
+    public AttackType attackType;
     [Range(0.1f, 1f), SerializeField]
     float far = 1f;
     [Range(0f, 0.9f), SerializeField]
@@ -26,13 +32,16 @@ public class Weapon : MonoBehaviour
     public int attack;
     [HideInInspector]
     public float farLength, nearLength, size;
-    [HideInInspector]
-    public Material mask;
-
+    void Awake()
+    {
+        farLength = length * far;
+        nearLength = length * near;
+        size = farLength - nearLength;
+    }
     public bool HitDetect(Transform owner, Unit target)
     {
-        Pose ownerXZ = new Pose(Vector.XZ(owner.position), owner.rotation);
-        Vector3 targetXZ = Vector.XZ(target.transform.position);
+        Pose ownerXZ = new Pose(Vector.Xz(owner.position), owner.rotation);
+        Vector3 targetXZ = Vector.Xz(target.transform.position);
         float distance = Vector3.Distance(targetXZ, ownerXZ.position);
         if (distance >= nearLength && distance <= farLength)
         {
@@ -52,18 +61,5 @@ public class Weapon : MonoBehaviour
             }
         }
         return hits.Any();
-    }
-    void OnValidate()
-    {
-        farLength = length * far;
-        nearLength = length * near;
-        size = farLength - nearLength;
-        Texture texture = SectorGenerator.GenerateTexture(angle / 2, far, near, Color.gray, Color.red);
-        if (mask == null)
-        {
-            mask = new Material(Shader.Find("Universal Render Pipeline/NiloCat Extension/Screen Space Decal/Unlit"));
-        }
-        mask.SetTexture("_MainTex", texture);
-        mask.SetFloat("_DstBlend", 1);
     }
 }

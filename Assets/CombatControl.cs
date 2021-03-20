@@ -10,12 +10,14 @@ public class CombatControl : MonoBehaviour
     [HideInInspector]
     public bool testing;
     Action stateUpdate;
+    List<Action> controlSeq = new List<Action>();
+    Action control;
     void Awake()
     {
         if (self == null)
             self = this;
     }
-    public void Startup()
+    public void Setup()
     {
         Team.All.ForEach(x => x.Update());
         UserControl.Setup();
@@ -24,6 +26,8 @@ public class CombatControl : MonoBehaviour
         else
             Camera.main.transform.LookAt(Team.All[0].center);
         Camera.main.GetComponent<TrackballCamera>().Start();
+        controlSeq = new List<Action> { SetPosition, SetRotation };
+        control = controlSeq.First();
         stateUpdate = Selecting;
     }
     void Update()
@@ -35,19 +39,13 @@ public class CombatControl : MonoBehaviour
         if (Mouse.Hit(out RaycastHit hit, LayerMask.GetMask("Unit")))
         {
             Unit unit = hit.transform.parent.parent.GetComponent<Unit>();
-            if (Mouse.LeftDown && UserControl.team.alives.Contains(unit))
-            {
-                UserControl.Select(unit);
-                stateUpdate = SetPosition;
-            }
-            else
-            {
-                unit.status.Display(UnitStatus.Type.Moving);
-            }
+            UserControl.Highlight(unit);
+            if (Mouse.LeftDown && UserControl.Select(unit))
+                stateUpdate = Control;
         }
         else
         {
-            Unit.Alive.ForEach(x => x.status.Display(UnitStatus.Type.Attack));
+            UserControl.Highlight();
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -57,44 +55,64 @@ public class CombatControl : MonoBehaviour
             stateUpdate = InAction;
         }
     }
+
+    void Control()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            controlSeq.Reverse();
+            control = controlSeq.First();
+            UserControl.ReControl();
+            return;
+        }
+        control();
+        int controlId = controlSeq.IndexOf(control);
+        bool end = false;
+        if (Mouse.LeftDown)
+        {
+            end = ++controlId >= controlSeq.Count;
+            if (end)
+                UserControl.Complete();
+        }
+        else if (Mouse.RightDown)
+        {
+            end = --controlId < 0;
+            if (end)
+                UserControl.Deselect();
+        }
+        if (end)
+        {
+            control = controlSeq.First();
+            stateUpdate = Selecting;
+        }
+        else
+            control = controlSeq[controlId];
+    }
     void SetPosition()
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            UserControl.unit.MoveModel(hit.point);
-            if (Mouse.LeftDown)
-            {
-                UserControl.unit.status.Display(UnitStatus.Type.Attack);
-                stateUpdate = SetRotation;
-            }
-            else if (Mouse.RightDown)
-            {
-                UserControl.Deselect();
-                stateUpdate = Selecting;
-            }
+            if (Input.GetKey(KeyCode.LeftShift))
+                UserControl.MoveBack();
+            else
+                UserControl.MoveTo(hit.point);
         }
     }
     void SetRotation()
     {
         if (Mouse.HitGround(out RaycastHit hit))
         {
-            UserControl.unit.RotateModel(hit.point);
-            if (Mouse.LeftDown)
-            {
-                stateUpdate = Selecting;
-                UserControl.Complete();
-            }
-            else if (Mouse.RightDown)
-            {
-                stateUpdate = SetPosition;
-            }
+            if (Input.GetKey(KeyCode.LeftShift))
+                UserControl.LookOrigin();
+            else
+                UserControl.LookAt(hit.point);
         }
     }
     void InAction()
     {
-        if (!Unit.Alive.FindAll(x => x.action.IsPlaying()).Any())
+        if (!Unit.Alive.FindAll(x => x.inAction).Any())
         {
-            Unit.Alive.ForEach(x => x.Combat());
+            Unit.Alive.ForEach(x => x.StartCombat());
             stateUpdate = InCombat;
         }
     }
@@ -102,6 +120,7 @@ public class CombatControl : MonoBehaviour
     {
         if (!Unit.Alive.FindAll(x => x.inCombat).Any())
         {
+            Unit.Alive.ForEach(x => x.EndCombat());
             Team.All.RemoveAll(x => x.alives.Count == 0);
             Team.NonUser.RemoveAll(x => x.alives.Count == 0);
             if (Team.All.Count == 1 && !testing)

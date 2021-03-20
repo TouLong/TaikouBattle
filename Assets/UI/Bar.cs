@@ -8,12 +8,12 @@ public class Bar : MonoBehaviour
     Image fornt;
     public Gradient healthColor;
 
-    public void Setup(float maxHealth)
+    public void Setup(float max)
     {
         slider = GetComponent<Slider>();
         fornt = transform.Find("Front").GetComponent<Image>();
         slider.minValue = 0;
-        slider.maxValue = maxHealth;
+        slider.maxValue = max;
     }
     public void Set(float value)
     {

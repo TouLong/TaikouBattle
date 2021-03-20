@@ -15,20 +15,17 @@ public class Testing : MonoBehaviour
         foreach (Unit unit in users)
         {
             userTeam.members.Add(new UnitInfo(userTeam, unit));
-            unit.GetComponent<UnitStatus>().Setup(unit);
         }
         foreach (Unit unit in npcs)
         {
             npcTeam.members.Add(new UnitInfo(npcTeam, unit));
-            unit.GetComponent<UnitStatus>().Setup(unit);
         }
         foreach (Unit unit in dummys)
         {
             UnitInfo unitInfo = new UnitInfo(dummyTeam, unit);
             unitInfo.name = "Dummy";
             dummyTeam.members.Add(unitInfo);
-            unit.GetComponent<UnitStatus>().Setup(unit);
-            unit.GetComponent<UnitStatus>().Setup(unitInfo);
+            unit.SetInfo(unitInfo);
         }
         Unit.player = userTeam.members[0].unit;
         userTeam.Setup();
@@ -37,6 +34,6 @@ public class Testing : MonoBehaviour
         Team.NonUser.Remove(dummyTeam);
         Team.Dummy.Add(dummyTeam);
         CombatControl.self.testing = true;
-        CombatControl.self.Startup();
+        CombatControl.self.Setup();
     }
 }

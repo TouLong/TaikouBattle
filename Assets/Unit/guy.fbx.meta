@@ -66,6 +66,45 @@ ModelImporter:
   - first:
       74: 7012643433743022897
     second: spear-back3
+  - first:
+      74: -2465062247439657728
+    second: both-hack-idle
+  - first:
+      74: -1981182920837486977
+    second: pole-hack-idle
+  - first:
+      74: 6931203672577340701
+    second: guy.armature|pole-stab
+  - first:
+      74: 8219060833997212764
+    second: shield-hack-idle
+  - first:
+      74: -7366754263565732271
+    second: shield-stab-idle (1)
+  - first:
+      74: 3362661310246371091
+    second: single-hack-idle
+  - first:
+      74: -8902855854771869971
+    second: armature|both-hack
+  - first:
+      74: -2781572814800252569
+    second: armature|pole-hack
+  - first:
+      74: 491889158960254183
+    second: armature|pole-stab
+  - first:
+      74: 4977275275437081598
+    second: armature|shield-hack
+  - first:
+      74: -1462571588733397647
+    second: armature|shield-stab
+  - first:
+      74: 1060095394782536671
+    second: armature|single-hack
+  - first:
+      74: -6146566634583115674
+    second: armature|-empty
   externalObjects: {}
   materials:
     materialImportMode: 0
@@ -95,8 +134,8 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: empty
-      takeName: guy.armature|empty
+      name: armature|-empty
+      takeName: armature|-empty
       internalID: 0
       firstFrame: 0
       lastFrame: 1
@@ -124,40 +163,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: spear-idle
-      takeName: guy.armature|spear
-      internalID: 0
-      firstFrame: 48
-      lastFrame: 49
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: spear-front1
-      takeName: guy.armature|spear
+      name: armature|both-hack
+      takeName: armature|both-hack
       internalID: 0
       firstFrame: 0
-      lastFrame: 4
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -182,11 +192,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: spear-front2
-      takeName: guy.armature|spear
+      name: armature|pole-hack
+      takeName: armature|pole-hack
       internalID: 0
-      firstFrame: 4
-      lastFrame: 8
+      firstFrame: 0
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -211,11 +221,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: spear-front3
-      takeName: guy.armature|spear
+      name: armature|pole-stab
+      takeName: armature|pole-stab
       internalID: 0
-      firstFrame: 8
-      lastFrame: 16
+      firstFrame: 0
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -240,11 +250,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: spear-back1
-      takeName: guy.armature|spear
+      name: armature|shield-hack
+      takeName: armature|shield-hack
       internalID: 0
-      firstFrame: 16
-      lastFrame: 20
+      firstFrame: 0
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -269,11 +279,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: spear-back2
-      takeName: guy.armature|spear
+      name: armature|shield-stab
+      takeName: armature|shield-stab
       internalID: 0
-      firstFrame: 20
-      lastFrame: 24
+      firstFrame: 0
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -298,40 +308,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: spear-back3
-      takeName: guy.armature|spear
+      name: armature|single-hack
+      takeName: armature|single-hack
       internalID: 0
-      firstFrame: 24
-      lastFrame: 32
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: spear-attack
-      takeName: guy.armature|spear
-      internalID: 0
-      firstFrame: 32
-      lastFrame: 48
+      firstFrame: 0
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
