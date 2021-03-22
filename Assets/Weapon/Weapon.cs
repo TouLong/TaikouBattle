@@ -1,8 +1,10 @@
-﻿using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEditor;
 
-public class Weapon : MonoBehaviour
+[CreateAssetMenu()]
+public class Weapon : ScriptableObject
 {
     public enum HandleType
     {
@@ -18,32 +20,28 @@ public class Weapon : MonoBehaviour
     }
     public HandleType handleType;
     public AttackType attackType;
-    [Range(0.1f, 1f), SerializeField]
-    float far = 1f;
-    [Range(0f, 0.9f), SerializeField]
-    float near = 0.1f;
     [Range(1, 180)]
-    public int angle;
-    [Range(0.1f, 10f)]
-    public float length;
-    [Range(0f, 10f)]
-    public float weight;
-    [Range(1, 5)]
-    public int attack;
+    public int angle = 90;
+    [Range(0, 3)]
+    public float near = 0;
+    [Range(0, 3)]
+    public float far = 1;
     [HideInInspector]
-    public float farLength, nearLength, size;
-    void Awake()
+    public float size;
+    [Range(1, 3)]
+    public int attack = 1;
+    public GameObject main;
+    public GameObject sub;
+    public Mesh GetRangeMesh()
     {
-        farLength = length * far;
-        nearLength = length * near;
-        size = farLength - nearLength;
+        return GeoGenerator.SectorPlane(angle, far, near, 0);
     }
     public bool HitDetect(Transform owner, Unit target)
     {
         Pose ownerXZ = new Pose(Vector.Xz(owner.position), owner.rotation);
         Vector3 targetXZ = Vector.Xz(target.transform.position);
         float distance = Vector3.Distance(targetXZ, ownerXZ.position);
-        if (distance >= nearLength && distance <= farLength)
+        if (distance >= near && distance <= far)
         {
             float angle = Vector3.Angle(ownerXZ.forward, targetXZ - ownerXZ.position) * 2;
             return (int)angle <= this.angle;
@@ -63,3 +61,4 @@ public class Weapon : MonoBehaviour
         return hits.Any();
     }
 }
+

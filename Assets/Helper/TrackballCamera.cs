@@ -23,6 +23,7 @@ public class TrackballCamera : MonoBehaviour
         angleX = transform.eulerAngles.y;
         angleY = -transform.eulerAngles.x;
         position = transform.position;
+        Camera.main.orthographic = false;
     }
 
     void LateUpdate()

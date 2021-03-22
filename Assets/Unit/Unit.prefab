@@ -472,7 +472,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540467302918620638}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1540467303731406252}
@@ -508,8 +508,8 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540467302918620638}
   m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
@@ -697,7 +697,6 @@ GameObject:
   - component: {fileID: 1540467303269631074}
   - component: {fileID: 1540467303269631076}
   - component: {fileID: 1540467303269631077}
-  - component: {fileID: 896971864241618513}
   m_Layer: 0
   m_Name: AttackRange
   m_TagString: Untagged
@@ -713,7 +712,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540467303269631075}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1540467303731406252}
@@ -768,18 +767,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &896971864241618513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540467303269631075}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60e876e6688776843bf49133250e586f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1540467303731406249
 GameObject:
   m_ObjectHideFlags: 0
@@ -849,7 +836,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 8246762712707611316}
-  holdWeapon: {fileID: 42377869769542391}
   weapon: {fileID: 0}
   hp: 5
   ap: 1
@@ -858,7 +844,6 @@ MonoBehaviour:
   moveConsume: 0
   turnConsume: 0
   movingRange: {fileID: 0}
-  attackRange: {fileID: 0}
   destination:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -1545,12 +1530,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 42f18c2155bb41c499174fae253fb117, type: 3}
---- !u!4 &42377869769542391 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -761576790273468504, guid: 42f18c2155bb41c499174fae253fb117,
-    type: 3}
-  m_PrefabInstance: {fileID: 8500785652540038495}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8246762712707611316 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 42f18c2155bb41c499174fae253fb117,

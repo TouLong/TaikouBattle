@@ -21,10 +21,13 @@ public class CombatControl : MonoBehaviour
     {
         Team.All.ForEach(x => x.Update());
         UserControl.Setup();
-        if (UserControl.team != null)
-            Camera.main.transform.LookAt(UserControl.team.center);
-        else
-            Camera.main.transform.LookAt(Team.All[0].center);
+        if (!testing)
+        {
+            if (UserControl.team != null)
+                Camera.main.transform.LookAt(UserControl.team.center);
+            else
+                Camera.main.transform.LookAt(Team.All[0].center);
+        }
         Camera.main.GetComponent<TrackballCamera>().Start();
         controlSeq = new List<Action> { SetPosition, SetRotation };
         control = controlSeq.First();

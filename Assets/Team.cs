@@ -65,12 +65,12 @@ public class Team
             int blockingCount = -1;
             do
             {
-                if (guessDist < unit.maxMoving + unit.weapon.farLength)
+                if (guessDist < unit.maxMoving + unit.weapon.far)
                 {
                     Vector3 guessDir = (guessPosXZ - originXZ).normalized;
                     float guessAngle = Vector3.SignedAngle(Vector3.forward, guessDir, Vector3.up);
                     float randomMoveAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
-                    float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.nearLength, unit.weapon.farLength), -unit.maxMoving, unit.maxMoving);
+                    float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.near, unit.weapon.far), -unit.maxMoving, unit.maxMoving);
                     Vector3 randomMoveDir = Vector.DegToXz(guessAngle + randomMoveAngle);
                     dest.position = randomMoveDir * randomMoveDist + originXZ;
                     float randomPoseAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);

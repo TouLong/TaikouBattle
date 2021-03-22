@@ -18,8 +18,9 @@ public class Unit : MonoBehaviour
         All = 0b110,
     }
     public Transform model;
-    public Transform holdWeapon;
     public Weapon weapon;
+    Transform mainHold;
+    Transform subHold;
 
     public const int maxHp = 5;
     public const float maxAp = 1;
@@ -33,8 +34,7 @@ public class Unit : MonoBehaviour
 
     [HideInInspector]
     public MovingRange movingRange;
-    [HideInInspector]
-    public AttackRange attackRange;
+    GameObject attackRange;
     UnitStatus status;
     [HideInInspector]
     public Pose destination;
@@ -49,10 +49,22 @@ public class Unit : MonoBehaviour
     {
         All.Add(this);
         Alive.Add(this);
+        mainHold = model.Find("armature/both.r");
+        subHold = model.Find("armature/single.l");
     }
-    void Start()
+    public void Start()
     {
-        weapon = Instantiate(weapon, holdWeapon, false);
+        Transform mainWeapon = Instantiate(weapon.main, mainHold).transform;
+        mainWeapon.localPosition = Vector3.zero;
+        mainWeapon.localEulerAngles = Vector3.zero;
+        mainWeapon.localScale = Vector3.one;
+        if (weapon.sub != null)
+        {
+            Transform subWeapon = Instantiate(weapon.sub, subHold).transform;
+            subWeapon.localPosition = Vector3.zero;
+            subWeapon.localEulerAngles = Vector3.zero;
+            subWeapon.localScale = Vector3.one;
+        }
         destination.position = transform.position;
         destination.rotation = transform.rotation;
         //maxMoving = 1.8f - weapon.weight * 0.5f;
@@ -65,11 +77,11 @@ public class Unit : MonoBehaviour
         colliders.transform.SetParent(model);
         movingRange = GetComponentInChildren<MovingRange>();
         movingRange.Setup(maxMoving);
-        attackRange = GetComponentInChildren<AttackRange>();
-        attackRange.Setup(weapon);
+        attackRange = transform.Find("AttackRange").gameObject;
+        attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
         attackRange.transform.SetParent(model);
         Standing();
-        Display(Range.Nothing);
+        Display(Range.Attack);
     }
     public void SetInfo(UnitInfo info)
     {
@@ -78,7 +90,7 @@ public class Unit : MonoBehaviour
     public void Display(Range range)
     {
         movingRange.gameObject.SetActive(range.HasFlag(Range.Moving));
-        attackRange.gameObject.SetActive(range.HasFlag(Range.Attack));
+        attackRange.SetActive(range.HasFlag(Range.Attack));
     }
     public void StartAction()
     {

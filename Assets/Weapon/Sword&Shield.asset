@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ada0a16b9f48dd04e8b56445962b9bda, type: 3}
+  m_Name: Sword&Shield
+  m_EditorClassIdentifier: 
+  handleType: 3
+  attackType: 0
+  angle: 50
+  near: 0.5
+  far: 1.4
+  size: 0
+  attack: 1
+  main: {fileID: -2214671780200814635, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}
+  sub: {fileID: 2941280592704504532, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}

@@ -24,7 +24,7 @@ public class UserControl
         }
         else if (highlight)
         {
-            highlight.Display(Unit.Range.Nothing);
+            highlight.Display(Unit.Range.Attack);
             highlight = null;
         }
     }
