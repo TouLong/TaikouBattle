@@ -33,7 +33,7 @@ public class UserControl
         if (team.alives.Contains(unit))
         {
             UserControl.unit = highlight;
-            unit.ResetModel();
+            unit.ResetAction();
             unit.colliders.Enable(false);
             return true;
         }
@@ -41,20 +41,20 @@ public class UserControl
     }
     static public void Deselect()
     {
-        unit.ResetModel();
+        unit.ResetAction();
         unit.colliders.Enable(true);
         unit = null;
     }
     static public void ReControl()
     {
-        unit.ResetModel();
+        unit.ResetAction();
     }
     static public void MoveBack()
     {
         float remain = Unit.maxAp - unit.turnConsume;
         unit.movingRange.transform.localScale = new Vector3(remain, 1, remain);
         unit.model.localPosition = Vector3.zero;
-        unit.Display(Unit.Range.Moving);
+        unit.Display(Unit.Range.All);
         unit.moveConsume = 0;
         unit.SetAp(Unit.maxAp - unit.turnConsume);
     }
@@ -65,7 +65,7 @@ public class UserControl
         {
             unit.movingRange.transform.localScale = new Vector3(remain, 1, remain);
             unit.movingRange.transform.rotation = unit.model.transform.rotation;
-            unit.Display(Unit.Range.Moving);
+            unit.Display(Unit.Range.All);
             Vector3 from = unit.transform.position;
             Physics.Raycast(from, to - from, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("MovingRange"));
             float dist = Vector3.Distance(from, to);
@@ -91,7 +91,7 @@ public class UserControl
         float remain = Unit.maxAp - unit.moveConsume;
         if (remain > 0)
         {
-            float maxAngle = remain * unit.maxTurning * 3f;
+            float maxAngle = remain * Unit.maxTurning * 3f;
             Vector3 dir = Vector.Xz(to - unit.transform.position).normalized;
             Vector3 from = unit.transform.forward;
             float angle = Vector3.SignedAngle(from, dir, Vector3.up);

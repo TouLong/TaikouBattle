@@ -24,12 +24,14 @@ public class Unit : MonoBehaviour
 
     public const int maxHp = 5;
     public const float maxAp = 1;
+    public const float maxMoving = 1f;
+    public const float maxTurning = 180f;
     [Range(1, maxHp)]
     public int hp = maxHp;
     [Range(0, maxAp)]
     public float ap = maxAp;
     [HideInInspector]
-    public float maxMoving, maxTurning, moveConsume, turnConsume;
+    public float moveConsume, turnConsume;
     int roundOfHurt;
 
     [HideInInspector]
@@ -40,7 +42,7 @@ public class Unit : MonoBehaviour
     public Pose destination;
     [HideInInspector]
     public Team team;
-    AnimatorLayer anim;
+    UnitMotion motion;
     [HideInInspector]
     public bool inCombat, inAction;
     [HideInInspector]
@@ -52,7 +54,26 @@ public class Unit : MonoBehaviour
         mainHold = model.Find("armature/both.r");
         subHold = model.Find("armature/single.l");
     }
-    public void Start()
+    void Start()
+    {
+        SetupWeapon();
+        destination.position = transform.position;
+        destination.rotation = transform.rotation;
+        status = GetComponentInChildren<UnitStatus>();
+        status.Setup(this);
+        colliders = GetComponentInChildren<UnitColliders>();
+        colliders.transform.SetParent(model);
+        movingRange = GetComponentInChildren<MovingRange>();
+        movingRange.Setup(maxMoving);
+        attackRange = transform.Find("AttackRange").gameObject;
+        attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
+        attackRange.transform.SetParent(model);
+        motion = GetComponent<UnitMotion>();
+        motion.Setup(this);
+        motion.IdlePose();
+        Display(Range.Attack);
+    }
+    public void SetupWeapon()
     {
         Transform mainWeapon = Instantiate(weapon.main, mainHold).transform;
         mainWeapon.localPosition = Vector3.zero;
@@ -65,23 +86,6 @@ public class Unit : MonoBehaviour
             subWeapon.localEulerAngles = Vector3.zero;
             subWeapon.localScale = Vector3.one;
         }
-        destination.position = transform.position;
-        destination.rotation = transform.rotation;
-        //maxMoving = 1.8f - weapon.weight * 0.5f;
-        maxMoving = 1f;
-        maxTurning = 180f;
-        anim = new AnimatorLayer(GetComponent<Animator>(), 0);
-        status = GetComponentInChildren<UnitStatus>();
-        status.Setup(this);
-        colliders = GetComponentInChildren<UnitColliders>();
-        colliders.transform.SetParent(model);
-        movingRange = GetComponentInChildren<MovingRange>();
-        movingRange.Setup(maxMoving);
-        attackRange = transform.Find("AttackRange").gameObject;
-        attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
-        attackRange.transform.SetParent(model);
-        Standing();
-        Display(Range.Attack);
     }
     public void SetInfo(UnitInfo info)
     {
@@ -92,28 +96,47 @@ public class Unit : MonoBehaviour
         movingRange.gameObject.SetActive(range.HasFlag(Range.Moving));
         attackRange.SetActive(range.HasFlag(Range.Attack));
     }
+    public void ResetAction()
+    {
+        moveConsume = 0;
+        turnConsume = 0;
+        model.localPosition = Vector3.zero;
+        model.localEulerAngles = Vector3.zero;
+        movingRange.transform.localScale = Vector3.one;
+        movingRange.transform.rotation = transform.rotation;
+        SetAp(maxAp);
+    }
     public void StartAction()
     {
         inAction = true;
-        transform.DORotateQuaternion(destination.rotation, 4 / 24f)
+        motion.PlayReady();
+        transform.DORotateQuaternion(destination.rotation, 5 / 24f)
             .OnStart(() => {; });
         float dist = Vector3.Distance(destination.position, transform.position);
-        transform.DOJump(destination.position, dist * 0.5f, 1, 4 / 24f)
+        transform.DOJump(destination.position, dist * 0.5f, 1, 5 / 24f)
             .OnComplete(() => { inAction = false; });
     }
     public void StartCombat()
     {
         inCombat = true;
+        void action()
+        {
+            inCombat = false;
+            ResetAction();
+        }
         if (weapon.HitDetect(transform, team.enemies, out List<Unit> hits))
         {
             hits.ForEach(x => x.DamageBy(this));
+            motion.Attack(action);
         }
-        Standing();
-        inCombat = false;
-        ResetModel();
+        else
+        {
+            motion.ToIdle(action);
+        }
     }
     public void EndCombat()
     {
+        motion.IdlePose();
         if (roundOfHurt == 0)
             return;
         TextUI.Pop(roundOfHurt, Color.red, transform.position);
@@ -127,16 +150,6 @@ public class Unit : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
-    public void ResetModel()
-    {
-        moveConsume = 0;
-        turnConsume = 0;
-        model.localPosition = Vector3.zero;
-        model.localEulerAngles = Vector3.zero;
-        movingRange.transform.localScale = Vector3.one;
-        movingRange.transform.rotation = transform.rotation;
-        SetAp(maxAp);
-    }
     public void SetAp(float value)
     {
         ap = Mathf.Clamp(value, 0, maxAp);
@@ -145,9 +158,5 @@ public class Unit : MonoBehaviour
     public void DamageBy(Unit unit)
     {
         roundOfHurt += unit.weapon.attack;
-    }
-    public void Standing()
-    {
-        anim.Play(weapon.handleType.ToString() + "-" + weapon.attackType.ToString());
     }
 }

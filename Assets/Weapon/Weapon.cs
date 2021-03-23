@@ -32,6 +32,12 @@ public class Weapon : ScriptableObject
     public int attack = 1;
     public GameObject main;
     public GameObject sub;
+    [HideInInspector]
+    public string motionAnim;
+    void Awake()
+    {
+        motionAnim = handleType.ToString() + "-" + attackType.ToString();
+    }
     public Mesh GetRangeMesh()
     {
         return GeoGenerator.SectorPlane(angle, far, near, 0);

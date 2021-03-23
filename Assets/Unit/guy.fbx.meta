@@ -86,25 +86,73 @@ ModelImporter:
     second: single-hack-idle
   - first:
       74: -8902855854771869971
-    second: armature|both-hack
+    second: both-hack-idle
   - first:
       74: -2781572814800252569
-    second: armature|pole-hack
+    second: pole-hack-ready
   - first:
       74: 491889158960254183
-    second: armature|pole-stab
+    second: pole-stab
   - first:
       74: 4977275275437081598
-    second: armature|shield-hack
+    second: shield-hack-ready
   - first:
       74: -1462571588733397647
-    second: armature|shield-stab
+    second: shield-stab
   - first:
       74: 1060095394782536671
-    second: armature|single-hack
+    second: single-hack-ready
   - first:
       74: -6146566634583115674
-    second: armature|-empty
+    second: empty
+  - first:
+      74: -6189181760100734247
+    second: pole-stab-idle
+  - first:
+      74: 3055953239042831917
+    second: shield-stab-idle
+  - first:
+      74: -1419525912996030630
+    second: both-hack-ready
+  - first:
+      74: 9068630106671355476
+    second: pole-stab-ready
+  - first:
+      74: -6432159680239730067
+    second: shield-stab-ready
+  - first:
+      74: 720229633257591746
+    second: both-hack-action
+  - first:
+      74: -5807803223928027342
+    second: pole-hack-action
+  - first:
+      74: -7865890338548604920
+    second: pole-stab-action
+  - first:
+      74: -312514321731983458
+    second: shield-hack-action
+  - first:
+      74: -5170512063682976037
+    second: shield-stab-action
+  - first:
+      74: -511003043737674575
+    second: single-hack-action
+  - first:
+      74: -2895627116835027831
+    second: armature|pole-hack
+  - first:
+      74: 5384754617142421002
+    second: both-hack
+  - first:
+      74: -6718047058363768470
+    second: pole-hack
+  - first:
+      74: -2147495409350935531
+    second: shield-hack
+  - first:
+      74: -2161144336760616221
+    second: single-hack
   externalObjects: {}
   materials:
     materialImportMode: 0
@@ -114,7 +162,7 @@ ModelImporter:
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
-    resampleCurves: 0
+    resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
     rigImportErrors: 
@@ -134,7 +182,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: armature|-empty
+      name: empty
       takeName: armature|-empty
       internalID: 0
       firstFrame: 0
@@ -163,11 +211,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: armature|both-hack
+      name: both-hack
       takeName: armature|both-hack
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -192,11 +240,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: armature|pole-hack
+      name: pole-hack
       takeName: armature|pole-hack
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -221,11 +269,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: armature|pole-stab
+      name: pole-stab
       takeName: armature|pole-stab
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -250,11 +298,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: armature|shield-hack
+      name: shield-hack
       takeName: armature|shield-hack
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -279,11 +327,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: armature|shield-stab
+      name: shield-stab
       takeName: armature|shield-stab
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -308,11 +356,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: armature|single-hack
+      name: single-hack
       takeName: armature|single-hack
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 17
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -397,9 +445,9 @@ ModelImporter:
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 2
+  animationType: 1
   humanoidOversampling: 1
-  avatarSetup: 1
+  avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 

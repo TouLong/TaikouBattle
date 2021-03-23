@@ -94,7 +94,7 @@ public class Arena : MonoBehaviour
             }
             team.Setup();
         }
-        Timer.Set(0.2f, () =>
+        DelayEvent.Create(0.2f, () =>
         {
             CombatControl.self.Setup();
             menu.gameObject.SetActive(false);

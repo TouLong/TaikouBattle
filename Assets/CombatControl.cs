@@ -129,7 +129,7 @@ public class CombatControl : MonoBehaviour
             if (Team.All.Count == 1 && !testing)
             {
                 stateUpdate = null;
-                Timer.Set(2f, () =>
+                DelayEvent.Create(2f, () =>
                 {
                     Arena.ContestComplete(Team.All.First());
                     Team.All.Clear();

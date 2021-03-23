@@ -11,7 +11,7 @@ public class TextUI
         gameObject.transform.position = position;
         TextPop pop = gameObject.GetComponent<TextPop>();
         pop.Setup((fontSize > 0 ? fontSize : defualtFontSize) / 2f);
-        Timer.Set(time, pop.DestorySelf);
+        DelayEvent.Create(time, pop.DestorySelf);
         return ConfigTextMesh(gameObject.GetComponent<TextMesh>(), content, color, fontSize);
     }
 

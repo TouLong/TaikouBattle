@@ -17,7 +17,7 @@ public class OnTriggerGorund : MonoBehaviour
         {
             if (delayTimer != null)
                 return;
-            delayTimer = Timer.Set(delayTime, () =>
+            delayTimer = DelayEvent.Create(delayTime, () =>
             {
                 onEnter?.Invoke();
                 Destroy(this);

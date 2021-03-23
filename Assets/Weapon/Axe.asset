@@ -16,8 +16,9 @@ MonoBehaviour:
   attackType: 0
   angle: 90
   near: 1
-  far: 1.7
+  far: 1.8
   size: 0
   attack: 1
   main: {fileID: -8218768330931908140, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}
   sub: {fileID: 0}
+  motionAnim: both-hack

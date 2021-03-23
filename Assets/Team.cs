@@ -59,18 +59,18 @@ public class Team
             Unit target = enemies.OrderBy(x => Vector3.Distance(unit.transform.position, x.transform.position)).First();
             Pose dest;
             Vector3 originXZ = Vector.Xz(unit.transform.position);
-            Vector3 guessPosXZ = V3Random.RangeXz(-target.maxMoving, target.maxMoving) + Vector.Xz(target.transform.position);
+            Vector3 guessPosXZ = V3Random.RangeXz(-Unit.maxMoving, Unit.maxMoving) + Vector.Xz(target.transform.position);
             float guessDist = Vector3.Distance(originXZ, guessPosXZ);
             bool isBlocking;
             int blockingCount = -1;
             do
             {
-                if (guessDist < unit.maxMoving + unit.weapon.far)
+                if (guessDist < Unit.maxMoving + unit.weapon.far)
                 {
                     Vector3 guessDir = (guessPosXZ - originXZ).normalized;
                     float guessAngle = Vector3.SignedAngle(Vector3.forward, guessDir, Vector3.up);
                     float randomMoveAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
-                    float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.near, unit.weapon.far), -unit.maxMoving, unit.maxMoving);
+                    float randomMoveDist = Mathf.Clamp(guessDist - Random.Range(unit.weapon.near, unit.weapon.far), -Unit.maxMoving, Unit.maxMoving);
                     Vector3 randomMoveDir = Vector.DegToXz(guessAngle + randomMoveAngle);
                     dest.position = randomMoveDir * randomMoveDist + originXZ;
                     float randomPoseAngle = Random.Range(-unit.weapon.angle / 2, unit.weapon.angle / 2);
@@ -79,7 +79,7 @@ public class Team
                 }
                 else
                 {
-                    dest.position = Vector3.ClampMagnitude(guessPosXZ - originXZ, unit.maxMoving) + originXZ;
+                    dest.position = Vector3.ClampMagnitude(guessPosXZ - originXZ, Unit.maxMoving) + originXZ;
                     dest.rotation = Quaternion.LookRotation(guessPosXZ - originXZ);
                 }
                 isBlocking = false;

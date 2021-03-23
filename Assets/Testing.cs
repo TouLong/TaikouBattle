@@ -14,18 +14,23 @@ public class Testing : MonoBehaviour
         Team dummyTeam = new Team();
         foreach (Unit unit in users)
         {
-            userTeam.members.Add(new UnitInfo(userTeam, unit));
+            if (unit.gameObject.activeSelf)
+                userTeam.members.Add(new UnitInfo(userTeam, unit));
         }
         foreach (Unit unit in npcs)
         {
-            npcTeam.members.Add(new UnitInfo(npcTeam, unit));
+            if (unit.gameObject.activeSelf)
+                npcTeam.members.Add(new UnitInfo(npcTeam, unit));
         }
         foreach (Unit unit in dummys)
         {
-            UnitInfo unitInfo = new UnitInfo(dummyTeam, unit);
-            unitInfo.name = "Dummy";
-            dummyTeam.members.Add(unitInfo);
-            unit.SetInfo(unitInfo);
+            if (unit.gameObject.activeSelf)
+            {
+                UnitInfo unitInfo = new UnitInfo(dummyTeam, unit);
+                unitInfo.name = "Dummy";
+                dummyTeam.members.Add(unitInfo);
+                unit.SetInfo(unitInfo);
+            }
         }
         Unit.player = userTeam.members[0].unit;
         userTeam.Setup();

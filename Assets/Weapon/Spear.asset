@@ -16,8 +16,9 @@ MonoBehaviour:
   attackType: 1
   angle: 30
   near: 1.3
-  far: 2.6
+  far: 2.7
   size: 0
   attack: 1
   main: {fileID: -2102871778670692961, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}
   sub: {fileID: 0}
+  motionAnim: pole-stab

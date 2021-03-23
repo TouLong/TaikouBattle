@@ -776,7 +776,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1540467303731406252}
-  - component: {fileID: 1540467303731406250}
+  - component: {fileID: 5848037872114847522}
   - component: {fileID: 1540467303731406248}
   m_Layer: 0
   m_Name: Unit
@@ -804,25 +804,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &1540467303731406250
-Animator:
-  serializedVersion: 3
+--- !u!114 &5848037872114847522
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540467303731406249}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 42f18c2155bb41c499174fae253fb117, type: 3}
-  m_Controller: {fileID: 9100000, guid: 303755f4688eb524a9be9b9823f8e75e, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b1122a94204b3540bad487e1fa38357, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1540467303731406248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -839,8 +832,6 @@ MonoBehaviour:
   weapon: {fileID: 0}
   hp: 5
   ap: 1
-  maxMoving: 0
-  maxTurning: 0
   moveConsume: 0
   turnConsume: 0
   movingRange: {fileID: 0}
@@ -1527,6 +1518,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: guy
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223639932434330405, guid: 42f18c2155bb41c499174fae253fb117,
+        type: 3}
+      propertyPath: m_PlayAutomatically
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 42f18c2155bb41c499174fae253fb117, type: 3}
