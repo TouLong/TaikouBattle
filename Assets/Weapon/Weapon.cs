@@ -30,6 +30,8 @@ public class Weapon : ScriptableObject
     public float size;
     [Range(1, 3)]
     public int attack = 1;
+    [Range(0, 2)]
+    public int armor = 1;
     public GameObject main;
     public GameObject sub;
     [HideInInspector]

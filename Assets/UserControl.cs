@@ -51,32 +51,31 @@ public class UserControl
     }
     static public void MoveBack()
     {
-        float remain = Unit.maxAp - unit.turnConsume;
-        unit.movingRange.transform.localScale = new Vector3(remain, 1, remain);
         unit.model.localPosition = Vector3.zero;
-        unit.Display(Unit.Range.All);
+        unit.Display(Unit.Range.Attack);
         unit.moveConsume = 0;
         unit.SetAp(Unit.maxAp - unit.turnConsume);
+        unit.ClampTurningRange(Unit.maxTurning);
     }
     static public void MoveTo(Vector3 to)
     {
         float remain = Unit.maxAp - unit.turnConsume;
-        if (remain > 0)
-        {
-            unit.movingRange.transform.localScale = new Vector3(remain, 1, remain);
-            unit.movingRange.transform.rotation = unit.model.transform.rotation;
-            unit.Display(Unit.Range.All);
-            Vector3 from = unit.transform.position;
-            Physics.Raycast(from, to - from, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("MovingRange"));
-            float dist = Vector3.Distance(from, to);
-            float maxDist = hit.distance;
-            if (dist > maxDist)
-                unit.model.position = hit.point;
-            else
-                unit.model.position = to;
-            unit.moveConsume = dist / maxDist * remain;
-            unit.SetAp(remain - unit.moveConsume);
-        }
+        unit.ClampMovingRange(remain);
+        if (unit.turnConsume > 0)
+            unit.Display(Unit.Range.Moving | Unit.Range.Attack);
+        else
+            unit.Display(Unit.Range.All & ~Unit.Range.Arrow);
+        Vector3 from = unit.transform.position;
+        Physics.Raycast(from, to - from, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("MovingRange"));
+        float dist = Vector3.Distance(from, to);
+        float maxDist = hit.distance;
+        if (dist > maxDist)
+            unit.model.position = hit.point;
+        else
+            unit.model.position = to;
+        unit.moveConsume = dist / maxDist * remain;
+        unit.SetAp(remain - unit.moveConsume);
+        unit.ClampTurningRange(unit.ap * Unit.maxTurning);
     }
     static public void LookOrigin()
     {
@@ -87,11 +86,14 @@ public class UserControl
     }
     static public void LookAt(Vector3 to)
     {
-        unit.Display(Unit.Range.Attack);
+        if (unit.moveConsume > 0)
+            unit.Display(Unit.Range.Attack | Unit.Range.Turning | Unit.Range.Arrow);
+        else
+            unit.Display(Unit.Range.Attack);
         float remain = Unit.maxAp - unit.moveConsume;
         if (remain > 0)
         {
-            float maxAngle = remain * Unit.maxTurning * 3f;
+            float maxAngle = remain * Unit.maxTurning;
             Vector3 dir = Vector.Xz(to - unit.transform.position).normalized;
             Vector3 from = unit.transform.forward;
             float angle = Vector3.SignedAngle(from, dir, Vector3.up);

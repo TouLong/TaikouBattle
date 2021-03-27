@@ -25,7 +25,7 @@ public class MeshtTestEditor : Editor
 
         far = EditorGUILayout.Slider("far", far, 0.1f, 1f);
         near = EditorGUILayout.Slider("near", near, 0f, far);
-        range = EditorGUILayout.IntSlider("range", range, 1, 180);
+        range = EditorGUILayout.IntSlider("range", range, 1, 360);
         if (GUILayout.Button("SectorPng"))
         {
             Texture2D texture = GeoGenerator.SectorTexture(range, far, near, Color.white, Color.grey);
@@ -53,5 +53,12 @@ public class MeshtTestEditor : Editor
             Mesh mesh = GeoGenerator.EllipseWall(factor, offset, height, step);
             target.GetComponent<MeshFilter>().mesh = mesh;
         }
+        if (GUILayout.Button("SaveMesh"))
+        {
+            Mesh mesh = target.GetComponent<MeshFilter>().sharedMesh;
+            AssetDatabase.CreateAsset(mesh, "Assets/mesh.asset");
+            AssetDatabase.SaveAssets();
+        }
+
     }
 }

@@ -19,5 +19,7 @@ MonoBehaviour:
   far: 1.4
   size: 0
   attack: 1
+  armor: 2
   main: {fileID: -2214671780200814635, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}
   sub: {fileID: 2941280592704504532, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}
+  motionAnim: shield-hack

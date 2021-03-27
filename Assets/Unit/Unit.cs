@@ -12,31 +12,31 @@ public class Unit : MonoBehaviour
 
     public enum Range
     {
-        Nothing = 0b001,
-        Moving = 0b010,
-        Attack = 0b100,
-        All = 0b110,
+        Nothing = 0b00001,
+        Moving = 0b00010,
+        Turning = 0b00100,
+        Attack = 0b01000,
+        Arrow = 0b10000,
+        All = 0b11110,
     }
-    public Transform model;
     public Weapon weapon;
-    Transform mainHold;
-    Transform subHold;
 
-    public const int maxHp = 5;
     public const float maxAp = 1;
     public const float maxMoving = 1f;
-    public const float maxTurning = 180f;
-    [Range(1, maxHp)]
-    public int hp = maxHp;
-    [Range(0, maxAp)]
+    public const float maxTurning = 360f;
+    [HideInInspector]
+    public Transform model;
+    [HideInInspector]
+    public int maxHp, hp;
+    [HideInInspector]
     public float ap = maxAp;
     [HideInInspector]
     public float moveConsume, turnConsume;
     int roundOfHurt;
 
-    [HideInInspector]
-    public MovingRange movingRange;
-    GameObject attackRange;
+    Transform mainHold;
+    Transform subHold;
+    Transform movingRange, attackRange, turningRange, arrow;
     UnitStatus status;
     [HideInInspector]
     public Pose destination;
@@ -51,21 +51,26 @@ public class Unit : MonoBehaviour
     {
         All.Add(this);
         Alive.Add(this);
+        model = transform.Find("guy");
         mainHold = model.Find("armature/both.r");
         subHold = model.Find("armature/single.l");
     }
     void Start()
     {
         SetupWeapon();
+        maxHp = 3 + weapon.armor;
+        hp = maxHp;
         destination.position = transform.position;
         destination.rotation = transform.rotation;
         status = GetComponentInChildren<UnitStatus>();
         status.Setup(this);
         colliders = GetComponentInChildren<UnitColliders>();
         colliders.transform.SetParent(model);
-        movingRange = GetComponentInChildren<MovingRange>();
-        movingRange.Setup(maxMoving);
-        attackRange = transform.Find("AttackRange").gameObject;
+        movingRange = transform.Find("MovingRange");
+        turningRange = transform.Find("TurningRange");
+        attackRange = transform.Find("AttackRange");
+        arrow = transform.Find("Arrow");
+        arrow.transform.SetParent(model);
         attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
         attackRange.transform.SetParent(model);
         motion = GetComponent<UnitMotion>();
@@ -94,7 +99,21 @@ public class Unit : MonoBehaviour
     public void Display(Range range)
     {
         movingRange.gameObject.SetActive(range.HasFlag(Range.Moving));
-        attackRange.SetActive(range.HasFlag(Range.Attack));
+        attackRange.gameObject.SetActive(range.HasFlag(Range.Attack));
+        turningRange.gameObject.SetActive(range.HasFlag(Range.Turning));
+        arrow.gameObject.SetActive(range.HasFlag(Range.Arrow));
+    }
+    public void ClampMovingRange(float distance)
+    {
+        movingRange.localScale = new Vector3(distance, 1, distance);
+        movingRange.rotation = model.rotation;
+    }
+    public void ClampTurningRange(float angle)
+    {
+        Mesh mesh = GeoGenerator.SectorPlane((int)angle * 2, 0.7f, 0.67f, 0);
+        turningRange.GetComponent<MeshFilter>().mesh = mesh;
+        turningRange.rotation = model.rotation;
+        turningRange.position = new Vector3(model.position.x, turningRange.position.y, model.position.z);
     }
     public void ResetAction()
     {
@@ -102,24 +121,22 @@ public class Unit : MonoBehaviour
         turnConsume = 0;
         model.localPosition = Vector3.zero;
         model.localEulerAngles = Vector3.zero;
-        movingRange.transform.localScale = Vector3.one;
-        movingRange.transform.rotation = transform.rotation;
+        ClampMovingRange(maxAp);
+        ClampTurningRange(maxTurning);
         SetAp(maxAp);
     }
     public void StartAction()
     {
         inAction = true;
-        motion.PlayReady();
-        transform.DORotateQuaternion(destination.rotation, 5 / 24f)
-            .OnStart(() => {; });
+        transform.DORotateQuaternion(destination.rotation, 4 / 24f);
         float dist = Vector3.Distance(destination.position, transform.position);
-        transform.DOJump(destination.position, dist * 0.5f, 1, 5 / 24f)
+        transform.DOJump(destination.position, dist * 0.5f, 1, 4 / 24f)
             .OnComplete(() => { inAction = false; });
     }
     public void StartCombat()
     {
         inCombat = true;
-        void action()
+        void reset()
         {
             inCombat = false;
             ResetAction();
@@ -127,11 +144,11 @@ public class Unit : MonoBehaviour
         if (weapon.HitDetect(transform, team.enemies, out List<Unit> hits))
         {
             hits.ForEach(x => x.DamageBy(this));
-            motion.Attack(action);
+            motion.Attack(reset);
         }
         else
         {
-            motion.ToIdle(action);
+            reset();
         }
     }
     public void EndCombat()

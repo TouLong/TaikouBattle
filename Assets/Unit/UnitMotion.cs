@@ -37,23 +37,9 @@ public class UnitMotion : MonoBehaviour
         state.normalizedTime = idle.end;
         state.speed = 0;
     }
-    public void PlayReady()
-    {
-        state.normalizedTime = ready.start;
-        state.speed = 1;
-        targetFrame = ready.end;
-        StartCoroutine(Playing());
-    }
-    public void ToIdle(Action onCompleted)
-    {
-        state.normalizedTime = ready.end;
-        state.speed = -1;
-        targetFrame = idle.end;
-        StartCoroutine(Playing(onCompleted));
-    }
     public void Attack(Action onCompleted)
     {
-        state.normalizedTime = attack.start;
+        state.normalizedTime = ready.start;
         state.speed = 1;
         targetFrame = reset.end;
         StartCoroutine(Playing(onCompleted));
