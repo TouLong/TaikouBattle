@@ -20,11 +20,11 @@ public class CombatControl : MonoBehaviour
     public void Setup()
     {
         Team.All.ForEach(x => x.Update());
-        UserControl.Setup();
+        PlayerControl.Setup();
         if (!testing)
         {
-            if (UserControl.team != null)
-                Camera.main.transform.LookAt(UserControl.team.center);
+            if (PlayerControl.team != null)
+                Camera.main.transform.LookAt(PlayerControl.team.center);
             else
                 Camera.main.transform.LookAt(Team.All[0].center);
         }
@@ -42,19 +42,17 @@ public class CombatControl : MonoBehaviour
         if (Mouse.Hit(out RaycastHit hit, LayerMask.GetMask("Unit")))
         {
             Unit unit = hit.transform.parent.parent.GetComponent<Unit>();
-            UserControl.Highlight(unit);
-            if (Mouse.LeftDown && UserControl.Select(unit))
+            PlayerControl.Highlight(unit);
+            if (Mouse.LeftDown && PlayerControl.Select(unit))
                 stateUpdate = Control;
         }
         else
         {
-            UserControl.Highlight();
+            PlayerControl.Highlight();
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            UserControl.Action();
-            Team.NonUser.ForEach(x => x.PlanA());
-            Team.Dummy.ForEach(x => x.NotPlan());
+            PlayerControl.Action();
             stateUpdate = InAction;
         }
     }
@@ -65,7 +63,7 @@ public class CombatControl : MonoBehaviour
         {
             controlSeq.Reverse();
             control = controlSeq.First();
-            UserControl.ReControl();
+            PlayerControl.ReControl();
             return;
         }
         control();
@@ -75,13 +73,13 @@ public class CombatControl : MonoBehaviour
         {
             end = ++controlId >= controlSeq.Count;
             if (end)
-                UserControl.Complete();
+                PlayerControl.Complete();
         }
         else if (Mouse.RightDown)
         {
             end = --controlId < 0;
             if (end)
-                UserControl.Deselect();
+                PlayerControl.Deselect();
         }
         if (end)
         {
@@ -96,9 +94,9 @@ public class CombatControl : MonoBehaviour
         if (Mouse.HitGround(out RaycastHit hit))
         {
             if (Input.GetKey(KeyCode.LeftShift))
-                UserControl.MoveBack();
+                PlayerControl.MoveBack();
             else
-                UserControl.MoveTo(hit.point);
+                PlayerControl.MoveTo(hit.point);
         }
     }
     void SetRotation()
@@ -106,9 +104,9 @@ public class CombatControl : MonoBehaviour
         if (Mouse.HitGround(out RaycastHit hit))
         {
             if (Input.GetKey(KeyCode.LeftShift))
-                UserControl.LookOrigin();
+                PlayerControl.LookOrigin();
             else
-                UserControl.LookAt(hit.point);
+                PlayerControl.LookAt(hit.point);
         }
     }
     void InAction()
@@ -124,6 +122,7 @@ public class CombatControl : MonoBehaviour
         if (!Unit.Alive.FindAll(x => x.inCombat).Any())
         {
             Unit.Alive.ForEach(x => x.EndCombat());
+            Unit.Alive.RemoveAll(x => x.hp <= 0);
             Team.All.RemoveAll(x => x.alives.Count == 0);
             Team.NonUser.RemoveAll(x => x.alives.Count == 0);
             if (Team.All.Count == 1 && !testing)

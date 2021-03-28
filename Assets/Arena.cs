@@ -83,14 +83,12 @@ public class Arena : MonoBehaviour
             {
                 Transform unitPose = Take(self.unitLayout, unitSpawnIDs);
                 Unit unit = Instantiate(self.unitPrefab, unitPose.localPosition + teamPose.position, teamPose.rotation, unitObjects.transform);
-                unitInfo.unit = unit;
                 unit.weapon = ListRandom.In(self.weaponPrefab);
+                unit.info = unitInfo;
+                unitInfo.unit = unit;
                 if (unitInfo.id == user.id)
-                {
                     Unit.player = unit;
-                }
                 unit.gameObject.name = string.Format("{0}-{1}", unitInfo.id, unitInfo.name);
-                unit.SetInfo(unitInfo);
             }
             team.Setup();
         }

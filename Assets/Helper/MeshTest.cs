@@ -7,6 +7,7 @@ public class MeshTest : MonoBehaviour
 {
 }
 
+#if UNITY_EDITOR
 
 [CustomEditor(typeof(MeshTest))]
 public class MeshtTestEditor : Editor
@@ -62,3 +63,4 @@ public class MeshtTestEditor : Editor
 
     }
 }
+#endif

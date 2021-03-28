@@ -131,3 +131,52 @@ public class Group : List<Team>
     public int eachTeamMember;
     public Group() : base() { }
 }
+public class Team
+{
+    public static List<Team> All = new List<Team>();
+    public static List<Team> NonUser = new List<Team>();
+    public static List<Team> Dummy = new List<Team>();
+    public List<UnitInfo> members = new List<UnitInfo>();
+    public Color color = Color.black;
+    public List<Unit> alives = new List<Unit>();
+    public List<Unit> enemies = new List<Unit>();
+    public Vector3 center;
+    public void Setup()
+    {
+        All.Add(this);
+        NonUser.Add(this);
+        alives.AddRange(members.Select(x => x.unit));
+    }
+    public void Update()
+    {
+        center = Vector3.zero;
+        enemies.Clear();
+        enemies.AddRange(Unit.Alive);
+        foreach (Unit unit in alives)
+        {
+            unit.team = this;
+            enemies.Remove(unit);
+            center += unit.transform.position / alives.Count;
+        }
+    }
+}
+public class UnitInfo
+{
+    public int id;
+    public string name;
+    public Sprite icon;
+    public Group group;
+    public Team team;
+    public Unit unit;
+    public UnitInfo(Team team, Unit unit)
+    {
+        this.team = team;
+        this.unit = unit;
+    }
+    public UnitInfo(int id, string name, Sprite icon)
+    {
+        this.id = id;
+        this.name = name;
+        this.icon = icon;
+    }
+}

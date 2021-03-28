@@ -5,10 +5,8 @@ using UnityEngine.UI;
 public class UnitStatus : MonoBehaviour
 {
     public Bar healthBar, actionBar;
-    [SerializeField]
-    Image icon;
-    [SerializeField]
-    Text nameText;
+    public Image icon;
+    public Text nameText;
     public void Setup(Unit unit)
     {
         healthBar.Setup(unit.hp);

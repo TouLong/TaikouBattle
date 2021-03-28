@@ -7,7 +7,7 @@ public class WeaponConfig : MonoBehaviour
 {
     public Weapon weapon;
 }
-
+#if UNITY_EDITOR
 [CustomEditor(typeof(WeaponConfig))]
 public class WeaponConfigEditor : Editor
 {
@@ -31,3 +31,4 @@ public class WeaponConfigEditor : Editor
 
     }
 }
+#endif

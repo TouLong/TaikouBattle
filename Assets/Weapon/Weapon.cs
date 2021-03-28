@@ -39,24 +39,23 @@ public class Weapon : ScriptableObject
     void Awake()
     {
         motionAnim = handleType.ToString() + "-" + attackType.ToString();
+        size = far - near;
     }
-    public Mesh GetRangeMesh()
+    public Mesh GetRangeMesh() => GeoGenerator.SectorPlane(angle, far, near, 0);
+    public bool IsContain(float distance) => (distance >= near && distance <= far);
+    public bool IsFar(float distance) => (distance >= near && distance <= far);
+    public bool IsNear(float distance) => distance > far;
+    public bool HitDetect(Unit owner, Unit target)
     {
-        return GeoGenerator.SectorPlane(angle, far, near, 0);
-    }
-    public bool HitDetect(Transform owner, Unit target)
-    {
-        Pose ownerXZ = new Pose(Vector.Xz(owner.position), owner.rotation);
-        Vector3 targetXZ = Vector.Xz(target.transform.position);
-        float distance = Vector3.Distance(targetXZ, ownerXZ.position);
-        if (distance >= near && distance <= far)
+        float distance = owner.Distance(target);
+        if (IsContain(distance))
         {
-            float angle = Vector3.Angle(ownerXZ.forward, targetXZ - ownerXZ.position) * 2;
+            float angle = owner.Angle(target) * 2;
             return (int)angle <= this.angle;
         }
         return false;
     }
-    public bool HitDetect(Transform owner, List<Unit> targets, out List<Unit> hits)
+    public bool HitDetect(Unit owner, List<Unit> targets, out List<Unit> hits)
     {
         hits = new List<Unit>();
         foreach (Unit target in targets)

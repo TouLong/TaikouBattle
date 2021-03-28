@@ -29,7 +29,7 @@ public class Testing : MonoBehaviour
                 UnitInfo unitInfo = new UnitInfo(dummyTeam, unit);
                 unitInfo.name = "Dummy";
                 dummyTeam.members.Add(unitInfo);
-                unit.SetInfo(unitInfo);
+                unit.info = unitInfo;
             }
         }
         Unit.player = userTeam.members[0].unit;
