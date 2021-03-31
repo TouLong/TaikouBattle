@@ -762,7 +762,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1540467303731406252}
   - component: {fileID: 5848037872114847522}
-  - component: {fileID: 1540467303731406248}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -803,31 +802,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1122a94204b3540bad487e1fa38357, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1540467303731406248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540467303731406249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fcac5bdaa04a134469071d1b89f7436b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weapon: {fileID: 0}
-  model: {fileID: 8246762712707611316}
-  maxHp: 0
-  hp: 5
-  ap: 1
-  moveConsume: 0
-  turnConsume: 0
-  destination:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-  inCombat: 0
-  inAction: 0
-  colliders: {fileID: 0}
 --- !u!1 &1540467303953008795
 GameObject:
   m_ObjectHideFlags: 0

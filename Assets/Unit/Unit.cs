@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using System.Linq;
@@ -25,7 +24,7 @@ public class Unit : MonoBehaviour
     public const float maxTurning = 360f;
 
     public Weapon weapon;
-    Transform movingRange, attackRange, turningRange, arrow;
+    protected Transform movingRange, attackRange, turningRange, arrow;
     [HideInInspector]
     public Transform model;
     [HideInInspector]
@@ -39,7 +38,7 @@ public class Unit : MonoBehaviour
     public Pose destination;
     Transform mainHold;
     Transform subHold;
-    UnitStatus status;
+    protected UnitStatus status;
     [HideInInspector]
     public UnitInfo info;
     [HideInInspector]
@@ -56,6 +55,7 @@ public class Unit : MonoBehaviour
     public Vector3 Forward(Unit target) => (target.position - position).normalized;
     public Vector3 Backward(Unit target) => (position - target.position).normalized;
     public float Angle(Unit target) => Vector.ForwardAngle(transform, target.position);
+    public float SignelAngle(Unit target) => Vector.ForwardSignedAngle(transform, target.position);
     public float Distance(Unit target) => Vector3.Distance(position, target.position);
 
     void Awake()
@@ -87,10 +87,13 @@ public class Unit : MonoBehaviour
         motion = GetComponent<UnitMotion>();
         motion.Setup(this);
         motion.IdlePose();
-        status.icon.color = info.team.color;
-        status.icon.sprite = info.icon;
-        status.nameText.color = info.team.color;
-        status.nameText.text = info.name;
+        if (info != null)
+        {
+            status.icon.color = info.team.color;
+            status.icon.sprite = info.icon;
+            status.nameText.color = info.team.color;
+            status.nameText.text = info.name;
+        }
         Display(Range.Attack);
     }
     public void Display(Range range)
@@ -113,16 +116,6 @@ public class Unit : MonoBehaviour
         subWeapon.localEulerAngles = Vector3.zero;
         subWeapon.localScale = Vector3.one;
     }
-    public void ResetAction()
-    {
-        moveConsume = 0;
-        turnConsume = 0;
-        model.localPosition = Vector3.zero;
-        model.localEulerAngles = Vector3.zero;
-        ClampMovingRange(maxAp);
-        ClampTurningRange(maxTurning);
-        SetAp(maxAp);
-    }
     public void StartAction()
     {
         inAction = true;
@@ -134,19 +127,17 @@ public class Unit : MonoBehaviour
     public void StartCombat()
     {
         inCombat = true;
-        void reset()
-        {
-            inCombat = false;
-            ResetAction();
-        }
         if (weapon.HitDetect(this, team.enemies, out List<Unit> hits))
         {
             hits.ForEach(x => x.DamageBy(this));
-            motion.Attack(reset);
+            motion.Attack(() =>
+            {
+                inCombat = false;
+            });
         }
         else
         {
-            reset();
+            inCombat = false;
         }
     }
     public void EndCombat()
@@ -164,62 +155,22 @@ public class Unit : MonoBehaviour
             team.alives.Remove(this);
         }
     }
-    public void SetAp(float value)
-    {
-        ap = Mathf.Clamp(value, 0, maxAp);
-        status.actionBar.Set(ap);
-    }
     public void DamageBy(Unit unit)
     {
         roundOfHurt += unit.weapon.attack;
     }
-    public void ClampMovingRange(float scale)
+    public void ScaleMovingRange(float size)
     {
-        movingRange.localScale = new Vector3(scale, 1, scale);
+        movingRange.localScale = new Vector3(size, 1, size);
         movingRange.rotation = model.rotation;
     }
-    public void ClampTurningRange(float angle)
+    public RaycastHit HitMoveBorder(Vector3 direction, float range)
     {
-        Mesh mesh = GeoGenerator.SectorPlane((int)angle * 2, 0.7f, 0.67f, 0);
-        turningRange.GetComponent<MeshFilter>().mesh = mesh;
-        turningRange.rotation = model.rotation;
-        turningRange.position = new Vector3(model.position.x, turningRange.position.y, model.position.z);
-    }
-    public Vector3 GetMaxMovePoint(Vector3 direction, float distance)
-    {
-        ClampMovingRange(distance);
+        ScaleMovingRange(range);
         MeshCollider collider = movingRange.GetComponent<MeshCollider>();
         collider.enabled = true;
         Physics.Raycast(position, direction, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("MovingRange"));
         collider.enabled = false;
-        return hit.point;
-    }
-    public void Chase(Unit target)
-    {
-        float angle = Angle(target);
-        angle += UnityEngine.Random.Range(-weapon.angle, weapon.angle);
-        float moveRange = ap - angle / maxTurning;
-        Vector3 dir = Forward(target);
-        destination.position = GetMaxMovePoint(dir, moveRange);
-        destination.rotation = Quaternion.LookRotation(dir);
-    }
-    public void KeepAway(Unit target)
-    {
-        float angle = Angle(target);
-        angle += UnityEngine.Random.Range(-weapon.angle, weapon.angle);
-        float moveRange = ap - angle / maxTurning;
-        Vector3 backward = Backward(target);
-        Vector3 forward = Forward(target);
-        destination.position = GetMaxMovePoint(backward, moveRange);
-        destination.rotation = Quaternion.LookRotation(forward);
-    }
-    public void Guess(Unit target)
-    {
-        float look = Angle(target);
-        look += UnityEngine.Random.Range(-weapon.angle, weapon.angle);
-        float moveRange = ap - look / maxTurning;
-        Vector3 moveDir = V3Random.DirectionXz();
-        destination.position = GetMaxMovePoint(moveDir, moveRange);
-        destination.rotation = Quaternion.Euler(0, euler.y + look, 0);
+        return hit;
     }
 }

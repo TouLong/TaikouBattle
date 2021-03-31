@@ -5,40 +5,40 @@ using UnityEngine;
 public class Testing : MonoBehaviour
 {
     public Unit[] users;
-    public Unit[] npcs;
+    public Unit[] npc1;
+    public Unit[] npc2;
+    public Unit[] npc3;
     public Unit[] dummys;
     void Start()
     {
-        Team userTeam = new Team();
-        Team npcTeam = new Team();
-        Team dummyTeam = new Team();
-        foreach (Unit unit in users)
+        if (CreateTeam(users) != null)
+            Unit.player = users[0];
+        CreateTeam(npc1);
+        CreateTeam(npc2);
+        CreateTeam(npc3);
+        Team dummyTeam = CreateTeam(dummys);
+        if (dummyTeam != null)
         {
-            if (unit.gameObject.activeSelf)
-                userTeam.members.Add(new UnitInfo(userTeam, unit));
+            Team.NonUser.Remove(dummyTeam);
+            Team.Dummy.Add(dummyTeam);
         }
-        foreach (Unit unit in npcs)
-        {
-            if (unit.gameObject.activeSelf)
-                npcTeam.members.Add(new UnitInfo(npcTeam, unit));
-        }
-        foreach (Unit unit in dummys)
-        {
-            if (unit.gameObject.activeSelf)
-            {
-                UnitInfo unitInfo = new UnitInfo(dummyTeam, unit);
-                unitInfo.name = "Dummy";
-                dummyTeam.members.Add(unitInfo);
-                unit.info = unitInfo;
-            }
-        }
-        Unit.player = userTeam.members[0].unit;
-        userTeam.Setup();
-        npcTeam.Setup();
-        dummyTeam.Setup();
-        Team.NonUser.Remove(dummyTeam);
-        Team.Dummy.Add(dummyTeam);
         CombatControl.self.testing = true;
         CombatControl.self.Setup();
+    }
+    Team CreateTeam(Unit[] units)
+    {
+        if (units.Length > 0)
+        {
+            Team team = new Team();
+            foreach (Unit unit in units)
+            {
+                UnitInfo info = new UnitInfo(team, unit);
+                team.members.Add(info);
+                unit.info = info;
+            }
+            team.Setup();
+            return team;
+        }
+        return null;
     }
 }

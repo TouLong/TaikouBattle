@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening;
 using UnityEngine;
 
 public class CombatControl : MonoBehaviour
 {
     static public CombatControl self;
+    static public Team team;
+    static public Player selected;
+    static public Unit highlight;
     [HideInInspector]
     public bool testing;
     Action stateUpdate;
@@ -20,13 +22,14 @@ public class CombatControl : MonoBehaviour
     public void Setup()
     {
         Team.All.ForEach(x => x.Update());
-        PlayerControl.Setup();
-        if (!testing)
+        if (Unit.player != null)
         {
-            if (PlayerControl.team != null)
-                Camera.main.transform.LookAt(PlayerControl.team.center);
-            else
-                Camera.main.transform.LookAt(Team.All[0].center);
+            team = Unit.player.team;
+            Team.NonUser.Remove(team);
+        }
+        else
+        {
+            team = null;
         }
         Camera.main.GetComponent<TrackballCamera>().Start();
         controlSeq = new List<Action> { SetPosition, SetRotation };
@@ -42,17 +45,37 @@ public class CombatControl : MonoBehaviour
         if (Mouse.Hit(out RaycastHit hit, LayerMask.GetMask("Unit")))
         {
             Unit unit = hit.transform.parent.parent.GetComponent<Unit>();
-            PlayerControl.Highlight(unit);
-            if (Mouse.LeftDown && PlayerControl.Select(unit))
+            unit.Display(Unit.Range.Moving);
+            highlight = unit;
+            if (Mouse.LeftDown && team.alives.Contains(unit))
+            {
+                selected = unit as Player;
+                selected.StartControl();
                 stateUpdate = Control;
+            }
         }
-        else
+        else if (highlight)
         {
-            PlayerControl.Highlight();
+            highlight.Display(Unit.Range.Attack);
+            highlight = null;
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            PlayerControl.Action();
+            foreach (Team team in Team.NonUser)
+            {
+                foreach (Npc npc in team.alives)
+                {
+                    npc.Decision();
+                }
+            }
+            foreach (Player player in team.alives)
+            {
+                player.ResetStatus();
+            }
+            foreach (Unit unit in Unit.Alive)
+            {
+                unit.StartAction();
+            }
             stateUpdate = InAction;
         }
     }
@@ -63,7 +86,7 @@ public class CombatControl : MonoBehaviour
         {
             controlSeq.Reverse();
             control = controlSeq.First();
-            PlayerControl.ReControl();
+            selected.ResetStatus();
             return;
         }
         control();
@@ -73,13 +96,13 @@ public class CombatControl : MonoBehaviour
         {
             end = ++controlId >= controlSeq.Count;
             if (end)
-                PlayerControl.Complete();
+                selected.CompleteControl();
         }
         else if (Mouse.RightDown)
         {
             end = --controlId < 0;
             if (end)
-                PlayerControl.Deselect();
+                selected.CancelControl();
         }
         if (end)
         {
@@ -94,9 +117,9 @@ public class CombatControl : MonoBehaviour
         if (Mouse.HitGround(out RaycastHit hit))
         {
             if (Input.GetKey(KeyCode.LeftShift))
-                PlayerControl.MoveBack();
+                selected.MoveBack();
             else
-                PlayerControl.MoveTo(hit.point);
+                selected.MoveTo(hit.point);
         }
     }
     void SetRotation()
@@ -104,9 +127,9 @@ public class CombatControl : MonoBehaviour
         if (Mouse.HitGround(out RaycastHit hit))
         {
             if (Input.GetKey(KeyCode.LeftShift))
-                PlayerControl.LookOrigin();
+                selected.LookOrigin();
             else
-                PlayerControl.LookAt(hit.point);
+                selected.LookAt(hit.point);
         }
     }
     void InAction()

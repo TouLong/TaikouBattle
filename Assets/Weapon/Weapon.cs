@@ -43,8 +43,6 @@ public class Weapon : ScriptableObject
     }
     public Mesh GetRangeMesh() => GeoGenerator.SectorPlane(angle, far, near, 0);
     public bool IsContain(float distance) => (distance >= near && distance <= far);
-    public bool IsFar(float distance) => (distance >= near && distance <= far);
-    public bool IsNear(float distance) => distance > far;
     public bool HitDetect(Unit owner, Unit target)
     {
         float distance = owner.Distance(target);
