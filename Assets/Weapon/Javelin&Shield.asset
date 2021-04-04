@@ -16,8 +16,8 @@ MonoBehaviour:
   attackType: 1
   angle: 30
   near: 0.9
-  far: 2
-  size: 0
+  far: 2.1
+  size: 1.1
   attack: 1
   armor: 2
   main: {fileID: 898659171656026577, guid: a08de8627f0edea4c84c1bb6f60f9963, type: 3}

@@ -130,12 +130,20 @@ public class Group : List<Team>
 {
     public int eachTeamMember;
     public Group() : base() { }
+    public void NpcDecision()
+    {
+        ForEach(team => team.alives.ForEach(unit => (unit as Npc).Decision()));
+    }
+    public void Update()
+    {
+        ForEach(x => x.Update());
+    }
 }
 public class Team
 {
-    public static List<Team> All = new List<Team>();
-    public static List<Team> NonUser = new List<Team>();
-    public static List<Team> Dummy = new List<Team>();
+    public static Group All = new Group();
+    public static Group NonUser = new Group();
+    public static Group Dummy = new Group();
     public List<UnitInfo> members = new List<UnitInfo>();
     public Color color = Color.black;
     public List<Unit> alives = new List<Unit>();
@@ -159,6 +167,7 @@ public class Team
             center += unit.transform.position / alives.Count;
         }
     }
+
 }
 public class UnitInfo
 {

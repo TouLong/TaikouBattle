@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using DG.Tweening;
 
 public class CombatControl : MonoBehaviour
 {
     static public CombatControl self;
-    static public Team team;
+    static public Team playerTeam;
     static public Player selected;
     static public Unit highlight;
     [HideInInspector]
@@ -21,15 +22,15 @@ public class CombatControl : MonoBehaviour
     }
     public void Setup()
     {
-        Team.All.ForEach(x => x.Update());
+        Team.All.Update();
         if (Unit.player != null)
         {
-            team = Unit.player.team;
-            Team.NonUser.Remove(team);
+            playerTeam = Unit.player.team;
+            Team.NonUser.Remove(playerTeam);
         }
         else
         {
-            team = null;
+            playerTeam = null;
         }
         Camera.main.GetComponent<TrackballCamera>().Start();
         controlSeq = new List<Action> { SetPosition, SetRotation };
@@ -42,51 +43,91 @@ public class CombatControl : MonoBehaviour
     }
     void Selecting()
     {
+        highlight = null;
+        bool onPlayer = false;
+        bool hasPlayer = Unit.player != null;
         if (Mouse.Hit(out RaycastHit hit, LayerMask.GetMask("Unit")))
         {
-            Unit unit = hit.transform.parent.parent.GetComponent<Unit>();
-            unit.Display(Unit.Range.Moving);
-            highlight = unit;
-            if (Mouse.LeftDown && team.alives.Contains(unit))
+            highlight = hit.transform.GetComponent<Unit>();
+            if (hasPlayer)
+                onPlayer = playerTeam.alives.Contains(highlight);
+        }
+        bool showAttack = Input.GetKey(KeyCode.LeftAlt);
+        bool action = Input.GetKeyDown(KeyCode.Space);
+        bool selectPlayer = Mouse.LeftDown && onPlayer;
+        foreach (Team team in Team.NonUser)
+        {
+            foreach (Unit unit in team.alives)
             {
-                selected = unit as Player;
-                selected.StartControl();
-                stateUpdate = Control;
+                if (action)
+                    unit.Display(Unit.Highlight.Nothing);
+                else if (showAttack)
+                    unit.Display(Unit.Highlight.Info | Unit.Highlight.Attack);
+                else if (unit == highlight)
+                    unit.Display(Unit.Highlight.Attack | Unit.Highlight.Outline | Unit.Highlight.Info);
+                else
+                    unit.Display(Unit.Highlight.Nothing);
             }
         }
-        else if (highlight)
+        if (hasPlayer)
         {
-            highlight.Display(Unit.Range.Attack);
-            highlight = null;
-        }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            foreach (Team team in Team.NonUser)
+            foreach (Unit unit in playerTeam.alives)
             {
-                foreach (Npc npc in team.alives)
+                if (action)
+                    unit.Display(Unit.Highlight.Nothing);
+                else if (showAttack)
+                    unit.Display(Unit.Highlight.Info | Unit.Highlight.Attack);
+                else if (unit == highlight)
+                    unit.Display(Unit.Highlight.Attack | Unit.Highlight.Info | Unit.Highlight.Outline | Unit.Highlight.Moving);
+                else
+                    unit.Display(Unit.Highlight.Info);
+            }
+        }
+        if (selectPlayer)
+        {
+            selected = highlight as Player;
+            selected.StatusReset();
+            stateUpdate = Control;
+        }
+        else if (action)
+        {
+            stateUpdate = null;
+            Team.NonUser.NpcDecision();
+            if (hasPlayer)
+                playerTeam.alives.ForEach(x => (x as Player).StatusReset());
+            Unit.Action(() =>
+            {
+                Unit.Alive.RemoveAll(x => x.hp <= 0);
+                Team.All.RemoveAll(x => x.alives.Count == 0);
+                Team.NonUser.RemoveAll(x => x.alives.Count == 0);
+                if (Team.All.Count == 1 && !testing)
                 {
-                    npc.Decision();
+                    stateUpdate = null;
+                    DelayEvent.Create(2f, () =>
+                    {
+                        Arena.ContestComplete(Team.All.First());
+
+                        Team.All.Clear();
+                        Team.NonUser.Clear();
+                        Unit.All.Clear();
+                        Unit.Alive.Clear();
+                    });
                 }
-            }
-            foreach (Player player in team.alives)
-            {
-                player.ResetStatus();
-            }
-            foreach (Unit unit in Unit.Alive)
-            {
-                unit.StartAction();
-            }
-            stateUpdate = InAction;
+                else
+                {
+                    Team.All.ForEach(x => x.Update());
+                    stateUpdate = Selecting;
+                }
+            });
         }
     }
-
     void Control()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             controlSeq.Reverse();
             control = controlSeq.First();
-            selected.ResetStatus();
+            selected.StatusReset();
             return;
         }
         control();
@@ -96,13 +137,13 @@ public class CombatControl : MonoBehaviour
         {
             end = ++controlId >= controlSeq.Count;
             if (end)
-                selected.CompleteControl();
+                selected.ControlComplete();
         }
         else if (Mouse.RightDown)
         {
             end = --controlId < 0;
             if (end)
-                selected.CancelControl();
+                selected.StatusReset();
         }
         if (end)
         {
@@ -130,41 +171,6 @@ public class CombatControl : MonoBehaviour
                 selected.LookOrigin();
             else
                 selected.LookAt(hit.point);
-        }
-    }
-    void InAction()
-    {
-        if (!Unit.Alive.FindAll(x => x.inAction).Any())
-        {
-            Unit.Alive.ForEach(x => x.StartCombat());
-            stateUpdate = InCombat;
-        }
-    }
-    void InCombat()
-    {
-        if (!Unit.Alive.FindAll(x => x.inCombat).Any())
-        {
-            Unit.Alive.ForEach(x => x.EndCombat());
-            Unit.Alive.RemoveAll(x => x.hp <= 0);
-            Team.All.RemoveAll(x => x.alives.Count == 0);
-            Team.NonUser.RemoveAll(x => x.alives.Count == 0);
-            if (Team.All.Count == 1 && !testing)
-            {
-                stateUpdate = null;
-                DelayEvent.Create(2f, () =>
-                {
-                    Arena.ContestComplete(Team.All.First());
-                    Team.All.Clear();
-                    Team.NonUser.Clear();
-                    Unit.All.Clear();
-                    Unit.Alive.Clear();
-                });
-            }
-            else
-            {
-                Team.All.ForEach(x => x.Update());
-                stateUpdate = Selecting;
-            }
         }
     }
 }

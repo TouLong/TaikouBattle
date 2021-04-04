@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UnitMotion : MonoBehaviour
 {
-    const float totalFrame = 17;
+    const float frameToSecond = 1f / 24f;
     struct MotionFrame
     {
         public float start;
@@ -12,8 +12,8 @@ public class UnitMotion : MonoBehaviour
         public float length;
         public MotionFrame(int start, int end)
         {
-            this.start = start / totalFrame;
-            this.end = end / totalFrame;
+            this.start = start * frameToSecond;
+            this.end = end * frameToSecond;
             length = end - start;
         }
     }
@@ -27,30 +27,31 @@ public class UnitMotion : MonoBehaviour
     float targetFrame;
     public void Setup(Unit unit)
     {
-        anim = unit.model.GetComponent<Animation>();
+        anim = unit.GetComponentInChildren<Animation>();
         state = anim[unit.weapon.motionAnim];
         stateName = unit.weapon.motionAnim;
         anim.Play(stateName);
     }
     public void IdlePose()
     {
-        state.normalizedTime = idle.end;
+        state.time = idle.end;
         state.speed = 0;
     }
-    public void Attack(Action onCompleted)
+    public float Attack(Action onCompleted = null)
     {
-        state.normalizedTime = ready.start;
+        state.time = ready.start;
         state.speed = 1;
         targetFrame = reset.end;
         StartCoroutine(Playing(onCompleted));
+        return targetFrame - state.time;
     }
     IEnumerator Playing(Action onCompleted = null)
     {
         while (true)
         {
-            if (state.speed > 0 && state.normalizedTime <= targetFrame)
+            if (state.speed > 0 && state.time <= targetFrame)
                 yield return null;
-            else if (state.speed < 0 && state.normalizedTime >= targetFrame)
+            else if (state.speed < 0 && state.time >= targetFrame)
                 yield return null;
             else
             {

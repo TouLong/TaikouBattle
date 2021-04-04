@@ -5,7 +5,7 @@ public class Npc : Unit
 {
     public void Decision()
     {
-        Unit target = team.enemies.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).First();
+        Unit target = enemies.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).First();
         float distance = Distance(target);
         if (weapon.far < distance)
             Chase(target);
@@ -14,29 +14,35 @@ public class Npc : Unit
         else
             Guess(target);
     }
-    public void Chase(Unit target)
+    public void ChangeMovingRange(float look)
+    {
+        float moveRange = maxAp - Mathf.Abs(look) / maxTurning;
+        movingRange.localScale = new Vector3(moveRange, 1, moveRange);
+        movingRange.rotation = Quaternion.Euler(0, euler.y + look, 0);
+    }
+    void Chase(Unit target)
     {
         float look = Vector.ForwardSignedAngle(transform, target.position + V3Random.DirectionXz());
         destination.rotation = Quaternion.Euler(0, euler.y + look, 0);
-        float moveRange = ap - Mathf.Abs(look) / maxTurning;
-        RaycastHit border = HitMoveBorder(destination.forward, moveRange);
+        ChangeMovingRange(look);
+        RaycastHit border = HitMoveBorder(destination.forward);
         float randomDist = Distance(target) - Random.Range(weapon.near, weapon.far);
         float moveDist = Mathf.Min(border.distance, randomDist);
         destination.position = position + destination.forward * moveDist;
     }
-    public void KeepAway(Unit target)
+    void KeepAway(Unit target)
     {
         float look = Vector.ForwardSignedAngle(transform, target.position + V3Random.DirectionXz());
         destination.rotation = Quaternion.Euler(0, euler.y + look, 0);
-        float moveRange = ap - Mathf.Abs(look) / maxTurning;
-        destination.position = HitMoveBorder(-destination.forward, moveRange).point;
+        ChangeMovingRange(look);
+        destination.position = HitMoveBorder(-destination.forward).point;
     }
-    public void Guess(Unit target)
+    void Guess(Unit target)
     {
         float look = Vector.ForwardSignedAngle(transform, target.position + V3Random.DirectionXz());
         destination.rotation = Quaternion.Euler(0, euler.y + look, 0);
-        float moveRange = ap - Mathf.Abs(look) / maxTurning;
+        ChangeMovingRange(look);
         Vector3 moveDir = V3Random.DirectionXz();
-        destination.position = HitMoveBorder(-destination.forward, moveRange).point;
+        destination.position = HitMoveBorder(moveDir).point;
     }
 }

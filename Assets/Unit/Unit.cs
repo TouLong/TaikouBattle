@@ -5,18 +5,16 @@ using System.Linq;
 
 public class Unit : MonoBehaviour
 {
-    static public List<Unit> All = new List<Unit>();
-    static public List<Unit> Alive = new List<Unit>();
-    static public Unit player;
-
-    public enum Range
+    public enum Highlight
     {
-        Nothing = 0b00001,
-        Moving = 0b00010,
-        Turning = 0b00100,
-        Attack = 0b01000,
-        Arrow = 0b10000,
-        All = 0b11110,
+        Nothing = 0b000001,
+        Moving = 0b0000010,
+        Turning = 0b0000100,
+        Attack = 0b0001000,
+        Arrow = 0b0010000,
+        Outline = 0b0100000,
+        Info = 0b1000000,
+        All = 0b1111110,
     }
     public const int baseHp = 3;
     public const float maxAp = 1;
@@ -24,31 +22,18 @@ public class Unit : MonoBehaviour
     public const float maxTurning = 360f;
 
     public Weapon weapon;
-    protected Transform movingRange, attackRange, turningRange, arrow;
-    [HideInInspector]
-    public Transform model;
-    [HideInInspector]
-    public int maxHp, hp;
-    [HideInInspector]
-    public float ap = maxAp;
-    [HideInInspector]
-    public float moveConsume, turnConsume;
-    int roundOfHurt;
-    [HideInInspector]
-    public Pose destination;
-    Transform mainHold;
-    Transform subHold;
+    protected Transform model, mainHold, subHold, movingRange, attackRange, turningRange, arrow;
+    protected Pose destination;
     protected UnitStatus status;
     [HideInInspector]
-    public UnitInfo info;
-    [HideInInspector]
-    public Team team;
+    public int hp;
+    int roundOfHurt;
     UnitMotion motion;
-    [HideInInspector]
-    public bool inCombat, inAction;
-    [HideInInspector]
-    public UnitColliders colliders;
-
+    Outline outline;
+    public UnitInfo info;
+    public Team team;
+    Rigidbody rig;
+    public List<Unit> enemies => team.enemies;
     public Vector3 position => transform.position;
     public Vector3 euler => transform.eulerAngles;
     public Quaternion rotation => transform.rotation;
@@ -57,9 +42,10 @@ public class Unit : MonoBehaviour
     public float Angle(Unit target) => Vector.ForwardAngle(transform, target.position);
     public float SignelAngle(Unit target) => Vector.ForwardSignedAngle(transform, target.position);
     public float Distance(Unit target) => Vector3.Distance(position, target.position);
-
     void Awake()
     {
+        if (movingClamp == null)
+            movingClamp = GameObject.Find("Game/MovingClamp").GetComponent<MeshCollider>();
         All.Add(this);
         Alive.Add(this);
         model = transform.Find("guy");
@@ -73,20 +59,14 @@ public class Unit : MonoBehaviour
     void Start()
     {
         SetupWeapon();
-        attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
-        maxHp = baseHp + weapon.armor;
-        hp = maxHp;
+        hp = baseHp + weapon.armor;
         destination.position = transform.position;
         destination.rotation = transform.rotation;
+        attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
         arrow.transform.SetParent(model);
-        attackRange.transform.SetParent(model);
         status = GetComponentInChildren<UnitStatus>();
-        status.Setup(this);
-        colliders = GetComponentInChildren<UnitColliders>();
-        colliders.transform.SetParent(model);
-        motion = GetComponent<UnitMotion>();
-        motion.Setup(this);
-        motion.IdlePose();
+        status.healthBar.Setup(hp);
+        status.healthBar.Set(hp);
         if (info != null)
         {
             status.icon.color = info.team.color;
@@ -94,14 +74,22 @@ public class Unit : MonoBehaviour
             status.nameText.color = info.team.color;
             status.nameText.text = info.name;
         }
-        Display(Range.Attack);
+        motion = GetComponent<UnitMotion>();
+        motion.Setup(this);
+        motion.IdlePose();
+        outline = model.GetComponent<Outline>();
+        rig = GetComponent<Rigidbody>();
+        Display(Highlight.Attack);
     }
-    public void Display(Range range)
+    public void Display(Highlight range)
     {
-        movingRange.GetComponent<MeshRenderer>().enabled = range.HasFlag(Range.Moving);
-        attackRange.gameObject.SetActive(range.HasFlag(Range.Attack));
-        turningRange.gameObject.SetActive(range.HasFlag(Range.Turning));
-        arrow.gameObject.SetActive(range.HasFlag(Range.Arrow));
+        movingRange.gameObject.SetActive(range.HasFlag(Highlight.Moving));
+        attackRange.gameObject.SetActive(range.HasFlag(Highlight.Attack));
+        turningRange.gameObject.SetActive(range.HasFlag(Highlight.Turning));
+        arrow.gameObject.SetActive(range.HasFlag(Highlight.Arrow));
+        outline.enabled = range.HasFlag(Highlight.Outline);
+        status.nameText.enabled = range.HasFlag(Highlight.Info);
+        status.icon.enabled = range.HasFlag(Highlight.Info);
     }
     public void SetupWeapon()
     {
@@ -116,61 +104,70 @@ public class Unit : MonoBehaviour
         subWeapon.localEulerAngles = Vector3.zero;
         subWeapon.localScale = Vector3.one;
     }
-    public void StartAction()
-    {
-        inAction = true;
-        transform.DORotateQuaternion(destination.rotation, 8 / 24f);
-        float dist = Vector3.Distance(destination.position, transform.position);
-        transform.DOJump(destination.position, dist * 0.25f, 1, 8 / 24f)
-            .OnComplete(() => { inAction = false; });
-    }
-    public void StartCombat()
-    {
-        inCombat = true;
-        if (weapon.HitDetect(this, team.enemies, out List<Unit> hits))
-        {
-            hits.ForEach(x => x.DamageBy(this));
-            motion.Attack(() =>
-            {
-                inCombat = false;
-            });
-        }
-        else
-        {
-            inCombat = false;
-        }
-    }
-    public void EndCombat()
-    {
-        motion.IdlePose();
-        if (roundOfHurt == 0)
-            return;
-        TextUI.Pop(roundOfHurt, Color.red, transform.position);
-        hp = Mathf.Max(hp - roundOfHurt, 0);
-        status.healthBar.Set(hp);
-        roundOfHurt = 0;
-        if (hp <= 0 && Alive.Contains(this))
-        {
-            gameObject.SetActive(false);
-            team.alives.Remove(this);
-        }
-    }
     public void DamageBy(Unit unit)
     {
         roundOfHurt += unit.weapon.attack;
     }
-    public void ScaleMovingRange(float size)
+    public RaycastHit HitMoveBorder(Vector3 direction)
     {
-        movingRange.localScale = new Vector3(size, 1, size);
-        movingRange.rotation = model.rotation;
-    }
-    public RaycastHit HitMoveBorder(Vector3 direction, float range)
-    {
-        ScaleMovingRange(range);
-        MeshCollider collider = movingRange.GetComponent<MeshCollider>();
-        collider.enabled = true;
+        movingClamp.transform.position = movingRange.position;
+        movingClamp.transform.rotation = movingRange.rotation;
+        movingClamp.transform.localScale = movingRange.localScale;
+        movingClamp.enabled = true;
         Physics.Raycast(position, direction, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("MovingRange"));
-        collider.enabled = false;
+        movingClamp.enabled = false;
         return hit;
+    }
+    static public List<Unit> All = new List<Unit>();
+    static public List<Unit> Alive = new List<Unit>();
+    static public Unit player;
+    static public MeshCollider movingClamp;
+    static public void Action(System.Action onCompleted)
+    {
+        Sequence action = DOTween.Sequence();
+        foreach (Unit unit in Alive)
+        {
+            Pose destination = unit.destination;
+            float dist = Vector3.Distance(destination.position, unit.position);
+            action.Join(unit.transform.DORotateQuaternion(destination.rotation, 8 / 24f));
+            action.Join(unit.transform.DOJump(destination.position, dist * 0.25f, 1, 8 / 24f));
+            unit.rig.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        }
+        action.AppendInterval(0.1f);
+        action.AppendCallback(() =>
+        {
+            float sec = 0;
+            foreach (Unit unit in Alive)
+            {
+                unit.rig.constraints = RigidbodyConstraints.FreezeAll;
+                if (unit.weapon.HitDetect(unit, unit.enemies, out List<Unit> hits))
+                {
+                    unit.Display(Highlight.Attack);
+                    hits.ForEach(x => x.DamageBy(unit));
+                    sec = Mathf.Max(sec, unit.motion.Attack());
+                }
+            }
+            Sequence combat = DOTween.Sequence();
+            combat.AppendInterval(sec);
+            combat.AppendCallback(() =>
+            {
+                foreach (Unit unit in Alive)
+                {
+                    unit.motion.IdlePose();
+                    if (unit.roundOfHurt == 0)
+                        continue;
+                    TextUI.Pop(unit.roundOfHurt, Color.red, unit.position);
+                    unit.hp = Mathf.Max(unit.hp - unit.roundOfHurt, 0);
+                    unit.status.healthBar.Set(unit.hp);
+                    unit.roundOfHurt = 0;
+                    if (unit.hp <= 0 && Alive.Contains(unit))
+                    {
+                        unit.gameObject.SetActive(false);
+                        unit.team.alives.Remove(unit);
+                    }
+                }
+            });
+            combat.OnComplete(() => onCompleted());
+        });
     }
 }

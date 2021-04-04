@@ -29,9 +29,9 @@ public class Arena : MonoBehaviour
     static User user;
     static GameObject unitObjects;
 
-    public Unit unitPrefab;
-    public Weapon[] weaponPrefab;
-    public Sprite[] iconPrefab;
+    public GameObject unitPrefab;
+    public Weapon[] weapons;
+    public Sprite[] icons;
     public Color[] teamColors = new Color[] { };
     public Transform teamLayout;
     public Transform unitLayout;
@@ -79,24 +79,32 @@ public class Arena : MonoBehaviour
         {
             Transform teamPose = Take(self.teamLayout, teamSpawnIDs);
             List<int> unitSpawnIDs = Enumerable.Range(0, self.unitLayout.childCount).ToList();
+            bool isPlayerTeam = team.members.Find(x => x.id == user.id) != null;
             foreach (UnitInfo unitInfo in team.members)
             {
                 Transform unitPose = Take(self.unitLayout, unitSpawnIDs);
-                Unit unit = Instantiate(self.unitPrefab, unitPose.localPosition + teamPose.position, teamPose.rotation, unitObjects.transform);
-                unit.weapon = ListRandom.In(self.weaponPrefab);
-                unit.info = unitInfo;
-                unitInfo.unit = unit;
+                GameObject go = Instantiate(self.unitPrefab,
+                    unitPose.localPosition + teamPose.position, teamPose.rotation, unitObjects.transform);
+                go.SetActive(true);
+                Unit unit;
+                if (isPlayerTeam)
+                    unit = go.AddComponent<Player>();
+                else
+                    unit = go.AddComponent<Npc>();
                 if (unitInfo.id == user.id)
                     Unit.player = unit;
+                unit.weapon = ListRandom.In(self.weapons);
+                unit.info = unitInfo;
+                unitInfo.unit = unit;
                 unit.gameObject.name = string.Format("{0}-{1}", unitInfo.id, unitInfo.name);
             }
             team.Setup();
         }
         DelayEvent.Create(0.2f, () =>
-        {
-            CombatControl.self.Setup();
-            menu.gameObject.SetActive(false);
-        });
+    {
+        CombatControl.self.Setup();
+        menu.gameObject.SetActive(false);
+    });
     }
     static public void ContestComplete(Team winTeam)
     {
@@ -152,10 +160,10 @@ public class Arena : MonoBehaviour
         for (int i = 0; i < unitCount; i++)
         {
             if (i != user.id)
-                schedule.units.Add(new UnitInfo(i, string.Format("參賽者 {0}號", ++count), ListRandom.In(self.iconPrefab)));
+                schedule.units.Add(new UnitInfo(i, string.Format("參賽者 {0}號", ++count), ListRandom.In(self.icons)));
             else
             {
-                user.info = new UnitInfo(user.id, "玩家", ListRandom.In(self.iconPrefab));
+                user.info = new UnitInfo(user.id, "玩家", ListRandom.In(self.icons));
                 schedule.units.Add(user.info);
             }
         }

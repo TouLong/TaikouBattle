@@ -19,9 +19,9 @@ public class GeoGenerator
             angle += resolution;
             dir.x = dir.x * factor.x + offset.x;
             dir.z = dir.z * factor.y + offset.y;
-            dir.y = -height / 2;
+            dir.y = 0;
             vertices[vIndex++] = dir;
-            dir.y = height / 2;
+            dir.y = height;
             vertices[vIndex++] = dir;
         }
         AddVertices();
@@ -37,6 +37,7 @@ public class GeoGenerator
         }
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.RecalculateNormals();
         return mesh;
     }
     static public Mesh EllipsePlane(Vector2 factor, Vector2 offset, int step)
@@ -70,6 +71,7 @@ public class GeoGenerator
         triangles[tIndex++] = 1;
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.RecalculateNormals();
         return mesh;
     }
     static public Mesh SectorPlane(int range, float far, float near, float offset)
@@ -100,6 +102,7 @@ public class GeoGenerator
         }
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.RecalculateNormals();
         return mesh;
     }
     static public Texture2D SectorTexture(int range, float far, float near, Color mainColor, Color borderColor)
