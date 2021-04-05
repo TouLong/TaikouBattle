@@ -74,20 +74,19 @@ public class GeoGenerator
         mesh.RecalculateNormals();
         return mesh;
     }
-    static public Mesh SectorPlane(int range, float far, float near, float offset)
+    static public Mesh SectorPlane(int range, float far, float near)
     {
         Mesh mesh = new Mesh();
         Vector3[] vertices = new Vector3[(range + 1) * 2];
         int[] triangles = new int[range * 6];
         int angle = -range / 2;
-        Vector3 offsetZ = Vector3.forward * offset;
         int vIndex = 0;
         int tIndex = 0;
         void AddVertices()
         {
             Vector3 dir = Vector.DegToXz(angle++);
-            vertices[vIndex++] = dir * near + offsetZ;
-            vertices[vIndex++] = dir * far + offsetZ;
+            vertices[vIndex++] = dir * near;
+            vertices[vIndex++] = dir * far;
         }
         AddVertices();
         for (int i = 0; i < range; i++)

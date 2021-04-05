@@ -10,8 +10,8 @@ public class Player : Unit
     }
     void ChangeTurningRange(float angle)
     {
-        Mesh mesh = GeoGenerator.SectorPlane((int)angle * 2, 0.7f, 0.67f, 0);
-        turningRange.GetComponent<MeshFilter>().mesh = mesh;
+        Destroy(turningRange.GetComponent<MeshFilter>().mesh);
+        turningRange.GetComponent<MeshFilter>().mesh = GeoGenerator.SectorPlane((int)angle * 2, 0.7f, 0.67f);
         turningRange.rotation = model.rotation;
         turningRange.position = new Vector3(model.position.x, turningRange.position.y, model.position.z);
     }

@@ -23,7 +23,7 @@ public class WeaponConfigEditor : Editor
             weapon.angle = EditorGUILayout.IntSlider("angle", weapon.angle, 0, 180);
             if (GUILayout.Button("Config"))
             {
-                Mesh mesh = GeoGenerator.SectorPlane(weapon.angle, weapon.far, weapon.near, 0);
+                Mesh mesh = GeoGenerator.SectorPlane(weapon.angle, weapon.far, weapon.near);
                 config.GetComponent<MeshFilter>().mesh = mesh;
                 EditorUtility.SetDirty(weapon);
             }

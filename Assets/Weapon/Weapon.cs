@@ -41,7 +41,7 @@ public class Weapon : ScriptableObject
         motionAnim = handleType.ToString() + "-" + attackType.ToString();
         size = far - near;
     }
-    public Mesh GetRangeMesh() => GeoGenerator.SectorPlane(angle, far, near, 0);
+    public Mesh GetRangeMesh() => GeoGenerator.SectorPlane(angle, far, near);
     public bool IsContain(float distance) => (distance >= near && distance <= far);
     public bool HitDetect(Unit owner, Unit target)
     {

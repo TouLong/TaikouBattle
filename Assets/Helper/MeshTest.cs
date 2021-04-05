@@ -36,7 +36,7 @@ public class MeshtTestEditor : Editor
         }
         if (GUILayout.Button("Sector"))
         {
-            Mesh mesh = GeoGenerator.SectorPlane(range, far, near, 0);
+            Mesh mesh = GeoGenerator.SectorPlane(range, far, near);
             target.GetComponent<MeshFilter>().mesh = mesh;
         }
 
