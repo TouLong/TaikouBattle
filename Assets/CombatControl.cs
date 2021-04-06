@@ -22,16 +22,21 @@ public class CombatControl : MonoBehaviour
     }
     public void Setup()
     {
+        Team lookTeam;
         Team.All.Update();
         if (Unit.player != null)
         {
             playerTeam = Unit.player.team;
             Team.NonUser.Remove(playerTeam);
+            lookTeam = playerTeam;
         }
         else
         {
             playerTeam = null;
+            lookTeam = Team.All.First();
         }
+        Camera.main.transform.position = lookTeam.center + (Vector3.up - lookTeam.lookat) * 5;
+        Camera.main.transform.LookAt(lookTeam.center);
         Camera.main.GetComponent<TrackballCamera>().Start();
         controlSeq = new List<Action> { SetPosition, SetRotation };
         control = controlSeq.First();
@@ -50,14 +55,14 @@ public class CombatControl : MonoBehaviour
         {
             highlight = hit.transform.GetComponent<Unit>();
             if (hasPlayer)
-                onPlayer = playerTeam.alives.Contains(highlight);
+                onPlayer = playerTeam.memebers.Contains(highlight);
         }
         bool showAttack = Input.GetKey(KeyCode.LeftAlt);
         bool action = Input.GetKeyDown(KeyCode.Space);
         bool selectPlayer = Mouse.LeftDown && onPlayer;
         foreach (Team team in Team.NonUser)
         {
-            foreach (Unit unit in team.alives)
+            foreach (Unit unit in team.memebers)
             {
                 if (action)
                     unit.Display(Unit.Highlight.Nothing);
@@ -71,7 +76,7 @@ public class CombatControl : MonoBehaviour
         }
         if (hasPlayer)
         {
-            foreach (Unit unit in playerTeam.alives)
+            foreach (Unit unit in playerTeam.memebers)
             {
                 if (action)
                     unit.Display(Unit.Highlight.Nothing);
@@ -94,12 +99,12 @@ public class CombatControl : MonoBehaviour
             stateUpdate = null;
             Team.NonUser.NpcDecision();
             if (hasPlayer)
-                playerTeam.alives.ForEach(x => (x as Player).StatusReset());
+                playerTeam.memebers.ForEach(x => (x as Player).StatusReset());
             Unit.Action(() =>
             {
                 Unit.Alive.RemoveAll(x => x.hp <= 0);
-                Team.All.RemoveAll(x => x.alives.Count == 0);
-                Team.NonUser.RemoveAll(x => x.alives.Count == 0);
+                Team.All.RemoveAll(x => x.memebers.Count == 0);
+                Team.NonUser.RemoveAll(x => x.memebers.Count == 0);
                 if (Team.All.Count == 1 && !testing)
                 {
                     stateUpdate = null;

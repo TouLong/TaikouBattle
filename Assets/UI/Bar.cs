@@ -14,6 +14,7 @@ public class Bar : MonoBehaviour
         fornt = transform.Find("Front").GetComponent<Image>();
         slider.minValue = 0;
         slider.maxValue = max;
+        Set(max);
     }
     public void Set(float value)
     {

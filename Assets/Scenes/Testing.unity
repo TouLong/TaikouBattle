@@ -1145,6 +1145,11 @@ PrefabInstance:
       propertyPath: weaponPrefab.Array.size
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5078863183889758158, guid: 03519f9213faff4429bc23975acbcf11,
+        type: 3}
+      propertyPath: icon
+      value: 
+      objectReference: {fileID: 2800000, guid: 23264afdace85b84cbc8a58088dbc28f, type: 3}
     - target: {fileID: 5078863183889758159, guid: 03519f9213faff4429bc23975acbcf11,
         type: 3}
       propertyPath: m_RootOrder

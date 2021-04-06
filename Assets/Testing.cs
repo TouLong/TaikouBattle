@@ -32,11 +32,10 @@ public class Testing : MonoBehaviour
             Team team = new Team();
             foreach (Unit unit in units)
             {
-                UnitInfo info = new UnitInfo(team, unit);
-                team.members.Add(info);
+                UnitInfo info = new UnitInfo { name = unit.name, team = team };
                 unit.info = info;
             }
-            team.Setup();
+            team.Setup(units.ToList());
             return team;
         }
         return null;

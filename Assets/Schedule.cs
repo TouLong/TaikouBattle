@@ -17,11 +17,11 @@ public class Schedule : List<Round>
             Add(round);
         }
     }
-    public bool Next(Team winTeam)
+    public void Next(Team winTeam)
     {
         if (groupId == 0)
             units.Clear();
-        units.AddRange(winTeam.members);
+        units.AddRange(winTeam.unitInfos);
         if (++groupId >= CurrentRound.Count)
         {
             if (++roundId < Count)
@@ -29,9 +29,7 @@ public class Schedule : List<Round>
                 CurrentRound.RandomAssign(units);
                 groupId = 0;
             }
-            return true;
         }
-        return false;
     }
     public bool IsEndGame => roundId >= Count;
     public bool IsEndRound => groupId == 0;
@@ -101,29 +99,26 @@ public class Round : List<Group>
                     int id = ListRandom.In(Ids);
                     Ids.Remove(id);
                     UnitInfo unit = units[id];
-                    unit.group = group;
                     unit.team = team;
-                    team.members.Add(unit);
+                    team.unitInfos.Add(unit);
                 }
             }
         }
     }
-    public void Assign(List<UnitInfo> units)
+    public Group GetGroup(int id)
     {
-        int count = 0;
         foreach (Group group in this)
         {
             foreach (Team team in group)
             {
-                for (int i = 0; i < group.eachTeamMember; i++)
+                foreach (UnitInfo unit in team.unitInfos)
                 {
-                    UnitInfo unit = units[count++];
-                    unit.group = group;
-                    unit.team = team;
-                    team.members.Add(unit);
+                    if (unit.id == id)
+                        return group;
                 }
             }
         }
+        return null;
     }
 }
 public class Group : List<Team>
@@ -132,7 +127,7 @@ public class Group : List<Team>
     public Group() : base() { }
     public void NpcDecision()
     {
-        ForEach(team => team.alives.ForEach(unit => (unit as Npc).Decision()));
+        ForEach(team => team.memebers.ForEach(unit => (unit as Npc).Decision()));
     }
     public void Update()
     {
@@ -144,28 +139,29 @@ public class Team
     public static Group All = new Group();
     public static Group NonUser = new Group();
     public static Group Dummy = new Group();
-    public List<UnitInfo> members = new List<UnitInfo>();
+    public List<UnitInfo> unitInfos = new List<UnitInfo>();
     public Color color = Color.black;
-    public List<Unit> alives = new List<Unit>();
+    public List<Unit> memebers = new List<Unit>();
     public List<Unit> enemies = new List<Unit>();
-    public Vector3 center;
-    public void Setup()
+    public Vector3 center, lookat;
+    public void Setup(List<Unit> units)
     {
         All.Add(this);
         NonUser.Add(this);
-        alives.AddRange(members.Select(x => x.unit));
+        memebers = units;
     }
     public void Update()
     {
         center = Vector3.zero;
         enemies.Clear();
         enemies.AddRange(Unit.Alive);
-        foreach (Unit unit in alives)
+        foreach (Unit unit in memebers)
         {
             unit.team = this;
             enemies.Remove(unit);
-            center += unit.transform.position / alives.Count;
+            center += unit.transform.position / memebers.Count;
         }
+        lookat = -center.normalized;
     }
 
 }
@@ -174,18 +170,5 @@ public class UnitInfo
     public int id;
     public string name;
     public Sprite icon;
-    public Group group;
     public Team team;
-    public Unit unit;
-    public UnitInfo(Team team, Unit unit)
-    {
-        this.team = team;
-        this.unit = unit;
-    }
-    public UnitInfo(int id, string name, Sprite icon)
-    {
-        this.id = id;
-        this.name = name;
-        this.icon = icon;
-    }
 }

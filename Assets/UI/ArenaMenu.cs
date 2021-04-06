@@ -138,7 +138,7 @@ public class ArenaMenu : MonoBehaviour
         foreach (UnitInfo unit in units)
         {
             Transform teamContent = teamDict[unit.team];
-            int childID = unit.team.members.IndexOf(unit);
+            int childID = unit.team.unitInfos.IndexOf(unit);
             Transform unitContent = teamContent.GetChild(childID);
             unitContent.GetChild(0).GetComponent<Image>().sprite = unit.icon;
             unitContent.GetChild(1).GetComponent<Text>().text = unit.name;

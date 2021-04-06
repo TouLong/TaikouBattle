@@ -24,24 +24,17 @@ public class Weapon : ScriptableObject
     public int angle = 90;
     [Range(0, 3)]
     public float near = 0;
-    [Range(0, 3)]
+    [Range(0, 10)]
     public float far = 1;
-    [HideInInspector]
-    public float size;
-    [Range(1, 3)]
+    [Range(1, 5)]
     public int attack = 1;
     [Range(0, 2)]
     public int armor = 1;
     public GameObject main;
     public GameObject sub;
     [HideInInspector]
-    public string motionAnim;
-    void Awake()
-    {
-        motionAnim = handleType.ToString() + "-" + attackType.ToString();
-        size = far - near;
-    }
-    public Mesh GetRangeMesh() => GeoGenerator.SectorPlane(angle, far, near);
+    public string motionAnim => handleType.ToString() + "-" + attackType.ToString();
+    public Mesh rangeMesh => GeoGenerator.SectorPlane(angle, far, near);
     public bool IsContain(float distance) => (distance >= near && distance <= far);
     public bool HitDetect(Unit owner, Unit target)
     {

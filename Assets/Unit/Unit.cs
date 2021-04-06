@@ -2,6 +2,7 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Linq;
+using UnityEngine.UI;
 
 public class Unit : MonoBehaviour
 {
@@ -24,10 +25,12 @@ public class Unit : MonoBehaviour
     public Weapon weapon;
     protected Transform model, mainHold, subHold, movingRange, attackRange, turningRange, arrow;
     protected Pose destination;
-    protected UnitStatus status;
     [HideInInspector]
     public int hp;
     int roundOfHurt;
+    Bar healthBar;
+    Image icon;
+    Text nameText;
     UnitMotion motion;
     Outline outline;
     public UnitInfo info;
@@ -55,6 +58,9 @@ public class Unit : MonoBehaviour
         turningRange = transform.Find("TurningRange");
         attackRange = transform.Find("AttackRange");
         arrow = transform.Find("Arrow");
+        healthBar = transform.Find("Status/Health").GetComponent<Bar>();
+        icon = transform.Find("Status/Info/Icon").GetComponent<Image>();
+        nameText = transform.Find("Status/Info/Name").GetComponent<Text>();
     }
     void Start()
     {
@@ -62,23 +68,22 @@ public class Unit : MonoBehaviour
         hp = baseHp + weapon.armor;
         destination.position = transform.position;
         destination.rotation = transform.rotation;
-        attackRange.GetComponent<MeshFilter>().mesh = weapon.GetRangeMesh();
+        attackRange.GetComponent<MeshFilter>().mesh = weapon.rangeMesh;
         arrow.transform.SetParent(model);
-        status = GetComponentInChildren<UnitStatus>();
-        status.healthBar.Setup(hp);
-        status.healthBar.Set(hp);
-        if (info != null)
-        {
-            status.icon.color = info.team.color;
-            status.icon.sprite = info.icon;
-            status.nameText.color = info.team.color;
-            status.nameText.text = info.name;
-        }
+        healthBar.Setup(hp);
         motion = GetComponent<UnitMotion>();
         motion.Setup(this);
         motion.IdlePose();
         outline = model.GetComponent<Outline>();
         rig = GetComponent<Rigidbody>();
+        icon.color = team.color;
+        icon.sprite = info.icon;
+        outline.OutlineColor = team.color;
+        if (info != null)
+        {
+            nameText.color = team.color;
+            nameText.text = info.name;
+        }
         Display(Highlight.Attack);
     }
     public void Display(Highlight range)
@@ -87,9 +92,9 @@ public class Unit : MonoBehaviour
         attackRange.gameObject.SetActive(range.HasFlag(Highlight.Attack));
         turningRange.gameObject.SetActive(range.HasFlag(Highlight.Turning));
         arrow.gameObject.SetActive(range.HasFlag(Highlight.Arrow));
-        outline.enabled = range.HasFlag(Highlight.Outline);
-        status.nameText.enabled = range.HasFlag(Highlight.Info);
-        status.icon.enabled = range.HasFlag(Highlight.Info);
+        outline.OutlineWidth = range.HasFlag(Highlight.Outline) ? 10f : 5f;
+        nameText.enabled = range.HasFlag(Highlight.Info);
+        icon.enabled = range.HasFlag(Highlight.Info);
     }
     public void SetupWeapon()
     {
@@ -118,6 +123,7 @@ public class Unit : MonoBehaviour
         movingClamp.enabled = false;
         return hit;
     }
+
     static public List<Unit> All = new List<Unit>();
     static public List<Unit> Alive = new List<Unit>();
     static public Unit player;
@@ -158,12 +164,12 @@ public class Unit : MonoBehaviour
                         continue;
                     TextUI.Pop(unit.roundOfHurt, Color.red, unit.position);
                     unit.hp = Mathf.Max(unit.hp - unit.roundOfHurt, 0);
-                    unit.status.healthBar.Set(unit.hp);
+                    unit.healthBar.Set(unit.hp);
                     unit.roundOfHurt = 0;
                     if (unit.hp <= 0 && Alive.Contains(unit))
                     {
                         unit.gameObject.SetActive(false);
-                        unit.team.alives.Remove(unit);
+                        unit.team.memebers.Remove(unit);
                     }
                 }
             });

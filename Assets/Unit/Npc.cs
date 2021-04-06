@@ -5,6 +5,8 @@ public class Npc : Unit
 {
     public void Decision()
     {
+        if (enemies.Count == 0)
+            return;
         Unit target = enemies.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).First();
         float distance = Distance(target);
         if (weapon.far < distance)

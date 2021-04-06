@@ -327,6 +327,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4c6ab31844e5f574cbbcac4565ee0626, type: 2}
   - {fileID: 11400000, guid: c8993cc60c3aecc44a64fdfb76dc2962, type: 2}
   - {fileID: 11400000, guid: 77b9f284886336a41b5da3108926ecfc, type: 2}
+  testWeapon: {fileID: 0}
   icons:
   - {fileID: 21300000, guid: 8bef4b1b7696c5d4791741bc1824423d, type: 3}
   - {fileID: 21300000, guid: a0e43ffe5044bcd43b935329ff768b12, type: 3}
@@ -764,7 +765,7 @@ PrefabInstance:
     - target: {fileID: 1540467303731406252, guid: 2e709ac63fbe47c4684c807e1e372a1c,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 1540467303731406252, guid: 2e709ac63fbe47c4684c807e1e372a1c,
         type: 3}
