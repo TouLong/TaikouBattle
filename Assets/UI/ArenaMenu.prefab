@@ -1705,6 +1705,7 @@ GameObject:
   m_Component:
   - component: {fileID: 898533910208545934}
   - component: {fileID: 8590250506979542051}
+  - component: {fileID: 3274549753459379596}
   m_Layer: 5
   m_Name: ArenaMenu
   m_TagString: Untagged
@@ -1741,6 +1742,47 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2564071955531177101}
   m_CullTransparentMesh: 0
+--- !u!114 &3274549753459379596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2564071955531177101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3681b253337a3c5448ea429854fd36bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ui:
+    main: {fileID: 1929709898321278897}
+    schedule: {fileID: 9117704856222122506}
+    round: {fileID: 1924259002489750538}
+    roundTitle: {fileID: 4056042500083486472}
+    roundContent: {fileID: 2501215923480639454}
+    group: {fileID: 7124020614902726635}
+    groupTitle: {fileID: 2652764501740123320}
+    groupContent: {fileID: 327194116467040406}
+    team: {fileID: 3141907858817529970}
+    member: {fileID: 7813255336942408247}
+    action: {fileID: 1929709898741423740}
+    change: {fileID: 1929709898657310634}
+    start: {fileID: 1929709899427253342}
+    skip: {fileID: 309434106}
+    view: {fileID: 2070261471}
+    end: {fileID: 1980791491}
+    quit: {fileID: 1216778331}
+  roundTexts:
+  - I
+  - II
+  - III
+  - IV
+  groupTexts:
+  - I
+  - II
+  - III
+  - IV
+  disableColor: {r: 0.72156864, g: 0.70980394, b: 0.7254902, a: 1}
 --- !u!1 &3039029855006080470
 GameObject:
   m_ObjectHideFlags: 0

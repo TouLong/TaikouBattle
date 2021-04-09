@@ -33,7 +33,6 @@ public class Arena : MonoBehaviour
     public Weapon[] weapons;
     public Weapon testWeapon;
     public Sprite[] icons;
-    public Color[] teamColors = new Color[] { };
     public Transform teamLayout;
     public Transform unitLayout;
 
@@ -52,6 +51,7 @@ public class Arena : MonoBehaviour
         menu.ui.end.onClick.AddListener(End);
         menu.ui.quit.onClick.AddListener(End);
         user.id = -1;
+        Hint.self.gameObject.SetActive(false);
         RandomRule();
     }
     static public void Display(ButtonType button)
@@ -95,14 +95,11 @@ public class Arena : MonoBehaviour
                     unit = go.AddComponent<Player>();
                 else
                     unit = go.AddComponent<Npc>();
+                unit.weapon = ListRandom.In(self.weapons);
                 if (unitInfo.id == user.id)
                 {
                     Unit.player = unit;
-                    unit.weapon = self.testWeapon;
-                }
-                else
-                {
-                    unit.weapon = ListRandom.In(self.weapons);
+                    //unit.weapon = self.testWeapon;
                 }
                 unit.info = unitInfo;
                 unit.gameObject.name = string.Format("{0}-{1}", unitInfo.id, unitInfo.name);
@@ -113,12 +110,14 @@ public class Arena : MonoBehaviour
         }
         DelayEvent.Create(0.2f, () =>
         {
+            Hint.self.gameObject.SetActive(true);
             CombatControl.self.Setup();
             menu.gameObject.SetActive(false);
         });
     }
     static public void ContestComplete(Team winTeam)
     {
+        Hint.self.gameObject.SetActive(false);
         Destroy(unitObjects);
         menu.gameObject.SetActive(true);
         Next(winTeam);
@@ -170,11 +169,8 @@ public class Arena : MonoBehaviour
         schedule.units = new List<UnitInfo>();
         foreach (Group group in schedule.CurrentRound)
         {
-            int teamCount = 0;
             foreach (Team team in group)
             {
-                team.color = self.teamColors[teamCount++];
-
                 for (int i = 0; i < group.eachTeamMember; i++)
                 {
                     Sprite icon = ListRandom.In(self.icons);
@@ -203,37 +199,14 @@ public class Arena : MonoBehaviour
                 int teamCount = 0;
                 foreach (Team team in group)
                 {
-                    team.color = self.teamColors[teamCount++];
+                    team.color = Setting.self.colors[teamCount];
+                    team.material = Setting.self.materials[teamCount];
+                    teamCount++;
                 }
             }
         }
         user.group = schedule.CurrentRound.GetGroup(user.id);
         menu.CreateMain(schedule);
         menu.UpdateSchedule(schedule.units);
-    }
-}
-
-[CustomEditor(typeof(Arena))]
-public class ArenaEditor : Editor
-{
-    int teamCount;
-    float spacing;
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-        Arena arena = target as Arena;
-        teamCount = EditorGUILayout.IntSlider("Team Count", teamCount, 1, 6);
-        spacing = EditorGUILayout.Slider("Spacing", spacing, 1f, 10f);
-        if (GUILayout.Button("Team layout"))
-        {
-            float step = 360 / teamCount;
-            for (int i = 0; i < arena.teamLayout.childCount; i++)
-            {
-                Transform layout = arena.teamLayout.GetChild(i);
-                layout.position = Vector.DegToXz(step * i) * spacing;
-                layout.eulerAngles = new Vector3(0, step * i + 180, 0);
-                layout.gameObject.SetActive(i < teamCount);
-            }
-        }
     }
 }

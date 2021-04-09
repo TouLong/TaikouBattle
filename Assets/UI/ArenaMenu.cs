@@ -160,6 +160,10 @@ public class ArenaMenu : MonoBehaviour
                 Arena.self = FindObjectOfType<Arena>();
                 Arena.menu = ui;
             }
+            if (Hint.self == null)
+                Hint.self = FindObjectOfType<Hint>();
+            if (Setting.self == null)
+                Setting.self = FindObjectOfType<Setting>();
             unitCount = EditorGUILayout.IntSlider("人數", unitCount, Arena.minUnit, Arena.maxUnit);
             if (GUILayout.Button("重置"))
             {

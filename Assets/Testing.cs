@@ -11,12 +11,13 @@ public class Testing : MonoBehaviour
     public Unit[] dummys;
     void Start()
     {
-        if (CreateTeam(users) != null)
+        if (CreateTeam(users, 0) != null)
             Unit.player = users[0];
-        CreateTeam(npc1);
-        CreateTeam(npc2);
-        CreateTeam(npc3);
-        Team dummyTeam = CreateTeam(dummys);
+        CreateTeam(npc1, 1);
+        CreateTeam(npc2, 2);
+        CreateTeam(npc3, 3);
+
+        Team dummyTeam = CreateTeam(dummys, 4);
         if (dummyTeam != null)
         {
             Team.NonUser.Remove(dummyTeam);
@@ -25,7 +26,7 @@ public class Testing : MonoBehaviour
         CombatControl.self.testing = true;
         CombatControl.self.Setup();
     }
-    Team CreateTeam(Unit[] units)
+    Team CreateTeam(Unit[] units, int settingId)
     {
         if (units.Length > 0)
         {
@@ -36,6 +37,8 @@ public class Testing : MonoBehaviour
                 unit.info = info;
             }
             team.Setup(units.ToList());
+            team.color = Setting.self.colors[settingId];
+            team.material = Setting.self.materials[settingId];
             return team;
         }
         return null;

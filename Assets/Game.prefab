@@ -261,6 +261,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5078863183889758159}
+  - component: {fileID: 7641128606167680174}
   - component: {fileID: 8177535743977709499}
   - component: {fileID: 5078863183889758156}
   - component: {fileID: 5078863183889758158}
@@ -289,6 +290,32 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7641128606167680174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5078863183889758129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8902750ad17286c4083d738ae00b8e4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colors:
+  - {r: 0.7058824, g: 0.32156864, b: 0.32156864, a: 1}
+  - {r: 0.29411766, g: 0.5019608, b: 0.79215693, a: 1}
+  - {r: 0.5411765, g: 0.6901961, b: 0.37647063, a: 1}
+  - {r: 0.82745105, g: 0.627451, b: 0.40784317, a: 1}
+  - {r: 0.63529414, g: 0.86274517, b: 0.7803922, a: 1}
+  - {r: 0.4156863, g: 0.3254902, b: 0.43137258, a: 1}
+  materials:
+  - {fileID: 2100000, guid: df6537b881283de4a8312565725b0acd, type: 2}
+  - {fileID: 2100000, guid: d23d11a73dae63544a211e6b6ebfd12e, type: 2}
+  - {fileID: 2100000, guid: f232e6c0829672942908f0b759b4265d, type: 2}
+  - {fileID: 2100000, guid: d87dcc1abb672eb49a0acfbfa4c75240, type: 2}
+  - {fileID: 2100000, guid: 8bf09abe1a3c51142bf3fd9fbd30a03d, type: 2}
+  - {fileID: 2100000, guid: dd80a84335e34564a8d369f447503f28, type: 2}
 --- !u!114 &8177535743977709499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,13 +371,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d903489b6a090a14f8f74cda5133564e, type: 3}
   - {fileID: 21300000, guid: f6cc3a18c38c5954787ecc4cda39b8b0, type: 3}
   - {fileID: 21300000, guid: 034195dcb4855814da055bd67519f1b2, type: 3}
-  teamColors:
-  - {r: 0.7058824, g: 0.32156864, b: 0.32156864, a: 1}
-  - {r: 0.29411766, g: 0.5019608, b: 0.79215693, a: 1}
-  - {r: 0.5411765, g: 0.6901961, b: 0.37647063, a: 1}
-  - {r: 0.82745105, g: 0.627451, b: 0.40784317, a: 1}
-  - {r: 0.63529414, g: 0.86274517, b: 0.7803922, a: 1}
-  - {r: 0.8117648, g: 0.5411765, b: 0.7960785, a: 1}
   teamLayout: {fileID: 5078863183323539739}
   unitLayout: {fileID: 5078863185410359597}
 --- !u!114 &5078863183889758158

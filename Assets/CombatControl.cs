@@ -17,6 +17,8 @@ public class CombatControl : MonoBehaviour
     Action control;
     void Awake()
     {
+        TextUI.defualtFontSize = 8;
+        TextUI.defualtPopTime = 0.3f;
         if (self == null)
             self = this;
     }
@@ -35,9 +37,12 @@ public class CombatControl : MonoBehaviour
             playerTeam = null;
             lookTeam = Team.All.First();
         }
-        Camera.main.transform.position = lookTeam.center + (Vector3.up - lookTeam.lookat) * 5;
-        Camera.main.transform.LookAt(lookTeam.center);
-        Camera.main.GetComponent<TrackballCamera>().Start();
+        if (!testing)
+        {
+            Camera.main.transform.position = lookTeam.center + (Vector3.up - lookTeam.lookat) * 5;
+            Camera.main.transform.LookAt(lookTeam.center);
+            Camera.main.GetComponent<TrackballCamera>().Start();
+        }
         controlSeq = new List<Action> { SetPosition, SetRotation };
         control = controlSeq.First();
         stateUpdate = Selecting;
@@ -57,41 +62,39 @@ public class CombatControl : MonoBehaviour
             if (hasPlayer)
                 onPlayer = playerTeam.memebers.Contains(highlight);
         }
-        bool showAttack = Input.GetKey(KeyCode.LeftAlt);
+        bool showInfo = Input.GetKey(KeyCode.LeftAlt);
         bool action = Input.GetKeyDown(KeyCode.Space);
         bool selectPlayer = Mouse.LeftDown && onPlayer;
-        foreach (Team team in Team.NonUser)
+        foreach (Unit unit in Unit.All)
         {
-            foreach (Unit unit in team.memebers)
+            if (action)
+                unit.Display(Unit.Highlight.Nothing);
+            else if (unit == highlight)
             {
-                if (action)
-                    unit.Display(Unit.Highlight.Nothing);
-                else if (showAttack)
-                    unit.Display(Unit.Highlight.Info | Unit.Highlight.Attack);
-                else if (unit == highlight)
-                    unit.Display(Unit.Highlight.Attack | Unit.Highlight.Outline | Unit.Highlight.Info);
-                else
-                    unit.Display(Unit.Highlight.Nothing);
+                Unit.Highlight state = Unit.Highlight.Attack | Unit.Highlight.Outline | Unit.Highlight.Info;
+                if (onPlayer)
+                    state |= Unit.Highlight.Moving;
+                unit.Display(state);
+            }
+            else
+            {
+                Unit.Highlight state = Unit.Highlight.Nothing;
+                if (showInfo)
+                    state |= Unit.Highlight.Info | Unit.Highlight.Attack;
+                unit.Display(state);
             }
         }
-        if (hasPlayer)
-        {
-            foreach (Unit unit in playerTeam.memebers)
-            {
-                if (action)
-                    unit.Display(Unit.Highlight.Nothing);
-                else if (showAttack)
-                    unit.Display(Unit.Highlight.Info | Unit.Highlight.Attack);
-                else if (unit == highlight)
-                    unit.Display(Unit.Highlight.Attack | Unit.Highlight.Info | Unit.Highlight.Outline | Unit.Highlight.Moving);
-                else
-                    unit.Display(Unit.Highlight.Info);
-            }
-        }
+        Hint.self.space.SetActive(!selectPlayer && !action);
+        Hint.self.alt.SetActive(!showInfo && !action);
+        Hint.self.control.SetActive(onPlayer && !selectPlayer && !action);
+        Hint.self.shift.SetActive(false);
+        Hint.self.ctrl.SetActive(selectPlayer && !action);
+        Hint.self.right.SetActive(selectPlayer && !action);
+        Hint.self.confirm.SetActive(selectPlayer && !action);
         if (selectPlayer)
         {
             selected = highlight as Player;
-            selected.StatusReset();
+            selected.ControlStart();
             stateUpdate = Control;
         }
         else if (action)
@@ -102,7 +105,7 @@ public class CombatControl : MonoBehaviour
                 playerTeam.memebers.ForEach(x => (x as Player).StatusReset());
             Unit.Action(() =>
             {
-                Unit.Alive.RemoveAll(x => x.hp <= 0);
+                Unit.Alive.RemoveAll(x => x.isDie);
                 Team.All.RemoveAll(x => x.memebers.Count == 0);
                 Team.NonUser.RemoveAll(x => x.memebers.Count == 0);
                 if (Team.All.Count == 1 && !testing)
@@ -135,6 +138,18 @@ public class CombatControl : MonoBehaviour
             selected.StatusReset();
             return;
         }
+        bool showInfo = Input.GetKey(KeyCode.LeftAlt);
+        foreach (Unit unit in Unit.All)
+        {
+            if (unit != selected)
+            {
+                if (showInfo)
+                    unit.Display(Unit.Highlight.Info | Unit.Highlight.Attack);
+                else
+                    unit.Display(Unit.Highlight.Nothing);
+            }
+        }
+        Hint.self.shift.SetActive(!Input.GetKey(KeyCode.LeftShift));
         control();
         int controlId = controlSeq.IndexOf(control);
         bool end = false;

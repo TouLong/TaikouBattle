@@ -5,13 +5,14 @@ using System;
 public class TextUI
 {
     static public int defualtFontSize = 10;
-    public static TextMesh Pop<T>(T content, Color color, Vector3 position, int fontSize = -1, float time = 0.5f)
+    static public float defualtPopTime = 0.5f;
+    public static TextMesh Pop<T>(T content, Color color, Vector3 position, int fontSize = -1, float time = 0f)
     {
         GameObject gameObject = new GameObject("Text Pop", typeof(TextMesh), typeof(TextPop));
         gameObject.transform.position = position;
         TextPop pop = gameObject.GetComponent<TextPop>();
         pop.Setup((fontSize > 0 ? fontSize : defualtFontSize) / 2f);
-        DelayEvent.Create(time, pop.DestorySelf);
+        DelayEvent.Create(time > 0 ? time : defualtPopTime, pop.DestorySelf);
         return ConfigTextMesh(gameObject.GetComponent<TextMesh>(), content, color, fontSize);
     }
 

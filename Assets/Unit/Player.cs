@@ -11,6 +11,7 @@ public class Player : Unit
     void ChangeTurningRange(float angle)
     {
         Destroy(turningRange.GetComponent<MeshFilter>().mesh);
+        angle = Mathf.Min(angle, 180);
         turningRange.GetComponent<MeshFilter>().mesh = GeoGenerator.SectorPlane((int)angle * 2, 0.7f, 0.67f);
         turningRange.rotation = model.rotation;
         turningRange.position = new Vector3(model.position.x, turningRange.position.y, model.position.z);
@@ -36,10 +37,21 @@ public class Player : Unit
         ChangeAttackRange(transform);
         ChangeAp(maxAp);
     }
+    public void ControlStart()
+    {
+        chess.gameObject.SetActive(false);
+        StatusReset();
+    }
     public void ControlComplete()
     {
         destination.position = model.position;
         destination.rotation = model.rotation;
+        chess.gameObject.SetActive(true);
+        LineRenderer line = chess.GetComponent<LineRenderer>();
+        chess.position = destination.position;
+        chess.rotation = destination.rotation;
+        line.SetPosition(0, position);
+        line.SetPosition(1, chess.position);
         StatusReset();
     }
     public void MoveBack()

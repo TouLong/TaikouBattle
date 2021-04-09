@@ -141,6 +141,7 @@ public class Team
     public static Group Dummy = new Group();
     public List<UnitInfo> unitInfos = new List<UnitInfo>();
     public Color color = Color.black;
+    public Material material;
     public List<Unit> memebers = new List<Unit>();
     public List<Unit> enemies = new List<Unit>();
     public Vector3 center, lookat;

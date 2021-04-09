@@ -23,10 +23,10 @@ public class Unit : MonoBehaviour
     public const float maxTurning = 360f;
 
     public Weapon weapon;
-    protected Transform model, mainHold, subHold, movingRange, attackRange, turningRange, arrow;
+    protected Transform model, mainHold, subHold;
+    protected Transform movingRange, attackRange, turningRange, arrow, chess;
     protected Pose destination;
-    [HideInInspector]
-    public int hp;
+    int hp;
     int roundOfHurt;
     Bar healthBar;
     Image icon;
@@ -40,6 +40,7 @@ public class Unit : MonoBehaviour
     public Vector3 position => transform.position;
     public Vector3 euler => transform.eulerAngles;
     public Quaternion rotation => transform.rotation;
+    public bool isDie => hp <= 0;
     public Vector3 Forward(Unit target) => (target.position - position).normalized;
     public Vector3 Backward(Unit target) => (position - target.position).normalized;
     public float Angle(Unit target) => Vector.ForwardAngle(transform, target.position);
@@ -58,6 +59,7 @@ public class Unit : MonoBehaviour
         turningRange = transform.Find("TurningRange");
         attackRange = transform.Find("AttackRange");
         arrow = transform.Find("Arrow");
+        chess = transform.Find("chess");
         healthBar = transform.Find("Status/Health").GetComponent<Bar>();
         icon = transform.Find("Status/Info/Icon").GetComponent<Image>();
         nameText = transform.Find("Status/Info/Name").GetComponent<Text>();
@@ -69,6 +71,12 @@ public class Unit : MonoBehaviour
         destination.position = transform.position;
         destination.rotation = transform.rotation;
         attackRange.GetComponent<MeshFilter>().mesh = weapon.rangeMesh;
+        if (team.material != null)
+        {
+            attackRange.GetComponent<MeshRenderer>().material = team.material;
+            chess.GetComponent<MeshRenderer>().material = team.material;
+            chess.GetComponent<LineRenderer>().material = team.material;
+        }
         arrow.transform.SetParent(model);
         healthBar.Setup(hp);
         motion = GetComponent<UnitMotion>();
@@ -133,6 +141,7 @@ public class Unit : MonoBehaviour
         Sequence action = DOTween.Sequence();
         foreach (Unit unit in Alive)
         {
+            unit.chess.gameObject.SetActive(false);
             Pose destination = unit.destination;
             float dist = Vector3.Distance(destination.position, unit.position);
             action.Join(unit.transform.DORotateQuaternion(destination.rotation, 8 / 24f));
@@ -142,6 +151,7 @@ public class Unit : MonoBehaviour
         action.AppendInterval(0.1f);
         action.AppendCallback(() =>
         {
+            Sequence combat = DOTween.Sequence();
             float sec = 0;
             foreach (Unit unit in Alive)
             {
@@ -153,7 +163,6 @@ public class Unit : MonoBehaviour
                     sec = Mathf.Max(sec, unit.motion.Attack());
                 }
             }
-            Sequence combat = DOTween.Sequence();
             combat.AppendInterval(sec);
             combat.AppendCallback(() =>
             {
@@ -162,7 +171,7 @@ public class Unit : MonoBehaviour
                     unit.motion.IdlePose();
                     if (unit.roundOfHurt == 0)
                         continue;
-                    TextUI.Pop(unit.roundOfHurt, Color.red, unit.position);
+                    TextUI.Pop("-" + unit.roundOfHurt, Color.red, unit.position);
                     unit.hp = Mathf.Max(unit.hp - unit.roundOfHurt, 0);
                     unit.healthBar.Set(unit.hp);
                     unit.roundOfHurt = 0;
